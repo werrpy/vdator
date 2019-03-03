@@ -12,6 +12,8 @@ Request a [TMDB API Key](https://developers.themoviedb.org/3/getting-started/int
 
 ### Install dependencies
 
+Install [pyhunspell](https://github.com/blatinier/pyhunspell#installation)
+
 ```
 pip3 install -r requirements.txt
 ```
