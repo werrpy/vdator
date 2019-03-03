@@ -10,6 +10,12 @@ Edit `vdator\.env` and set `DISCORD_BOT_SECRET` to your bot's token.
 
 Request a [TMDB API Key](https://developers.themoviedb.org/3/getting-started/introduction) and set `TMDB_API_KEY`.
 
+### Install dependencies
+
+```
+pip3 install -r requirements.txt
+```
+
 ### Update dependencies
 
 ```
