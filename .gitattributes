@@ -1,0 +1,8 @@
+# Binary files that should not be normalized or diffed
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+
+# Catch all for anything we forgot. Add rules if you get CRLF -> LF warnings.
+* eol=lf

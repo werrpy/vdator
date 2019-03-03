@@ -1,0 +1,7 @@
+requests==2.12.4
+hunspell==0.5.5
+discord==0.16.12
+python-dotenv==0.10.1
+IMDbPY==6.6
+nltk==3.4
+tmdbsimple==2.2.0
