@@ -16,6 +16,8 @@ Don't forget to create channels on the server and set them in `vdator\.env` for 
 
 Install [pyhunspell](https://github.com/blatinier/pyhunspell#installation)
 
+Install dependencies
+
 ```
 pip3 install -r requirements.txt
 ```
