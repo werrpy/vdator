@@ -1,6 +1,17 @@
 # vdator
 Remux validator Discord bot
 
+Checks:
+```
+Video track names
+Movie name format
+Video and audio track names
+DTS-HD MA 1.0/2.0 to FLAC, LPCM 1.0/2.0 to FLAC, LPCM > 2.0 to DTS-HD MA
+Commentary to AC-3 @ 224 kbps
+Text muxing mode
+Commentary track people and spellcheck
+```
+
 ### Setup
 
 Use [pip and virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) to run vdator.
