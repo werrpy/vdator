@@ -1,6 +1,8 @@
 # vdator
 Remux validator Discord bot
 
+Takes a Pastebin link with BDInfo and MediaInfo dump, and validates the remux.
+
 Checks:
 ```
 Video track names
