@@ -73,20 +73,20 @@ class PasteParser():
 
       if sect == self.Section.QUICK_SUMMARY:
         if l2.startswith("video:"):
-          bdinfo['video'].append(l.split(':', 1)[1].strip())
+          bdinfo['video'].append(self._format_track_name(l.split(':', 1)[1]))
         elif l2.startswith("audio:"):
           audio_name = l.split(':', 1)[1].strip()
           if "ac3 embedded" in audio_name.lower():
             audio_parts = re.split("\(ac3 embedded:", audio_name, flags=re.IGNORECASE)
-            bdinfo['audio'].append(audio_parts[0].strip())
-            bdinfo['audio'].append("Compatibility Track / Dolby Digital Audio / " + audio_parts[1].strip().rstrip(")"))
+            bdinfo['audio'].append(self._format_track_name(audio_parts[0]))
+            bdinfo['audio'].append(self._format_track_name("Compatibility Track / Dolby Digital Audio / " + audio_parts[1].strip().rstrip(")")))
           else:
             if "(" in l:
               l = l.split("(")[0]
             l = l.strip()
-            bdinfo['audio'].append(l.split(':', 1)[1].strip())
+            bdinfo['audio'].append(self._format_track_name(l.split(':', 1)[1]))
         elif l2.startswith("subtitle:"):
-          bdinfo['subtitle'].append(l.split(':', 1)[1].strip())
+          bdinfo['subtitle'].append(self._format_track_name(l.split(':', 1)[1]))
           
       elif sect == self.Section.PLAYLIST_REPORT:
       
@@ -115,18 +115,18 @@ class PasteParser():
               before = " ".join(parts[:kbps_i - 1]).strip()
               after = " ".join(parts[kbps_i + 1:]).strip()
               l = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
-              bdinfo['video'].append(l.strip())
+              bdinfo['video'].append(self._format_track_name(l))
             except ValueError:
               continue
               
           elif sect2 == self.Section2.PLAYLIST_AUDIO and sect3 == self.Section3.PLAYLIST_INNER_AUDIO:              
             name = self._name_from_parts(l)
-            bdinfo['audio'].append(name)
+            bdinfo['audio'].append(self._format_track_name(name))
             
             if "ac3 embedded" in l.lower():
               audio_parts = re.split("\(ac3 embedded:", l, flags=re.IGNORECASE)
               compat_track = "Compatibility Track / Dolby Digital Audio / " + "/".join(audio_parts[1].split("/")[:-1]).strip()
-              bdinfo['audio'].append(compat_track)
+              bdinfo['audio'].append(self._format_track_name(compat_track))
               
       elif sect == self.Section.MEDIAINFO:
         mediainfo.append(l)
@@ -143,6 +143,10 @@ class PasteParser():
     l_parts1 = " / ".join(l_parts[1:]).strip()
     name = " ".join(l_parts0[:-4]) + " / " + l_parts0[-1] + " / " + l_parts1
     return name
+    
+  def _format_track_name(self, name):
+    # remove multiple and trailing spaces
+    return ' '.join(name.split()).strip()
 
   def paste(self, url):
     self.url = url
