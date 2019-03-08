@@ -10,6 +10,7 @@ load_dotenv()
 
 # environment variables
 IGNORE_AFTER_LINE = os.environ.get("IGNORE_AFTER_LINE").strip()
+IGNORE_AFTER_LINE_METHOD = os.environ.get("IGNORE_AFTER_LINE_METHOD").strip()
 
 class BDInfoType(Enum):
   QUICK_SUMMARY = 1
@@ -52,7 +53,7 @@ class PasteParser():
     lines = text.splitlines()
     for l in lines:
       # break after ignore line
-      if l == IGNORE_AFTER_LINE:
+      if self._isIgnoreAfterLine(l):
         break
 
       # skip blank lines
@@ -147,6 +148,15 @@ class PasteParser():
   def _format_track_name(self, name):
     # remove multiple and trailing spaces
     return ' '.join(name.split()).strip()
+    
+  def _isIgnoreAfterLine(self, l):
+    if IGNORE_AFTER_LINE_METHOD == "equals":
+      if IGNORE_AFTER_LINE == l:
+        return True
+    elif IGNORE_AFTER_LINE_METHOD == "contains":
+      if IGNORE_AFTER_LINE in l:
+        return True
+    return False
 
   def paste(self, url):
     self.url = url
