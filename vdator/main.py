@@ -92,19 +92,23 @@ async def on_message(message):
       checker = Checker(bdinfo, mediainfo)
       
       # check metadata
-      reply += checker.check_video_track()
       reply += checker.check_movie_name()
+      reply += checker.check_tracks_have_language()
+      reply += checker.check_muxing_mode()
+      
+      # check video
+      reply += checker.check_video_track()
       
       # check audio
       reply += checker.print_audio_track_names()
       reply += checker.check_audio_track_conversions()
       
-      # check muxing mode
-      reply += checker.check_muxing_mode()
-      
       # TMDB and IMDb People API
       reply += checker.check_people()
       reply += checker.spell_check_commentary()
+      
+      # check text
+      reply += checker.print_text_tracks()
       
       # report
       reply += checker.display_report()
