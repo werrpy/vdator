@@ -331,7 +331,7 @@ class Checker():
   def print_text_tracks(self):
     reply = ""
     if len(self.mediainfo['text']) > 0:
-      reply += "Text Tracks (NOT IMPLEMENTED):\n"
+      reply += "Text Tracks:\n"
       reply += "```"
       for i, _ in enumerate(self.mediainfo['text']):
         reply += self._section_id("text", i) + ":"
@@ -347,6 +347,33 @@ class Checker():
       reply += "```"
     else:
       reply = self.print_report("info", "No text tracks\n", False)
+    return reply
+    
+  def text_order(self):
+    reply = ""
+    
+    if len(self.mediainfo['text']) > 0:
+      # list of subtitle languages without a title
+      text_langs_without_title = list()
+      for i, _ in enumerate(self.mediainfo['text']):
+        if 'language' in self.mediainfo['text'][i] and 'title' not in self.mediainfo['text'][i]:
+          text_langs_without_title.append(self.mediainfo['text'][i]['language'].lower())
+          
+      # check that English subtitles without a title are first if they exist
+      if len(text_langs_without_title) > 0:
+        if 'english' in text_langs_without_title:
+          if text_langs_without_title[0] == 'english':
+            reply += self.print_report("correct", "English subtitles are first\n")
+          else:
+            reply += self.print_report("error", "English subtitles should be first\n")
+            
+      # check if all other languages are in alphabetical order
+      text_langs_without_title_and_english = [x for x in text_langs_without_title if x != 'english']
+      if text_langs_without_title_and_english == sorted(text_langs_without_title_and_english):
+        reply += self.print_report("correct", "Rest of the subtitles are in alphabetical order\n")
+      else:
+        reply += self.print_report("error", "English subtitles should be first, rest should be in alphabetical order\n")
+    
     return reply
     
   def _is_commentary_track(self, title):

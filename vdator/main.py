@@ -109,6 +109,7 @@ async def on_message(message):
       
       # check text
       reply += checker.print_text_tracks()
+      reply += checker.text_order()
       
       # report
       reply += checker.display_report()
