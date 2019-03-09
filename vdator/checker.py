@@ -33,7 +33,8 @@ class Checker():
     self.report =	{
       "correct": 0,
       "warning": 0,
-      "error": 0
+      "error": 0,
+      "info": 0
     }
     
     self.hobj = hunspell.HunSpell(HUNSPELL_LANG[0], HUNSPELL_LANG[1])
@@ -354,6 +355,8 @@ class Checker():
     reply = ""
     
     if len(self.mediainfo['text']) > 0:
+      english_first = False
+      
       # list of subtitle languages without a title
       text_langs_without_title = list()
       for i, _ in enumerate(self.mediainfo['text']):
@@ -365,6 +368,7 @@ class Checker():
         if 'english' in text_langs_without_title:
           if text_langs_without_title[0] == 'english':
             reply += self.print_report("correct", "English subtitles are first\n")
+            english_first = True
           else:
             reply += self.print_report("error", "English subtitles should be first\n")
             
@@ -373,43 +377,52 @@ class Checker():
       if text_langs_without_title_and_english == sorted(text_langs_without_title_and_english):
         reply += self.print_report("correct", "Rest of the subtitles are in alphabetical order\n")
       else:
-        reply += self.print_report("error", "English subtitles should be first, rest should be in alphabetical order\n")
+        if english_first:
+          reply += self.print_report("error", "English subtitles are first, but rest should be in alphabetical order\n")
+        else:
+          reply += self.print_report("error", "English subtitles should be first, rest should be in alphabetical order\n")
     
     return reply
     
   def print_chapters(self):
-    reply = "```"
-    if len(self.mediainfo['menu'][0]) > 0:
-      for ch in self.mediainfo['menu'][0]:
-        if 'time' in ch:
-          reply += ch['time']
-        if 'language' in ch:
-          reply += " " + ch['language']
-        if 'title' in ch:
-          reply += " " + ch['title']
-        reply += "\n"
-    reply += "```\n"
+    reply = ""
+    if len(self.mediainfo['menu']) > 0:
+      reply += "```"
+      if len(self.mediainfo['menu'][0]) > 0:
+        for ch in self.mediainfo['menu'][0]:
+          if 'time' in ch:
+            reply += ch['time']
+          if 'language' in ch:
+            reply += " " + ch['language']
+          if 'title' in ch:
+            reply += " " + ch['title']
+          reply += "\n"
+      reply += "```\n"
     return reply
     
   def chapter_language(self):
     reply = ""
-    invalid_lang_list = list()
-    if len(self.mediainfo['menu'][0]) > 0:
-      for i, _ in enumerate(self.mediainfo['menu'][0]):
-        if 'language' in self.mediainfo['menu'][0][i]:
-          try:
-            iso639_languages.get(alpha2=self.mediainfo['menu'][0][i]['language'])
-          except KeyError:
-            invalid_lang_list.append(str(i + 1))
+    if len(self.mediainfo['menu']) > 0:
+      for i, _ in enumerate(self.mediainfo['menu']):
+        invalid_lang_list = list()
+        if len(self.mediainfo['menu'][i]) > 0:
+          for j, _ in enumerate(self.mediainfo['menu'][i]):
+            if 'language' in self.mediainfo['menu'][i][j]:
+              try:
+                iso639_languages.get(alpha2=self.mediainfo['menu'][i][j]['language'])
+              except KeyError:
+                invalid_lang_list.append(str(j + 1))
+            else:
+              invalid_lang_list.append(str(j + 1))
+        if len(invalid_lang_list) > 0:
+          if len(invalid_lang_list) == len(self.mediainfo['menu'][i]):
+            reply += self.print_report("error", "Chapters " + str(i) + ": All chapters are do not have a language set\n")
+          else:
+            reply += self.print_report("error", "Chapters " + str(i) + ": The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
         else:
-          invalid_lang_list.append(str(i + 1))
-    if len(invalid_lang_list) > 0:
-      if len(invalid_lang_list) == len(self.mediainfo['menu'][0]):
-        reply += self.print_report("error", "All chapters are do not have a language set\n")
-      else:
-        reply += self.print_report("error", "The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
+          reply += self.print_report("correct", "Chapters " + str(i) + ": All chapters have a language set\n")
     else:
-      reply += self.print_report("correct", "All chapters have a language set\n")
+      reply += self.print_report("info", "No chapters\n")
     return reply
     
   def _is_commentary_track(self, title):
@@ -434,5 +447,10 @@ class Checker():
     return self.report
     
   def display_report(self):
-    return str(self.report['correct']) + " correct, " + str(self.report['warning']) + " warning(s), and " + str(self.report['error']) + " error(s)"
+    reply = str(self.report['correct']) + " correct, " + str(self.report['warning']) + " warning"
+    reply += "s" if self.report['error'] == 1 else ""
+    reply += ", " + str(self.report['error']) + " error"
+    reply += "s" if self.report['error'] == 1 else ""
+    reply += ", and " + str(self.report['info']) + " info"
+    return reply
     
