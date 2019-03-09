@@ -37,7 +37,9 @@ def print_help():
     "DTS-HD MA 1.0/2.0 to FLAC, LPCM 1.0/2.0 to FLAC, LPCM > 2.0 to DTS-HD MA\n" \
     "Commentary to AC-3 @ 224 kbps\n" \
     "Text muxing mode\n" \
-    "Commentary track people and spellcheck```"
+    "Commentary track people and spellcheck\n" \
+    "Subtitle order\n" \
+    "Chapter languages```"
 
 async def add_status_reactions(client, message, content):
   # ignore help
@@ -110,6 +112,9 @@ async def on_message(message):
       # check text
       reply += checker.print_text_tracks()
       reply += checker.text_order()
+      
+      # check chapters
+      reply += checker.chapter_language()
       
       # report
       reply += checker.display_report()

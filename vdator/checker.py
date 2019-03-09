@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import string
 import re
+from iso639 import languages as iso639_languages
 
 # APIs
 import tmdbsimple as tmdb
@@ -374,6 +375,41 @@ class Checker():
       else:
         reply += self.print_report("error", "English subtitles should be first, rest should be in alphabetical order\n")
     
+    return reply
+    
+  def print_chapters(self):
+    reply = "```"
+    if len(self.mediainfo['menu'][0]) > 0:
+      for ch in self.mediainfo['menu'][0]:
+        if 'time' in ch:
+          reply += ch['time']
+        if 'language' in ch:
+          reply += " " + ch['language']
+        if 'title' in ch:
+          reply += " " + ch['title']
+        reply += "\n"
+    reply += "```\n"
+    return reply
+    
+  def chapter_language(self):
+    reply = ""
+    invalid_lang_list = list()
+    if len(self.mediainfo['menu'][0]) > 0:
+      for i, _ in enumerate(self.mediainfo['menu'][0]):
+        if 'language' in self.mediainfo['menu'][0][i]:
+          try:
+            iso639_languages.get(alpha2=self.mediainfo['menu'][0][i]['language'])
+          except KeyError:
+            invalid_lang_list.append(str(i + 1))
+        else:
+          invalid_lang_list.append(str(i + 1))
+    if len(invalid_lang_list) > 0:
+      if len(invalid_lang_list) == len(self.mediainfo['menu'][0]):
+        reply += self.print_report("error", "All chapters are do not have a language set\n")
+      else:
+        reply += self.print_report("error", "The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
+    else:
+      reply += self.print_report("correct", "All chapters have a language set\n")
     return reply
     
   def _is_commentary_track(self, title):
