@@ -448,9 +448,9 @@ class Checker():
     
   def display_report(self):
     reply = str(self.report['correct']) + " correct, " + str(self.report['warning']) + " warning"
-    reply += "s" if self.report['error'] == 1 else ""
+    reply += "" if self.report['error'] == 1 else "s"
     reply += ", " + str(self.report['error']) + " error"
-    reply += "s" if self.report['error'] == 1 else ""
+    reply += "" if self.report['error'] == 1 else "s"
     reply += ", and " + str(self.report['info']) + " info"
     return reply
     
