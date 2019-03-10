@@ -167,14 +167,14 @@ class Checker():
           if bdinfo_audio_parts[audio_split_index] == "DTS-HD Master Audio" and \
             self._is_number(bdinfo_audio_parts[audio_split_index + 1]) and float(bdinfo_audio_parts[audio_split_index + 1]) < 3:
             # DTS-HD MA 1.0 or 2.0 to FLAC
-            reply += self._check_audio_conversion(i, self.bdinfo, self.mediainfo, "DTS-HD MA", "FLAC Audio")
+            reply += self._check_audio_conversion(i, "DTS-HD MA", "FLAC Audio")
           elif bdinfo_audio_parts[audio_split_index] == "LPCM Audio":
             if self._is_number(bdinfo_audio_parts[audio_split_index + 1]) and float(bdinfo_audio_parts[audio_split_index + 1]) < 3:
               # LPCM 1.0 or 2.0 to FLAC
-              reply += self._check_audio_conversion(i, self.bdinfo, self.mediainfo, "LPCM Audio", "FLAC Audio")
+              reply += self._check_audio_conversion(i, "LPCM Audio", "FLAC Audio")
             else:
               # LPCM > 2.0 to DTS-HD MA
-              reply += self._check_audio_conversion(i, self.bdinfo, self.mediainfo, "LPCM Audio", "DTS-HD MA")
+              reply += self._check_audio_conversion(i, "LPCM Audio", "DTS-HD MA")
           else:
             if 'title' in self.mediainfo['audio'][i]:
               if title in self.mediainfo['audio'][i]['title']:
@@ -236,21 +236,21 @@ class Checker():
           
     return is_commentary, reply
     
-  def _check_audio_conversion(self, i, bdinfo, mediainfo, audio_from, audio_to):
+  def _check_audio_conversion(self, i, audio_from, audio_to):
     reply = ""
     
     # verify audio track titles
-    if ' / ' not in bdinfo['audio'][i] or \
-      'title' not in mediainfo['audio'][i] or ' / ' not in mediainfo['audio'][i]['title']:
+    if ' / ' not in self.bdinfo['audio'][i] or \
+      'title' not in self.mediainfo['audio'][i] or ' / ' not in self.mediainfo['audio'][i]['title']:
       reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i))
       return reply
       
-    bdinfo_audio_parts = re.sub(r'\s+', ' ', bdinfo['audio'][i]).split(' / ')
+    bdinfo_audio_parts = re.sub(r'\s+', ' ', self.bdinfo['audio'][i]).split(' / ')
     if len(bdinfo_audio_parts) <= 5:
       reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i))
       return reply
 
-    mediainfo_parts = mediainfo['audio'][i]['title'].split(' / ')
+    mediainfo_parts = self.mediainfo['audio'][i]['title'].split(' / ')
     if len(mediainfo_parts) <= 4:
       reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i))
       return reply
