@@ -348,7 +348,7 @@ class Checker():
         reply += "\n"
       reply += "```"
     else:
-      reply = self.print_report("info", "No text tracks\n", False)
+      reply = self.print_report("info", "No text tracks\n")
     return reply
     
   def text_order(self):
