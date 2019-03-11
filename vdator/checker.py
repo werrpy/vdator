@@ -195,8 +195,10 @@ class Checker():
     else:
       reply += self.print_report("error", "Cannot verify audio track conversions, " +
         str(len(self.bdinfo['audio'])) + " BDInfo Audio Track(s) vs " + str(len(self.mediainfo['audio'])) +
-        " MediaInfo Audio Track(s).\nDid you forget to add a minus (-) sign in front of unused audio tracks in bdinfo?\n")
-      
+        " MediaInfo Audio Track(s).\n")
+      if len(self.bdinfo['audio']) > len(self.mediainfo['audio']):
+        reply += "Did you forget to add a minus (-) sign in front of unused audio tracks in bdinfo?\n"
+        
     return reply
     
   def _check_commentary(self, i):
