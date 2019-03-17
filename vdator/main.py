@@ -97,6 +97,7 @@ async def on_message(message):
       reply += checker.check_movie_name()
       reply += checker.check_tracks_have_language()
       reply += checker.check_muxing_mode()
+      reply += checker.check_mkvmerge()
       
       # check video
       reply += checker.check_video_track()

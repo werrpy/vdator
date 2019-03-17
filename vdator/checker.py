@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import string
 import re
+import requests
 from iso639 import languages as iso639_languages
 
 # APIs
@@ -128,6 +129,28 @@ class Checker():
         reply += self.print_report("error", section.capitalize() + " #" + self.mediainfo[section][i]['id'] + " has muxing mode: " + self.mediainfo[section][i]["muxing_mode"] + "\n")
         is_valid = False
     return reply, is_valid
+    
+  def check_mkvmerge(self):
+    reply = ""
+    r = requests.get(os.environ.get("MKVTOOLNIX_NEWS"))
+    version_name_regex = '"(.*)"'
+    version_num_regex = '(\d+\.\d+\.\d+)'
+    if r.status_code == 200:
+      ## Version 32.0.0 "Astral Progressions" 2019-03-12
+      mkvtoolnix_version_line = r.text.splitlines()[0]
+      
+      mkvtoolnix_version_num = re.search(version_num_regex, mkvtoolnix_version_line).group(1)
+      mkvtoolnix_version_name = re.search(version_name_regex, mkvtoolnix_version_line).group(1)
+      
+      mediainfo_version_num = re.search(version_num_regex, self.mediainfo['general'][0]['writing_application']).group(1)
+      mediainfo_version_name = re.search(version_name_regex, self.mediainfo['general'][0]['writing_application']).group(1)
+      
+      if mkvtoolnix_version_num == mediainfo_version_num and mkvtoolnix_version_name == mediainfo_version_name:
+        reply += self.print_report("correct", "Uses latest mkvtoolnix: ")
+      else:
+        reply += self.print_report("warning", "Not using latest mkvtoolnix: " + mediainfo_version_num + " " + mediainfo_version_name +
+          " latest is: " + mkvtoolnix_version_num + " " + mkvtoolnix_version_name)
+    return reply
     
   def print_audio_track_names(self):
     reply = ""
