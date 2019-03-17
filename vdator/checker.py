@@ -133,23 +133,24 @@ class Checker():
   def check_mkvmerge(self):
     reply = ""
     r = requests.get(os.environ.get("MKVTOOLNIX_NEWS"))
-    version_name_regex = '"(.*)"'
+    version_name_regex_mkvtoolnix = '"(.*)"'
+    version_name_regex_mediainfo = '\'(.*)\''
     version_num_regex = '(\d+\.\d+\.\d+)'
     if r.status_code == 200:
       ## Version 32.0.0 "Astral Progressions" 2019-03-12
       mkvtoolnix_version_line = r.text.splitlines()[0]
       
       mkvtoolnix_version_num = re.search(version_num_regex, mkvtoolnix_version_line).group(1)
-      mkvtoolnix_version_name = re.search(version_name_regex, mkvtoolnix_version_line).group(1)
+      mkvtoolnix_version_name = re.search(version_name_regex_mkvtoolnix, mkvtoolnix_version_line).group(1)
       
       mediainfo_version_num = re.search(version_num_regex, self.mediainfo['general'][0]['writing_application']).group(1)
-      mediainfo_version_name = re.search(version_name_regex, self.mediainfo['general'][0]['writing_application']).group(1)
+      mediainfo_version_name = re.search(version_name_regex_mediainfo, self.mediainfo['general'][0]['writing_application']).group(1)
       
       if mkvtoolnix_version_num == mediainfo_version_num and mkvtoolnix_version_name == mediainfo_version_name:
-        reply += self.print_report("correct", "Uses latest mkvtoolnix: ")
+        reply += self.print_report("correct", "Uses latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name + "\"`\n")
       else:
-        reply += self.print_report("warning", "Not using latest mkvtoolnix: " + mediainfo_version_num + " " + mediainfo_version_name +
-          " latest is: " + mkvtoolnix_version_num + " " + mkvtoolnix_version_name)
+        reply += self.print_report("warning", "Not using latest mkvtoolnix: `" + mediainfo_version_num + " " + mediainfo_version_name +
+          "` latest is: `" + mkvtoolnix_version_num + " \"" + mkvtoolnix_version_name + "\"`\n")
     return reply
     
   def print_audio_track_names(self):
