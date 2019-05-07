@@ -285,17 +285,17 @@ class Checker():
     # verify audio track titles
     if ' / ' not in self.bdinfo['audio'][i] or \
       'title' not in self.mediainfo['audio'][i] or ' / ' not in self.mediainfo['audio'][i]['title']:
-      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i))
+      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
       return reply
       
     bdinfo_audio_parts = re.sub(r'\s+', ' ', self.bdinfo['audio'][i]).split(' / ')
     if len(bdinfo_audio_parts) <= 5:
-      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i))
+      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
       return reply
 
     mediainfo_parts = self.mediainfo['audio'][i]['title'].split(' / ')
     if len(mediainfo_parts) <= 4:
-      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i))
+      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
       return reply
 
     # verify audio conversions
