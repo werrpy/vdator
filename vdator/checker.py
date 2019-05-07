@@ -93,6 +93,23 @@ class Checker():
     
     return reply
     
+  def check_video_language_matches_first_audio_language(self):
+    reply = ""
+    
+    if 'video' not in self.mediainfo or len(self.mediainfo['video']) < 1 or \
+      'language' not in self.mediainfo['video'][0]:
+      reply += self.print_report("error", "Video language not set" + "\n")
+      return reply
+    if 'audio' not in self.mediainfo or len(self.mediainfo['audio']) < 1 or \
+      'language' not in self.mediainfo['audio'][0]:
+      reply += self.print_report("error", "First audio language not set" + "\n")
+      return reply
+    if self.mediainfo['video'][0]['language'] == self.mediainfo['audio'][0]['language']:
+      reply += self.print_report("correct", "Video language matches first audio language: `" + self.mediainfo['video'][0]['language'] + "`\n")
+    else:
+      reply += self.print_report("error", "Video language does not match first audio language: `" + self.mediainfo['video'][0]['language'] + "` vs `" + self.mediainfo['audio'][0]['language'] + "`\n")
+    return reply
+    
   def _check_tracks_have_language_section(self, section):
     reply, is_valid = "", True
     for i, _ in enumerate(self.mediainfo[section]):
