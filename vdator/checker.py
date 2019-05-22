@@ -48,9 +48,9 @@ class Checker():
   def check_video_track(self):
     reply = ""
     
-    if 'video' in self.bdinfo and 'video' in self.mediainfo and \
-      len(self.bdinfo['video']) >= 1 and len(self.mediainfo['video']) >= 1 and \
-      'title' in self.mediainfo['video'][0]:
+    if 'video' in self.bdinfo and 'video' in self.mediainfo:
+      if len(self.bdinfo['video']) == 1 and len(self.mediainfo['video']) == 1 and \
+        'title' in self.mediainfo['video'][0]:
         # bdinfo force decimal instead of comma in fps
         new_name = self.bdinfo['video'][0].split('/')
         new_name[3] = new_name[3].replace(',', '.')
@@ -60,6 +60,8 @@ class Checker():
           reply += self.print_report("correct", "Video track names match: ```" + self.bdinfo['video'][0] + "```")
         else:
           reply += self.print_report("error", "Video track names missmatch:\n```fix\nBDInfo: " + self.bdinfo['video'][0] + "\nMediaInfo: " + self.mediainfo['video'][0]['title'] + "```")
+      else:
+        reply += self.print_report("error", "Must only have 1 video track\n")
     else:
       reply += self.print_report("error", "Could not verify video track\n")
       
@@ -450,25 +452,28 @@ class Checker():
     
   def chapter_language(self):
     reply = ""
-    if len(self.mediainfo['menu']) > 0:
-      for i, _ in enumerate(self.mediainfo['menu']):
-        invalid_lang_list = list()
-        if len(self.mediainfo['menu'][i]) > 0:
-          for j, _ in enumerate(self.mediainfo['menu'][i]):
-            if 'language' in self.mediainfo['menu'][i][j]:
-              try:
-                iso639_languages.get(alpha2=self.mediainfo['menu'][i][j]['language'])
-              except KeyError:
+    if 'menu' in self.mediainfo and len(self.mediainfo['menu']) > 0:
+      if len(self.mediainfo['menu']) == 1:
+        for i, _ in enumerate(self.mediainfo['menu']):
+          invalid_lang_list = list()
+          if len(self.mediainfo['menu'][i]) > 0:
+            for j, _ in enumerate(self.mediainfo['menu'][i]):
+              if 'language' in self.mediainfo['menu'][i][j]:
+                try:
+                  iso639_languages.get(alpha2=self.mediainfo['menu'][i][j]['language'])
+                except KeyError:
+                  invalid_lang_list.append(str(j + 1))
+              else:
                 invalid_lang_list.append(str(j + 1))
+          if len(invalid_lang_list) > 0:
+            if len(invalid_lang_list) == len(self.mediainfo['menu'][i]):
+              reply += self.print_report("error", "Chapters " + str(i) + ": All chapters are do not have a language set\n")
             else:
-              invalid_lang_list.append(str(j + 1))
-        if len(invalid_lang_list) > 0:
-          if len(invalid_lang_list) == len(self.mediainfo['menu'][i]):
-            reply += self.print_report("error", "Chapters " + str(i) + ": All chapters are do not have a language set\n")
+              reply += self.print_report("error", "Chapters " + str(i) + ": The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
           else:
-            reply += self.print_report("error", "Chapters " + str(i) + ": The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
-        else:
-          reply += self.print_report("correct", "Chapters " + str(i) + ": All chapters have a language set\n")
+            reply += self.print_report("correct", "Chapters " + str(i) + ": All chapters have a language set\n")
+      else:
+        reply += self.print_report("error", "Must only have 1 chapter menu\n")
     else:
       reply += self.print_report("info", "No chapters\n")
     return reply
