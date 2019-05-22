@@ -61,7 +61,7 @@ class Checker():
         else:
           reply += self.print_report("error", "Video track names missmatch:\n```fix\nBDInfo: " + self.bdinfo['video'][0] + "\nMediaInfo: " + self.mediainfo['video'][0]['title'] + "```")
       else:
-        reply += self.print_report("error", "Must only have 1 video track\n")
+        reply += self.print_report("error", "Must have 1 video track\n")
     else:
       reply += self.print_report("error", "Could not verify video track\n")
       
@@ -473,7 +473,7 @@ class Checker():
           else:
             reply += self.print_report("correct", "Chapters " + str(i) + ": All chapters have a language set\n")
       else:
-        reply += self.print_report("error", "Must only have 1 chapter menu\n")
+        reply += self.print_report("error", "Must have at most 1 chapter menu\n")
     else:
       reply += self.print_report("info", "No chapters\n")
     return reply
