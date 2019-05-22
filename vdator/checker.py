@@ -51,6 +51,11 @@ class Checker():
     if 'video' in self.bdinfo and 'video' in self.mediainfo and \
       len(self.bdinfo['video']) >= 1 and len(self.mediainfo['video']) >= 1 and \
       'title' in self.mediainfo['video'][0]:
+        # bdinfo force decimal instead of comma in fps
+        new_name = self.bdinfo['video'][0].split('/')
+        new_name[3] = new_name[3].replace(',', '.')
+        self.bdinfo['video'][0] = "/".join(new_name)
+        
         if self.bdinfo['video'][0] == self.mediainfo['video'][0]['title']:
           reply += self.print_report("correct", "Video track names match: ```" + self.bdinfo['video'][0] + "```")
         else:
