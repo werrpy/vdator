@@ -10,6 +10,7 @@ from discord.utils import get
 # parsers
 from paste_parser import PasteParser
 from media_info_parser import MediaInfoParser
+from codecs_parser import CodecsParser
 from checker import Checker
 
 # load environment variables
@@ -20,6 +21,8 @@ IGNORE_AFTER_LINE = os.environ.get("IGNORE_AFTER_LINE").strip()
 REVIEW_CHANNELS = [x.strip() for x in os.environ.get("REVIEW_CHANNELS").split(',')]
 REVIEW_REPLY_CHANNELS = [x.strip() for x in os.environ.get("REVIEW_REPLY_CHANNELS").split(',')]
 BOT_CHANNELS = [x.strip() for x in os.environ.get("BOT_CHANNELS").split(',')]
+SOURCE = os.environ.get("SOURCE").strip()
+RELEASE_GROUP = os.environ.get("RELEASE_GROUP").strip()
 VERSION = os.environ.get("VERSION").strip()
 
 def print_help():
@@ -95,6 +98,8 @@ async def on_message(message):
       
       # check metadata
       reply += checker.check_movie_name()
+      codecs = CodecsParser()
+      reply += checker.check_filename(codecs, SOURCE, RELEASE_GROUP)
       reply += checker.check_tracks_have_language()
       reply += checker.check_video_language_matches_first_audio_language()
       reply += checker.check_muxing_mode()

@@ -82,6 +82,56 @@ class Checker():
       
     return reply
     
+  def check_filename(self, codecs, source, release_group):
+    reply = ""
+    # construct release name
+    release_name = ""
+    
+    if 'general' in self.mediainfo and len(self.mediainfo['general']) >= 1 and \
+      'movie_name' in self.mediainfo['general'][0] and \
+      'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 and \
+      'height' in self.mediainfo['video'][0] and \
+      'scan_type' in self.mediainfo['video'][0] and len(self.mediainfo['video'][0]['scan_type']) >= 1 and \
+      'format' in self.mediainfo['video'][0] and \
+      'audio' in self.mediainfo and len(self.mediainfo['audio']) >= 1 and \
+      'title' in self.mediainfo['audio'][0]:
+      # name.year
+      movie_name_search = re.search(r'(.*)\s\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
+      if movie_name_search:
+        title = movie_name_search.group(1).strip().replace(' ', '.')
+        year = movie_name_search.group(2).strip()
+        release_name += title + '.' + year
+      # resolution (ex. 1080p)
+      release_name += '.' + ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
+      release_name += self.mediainfo['video'][0]['scan_type'][0].lower()
+      # source (ex. BluRay.REMUX)
+      release_name += '.' + source
+      # video format (ex. AVC)
+      release_name += '.' + self.mediainfo['video'][0]['format']
+      main_audio_title = self.mediainfo['audio'][0]['title'].split(' / ')
+      if len(main_audio_title) >= 2:
+        # audio codec name for title (ex. DTS-HD.MA)
+        main_audio_title[0] = codecs.get_audio_codec_title_name(main_audio_title[0].strip())
+        # audio channel (ex. 5.1)
+        main_audio_title[1] = main_audio_title[1].strip()
+        release_name += '.' + main_audio_title[0]
+        release_name += '.' + main_audio_title[1]
+      # release group
+      release_name += '-' + release_group + '.mkv'
+      complete_name = self.mediainfo['general'][0]['complete_name']
+      if '\\' in complete_name:
+        complete_name = complete_name.split('\\')[-1]
+      elif '/' in complete_name:
+        complete_name = complete_name.split('/')[-1]
+      if release_name == complete_name:
+        reply += self.print_report("correct", "Filename: `" + release_name + "`\n")
+      else:
+        reply += self.print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + release_name + "```")
+    else:
+      reply += self.print_report("error", "Cannot validate filename\n")
+      
+    return reply
+    
   def check_tracks_have_language(self):
     reply, is_valid = "", True
     
