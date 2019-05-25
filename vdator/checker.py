@@ -111,7 +111,12 @@ class Checker():
       main_audio_title = self.mediainfo['audio'][0]['title'].split(' / ')
       if len(main_audio_title) >= 2:
         # audio codec name for title (ex. DTS-HD.MA)
-        main_audio_title[0] = codecs.get_audio_codec_title_name(main_audio_title[0].strip())
+        audio_codec = main_audio_title[0].strip()
+        title = codecs.get_audio_codec_title_name(audio_codec)
+        if title:
+          main_audio_title[0] = title
+        else:
+          reply += self.print_report("error", "No title name found for audio codec: `" + audio_codec + "`\n")
         # audio channel (ex. 5.1)
         main_audio_title[1] = main_audio_title[1].strip()
         release_name += '.' + main_audio_title[0]

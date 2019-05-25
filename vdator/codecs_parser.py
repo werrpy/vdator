@@ -44,65 +44,6 @@ class CodecsParser():
 
     # map of all codec names to extensions
     self.codec_ext = {**self.video_codecs, **self.audio_codecs, **self.sub_codecs, **self.chapter_codecs}
-    
-  def _convert_audio(self, codec_name, channnels):
-    """
-    Define audio conversions.
-    
-    Parameters
-    ----------
-    codec_name : str
-      codec title
-      
-    channels : float
-      audio channels
-      
-    Returns
-    -------
-    Exits if unsupported
-    """
-    # DTS-HD MA <= 2.0 to FLAC
-    if codec_name == 'DTS Master Audio' and float(channnels) <= 2:
-      codec_name = 'FLAC Audio'
-    # LPCM <= 2.0 to FLAC
-    elif codec_name == 'RAW/PCM' and float(channnels) <= 2:
-      codec_name = 'FLAC Audio'
-    self.check_codec(codec_name)
-    return codec_name
-    
-  def check_codec(self, codec):
-    """
-    Exit if codec is unsupported.
-    
-    Parameters
-    ----------
-    codec : str
-      codec
-      
-    Returns
-    -------
-    Exits if unsupported
-    """
-    if codec not in self.codec_ext:
-      print(colored("No extension found for codec: " + codec, 'red'))
-      exit(1)
-      
-  def check_audio_codec_title_name(self, codec):
-    """
-    Exit if audio codec is unsupported for title name.
-    
-    Parameters
-    ----------
-    codec : str
-      audio codec
-      
-    Returns
-    -------
-    Exits if unsupported
-    """
-    if codec not in self.audio_codec_title_names:
-      print(colored("No title name found for audio codec: " + codec, 'red'))
-      exit(1)
 
   def is_video(self, codec):
     """
@@ -185,7 +126,8 @@ class CodecsParser():
     -------
     str codec extension
     """
-    self.check_codec(codec)
+    if codec not in self.codec_ext:
+      return False
     return self.codec_ext[codec]
     
   def get_audio_codec_title_name(self, codec):
@@ -201,6 +143,7 @@ class CodecsParser():
     -------
     str codec extension
     """
-    self.check_audio_codec_title_name(codec)
+    if codec not in self.audio_codec_title_names:
+      return False
     return self.audio_codec_title_names[codec]
     
