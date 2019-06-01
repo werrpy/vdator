@@ -99,6 +99,8 @@ class Checker():
       movie_name_search = re.search(r'(.*)\s\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
       if movie_name_search:
         title = movie_name_search.group(1).strip().replace(' ', '.')
+        title_remove_chars = [':', '?']
+        title = ''.join(i for i in title if not i in title_remove_chars)
         year = movie_name_search.group(2).strip()
         release_name += title + '.' + year
       # resolution (ex. 1080p)

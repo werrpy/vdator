@@ -28,7 +28,7 @@ class CodecsParser():
     self.audio_codec_title_names = {
       'DTS Audio' : 'DTS',
       'DTS-HD Master Audio' : 'DTS-HD.MA',
-      'Dolby Digital Audio' : 'AC3',
+      'Dolby Digital Audio' : 'DD',
       'Dolby TrueHD Audio' : 'TrueHD',
       'FLAC Audio' : 'FLAC',
     }
