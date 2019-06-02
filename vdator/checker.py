@@ -463,6 +463,7 @@ class Checker():
     
     if len(self.mediainfo['text']) > 0:
       english_first = False
+      has_english = False
       
       # list of subtitle languages without a title
       text_langs_without_title = list()
@@ -473,6 +474,7 @@ class Checker():
       # check that English subtitles without a title are first if they exist
       if len(text_langs_without_title) > 0:
         if 'english' in text_langs_without_title:
+          has_english = True
           if text_langs_without_title[0] == 'english':
             reply += self.print_report("correct", "English subtitles are first\n")
             english_first = True
@@ -486,8 +488,10 @@ class Checker():
       else:
         if english_first:
           reply += self.print_report("error", "English subtitles are first, but rest should be in alphabetical order\n")
-        else:
+        elif has_english:
           reply += self.print_report("error", "English subtitles should be first, rest should be in alphabetical order\n")
+        else:
+          reply += self.print_report("error", "Subtitles should be in alphabetical order\n")
     
     return reply
     
