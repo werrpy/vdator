@@ -93,7 +93,8 @@ class PasteParser():
             if "ac3 embedded" in audio_name.lower():
               audio_parts = re.split("\(ac3 embedded:", audio_name, flags=re.IGNORECASE)
               bdinfo['audio'].append(self._format_track_name(audio_parts[0]))
-              bdinfo['audio'].append(self._format_track_name("Compatibility Track / Dolby Digital Audio / " + audio_parts[1].strip().rstrip(")")))
+              compat_track = "Compatibility Track / Dolby Digital Audio / " + audio_parts[1].strip().rstrip(")")
+              bdinfo['audio'].append(self._format_track_name(compat_track))
             else:
               if "(" in l:
                 l = l.split("(")[0]
@@ -139,7 +140,7 @@ class PasteParser():
               
               if "ac3 embedded" in l.lower():
                 audio_parts = re.split("\(ac3 embedded:", l, flags=re.IGNORECASE)
-                compat_track = "Compatibility Track / Dolby Digital Audio / " + "/".join(audio_parts[1].split("/")[:-1]).strip()
+                compat_track = "Compatibility Track / Dolby Digital Audio / " + "/".join(audio_parts[1].split("/")[:-1]).strip().rstrip(")")
                 bdinfo['audio'].append(self._format_track_name(compat_track))
                 
         elif sect == self.Section.MEDIAINFO:
@@ -160,7 +161,15 @@ class PasteParser():
     
   def _format_track_name(self, name):
     # remove multiple and trailing spaces
-    return ' '.join(name.split()).strip()
+    track_name = ' '.join(name.split()).strip()
+    # remove dialog normalization text
+    track_name = self._remove_dialog_normalization(track_name)
+    return track_name
+    
+  def _remove_dialog_normalization(self, name):
+    if 'DN' in name.upper():
+      return name.rpartition(' / ')[0]
+    return name
     
   def _isIgnoreAfterLine(self, l):
     if IGNORE_AFTER_LINE_METHOD == "equals":
