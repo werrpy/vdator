@@ -42,6 +42,11 @@ class CodecsParser():
       'Chapters' : '.txt',
     }
 
+    self.scan_type_title_names = {
+      'mbaff' : 'i',
+      'progressive' : 'p',
+    }
+
     # map of all codec names to extensions
     self.codec_ext = {**self.video_codecs, **self.audio_codecs, **self.sub_codecs, **self.chapter_codecs}
 
@@ -127,7 +132,7 @@ class CodecsParser():
     str codec extension
     """
     if codec not in self.codec_ext:
-      return False
+      return ''
     return self.codec_ext[codec]
     
   def get_audio_codec_title_name(self, codec):
@@ -141,9 +146,26 @@ class CodecsParser():
       
     Returns
     -------
-    str codec extension
+    str codec title name
     """
     if codec not in self.audio_codec_title_names:
-      return False
+      return ''
     return self.audio_codec_title_names[codec]
+    
+  def get_scan_type_title_name(self, scan_type):
+    """
+    Get name of video scan type for title. Checks if scan type is valid.
+    
+    Parameters
+    ----------
+    scan_type : str
+      scan type
+      
+    Returns
+    -------
+    str scan type title name
+    """
+    if scan_type not in self.scan_type_title_names:
+      return ''
+    return self.scan_type_title_names[scan_type]
     

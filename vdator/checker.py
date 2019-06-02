@@ -105,7 +105,7 @@ class Checker():
         release_name += title + '.' + year
       # resolution (ex. 1080p)
       release_name += '.' + ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
-      release_name += self.mediainfo['video'][0]['scan_type'][0].lower()
+      release_name += codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
       # source (ex. BluRay.REMUX)
       release_name += '.' + source
       # video format (ex. AVC)
