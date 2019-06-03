@@ -43,6 +43,7 @@ class CodecsParser():
     }
 
     self.scan_type_title_names = {
+      'interlaced' : 'i',
       'mbaff' : 'i',
       'progressive' : 'p',
     }
