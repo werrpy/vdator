@@ -25,6 +25,14 @@ ia = IMDb()
 
 HUNSPELL_LANG = [x.strip() for x in os.environ.get("HUNSPELL_LANG").split(',')]
 
+# used for filename
+RELEASE_GROUP = os.environ.get("RELEASE_GROUP").strip()
+SOURCE = os.environ.get("SOURCE").strip()
+
+# channels
+TRAINEE_CHANNELS = [x.strip() for x in os.environ.get("TRAINEE_CHANNELS").split(',')]
+INTERNAL_CHANNELS = [x.strip() for x in os.environ.get("INTERNAL_CHANNELS").split(',')]
+
 class Checker():
 
   def __init__(self, bdinfo, mediainfo):
@@ -82,7 +90,7 @@ class Checker():
       
     return reply
     
-  def check_filename(self, codecs, source, release_group):
+  def check_filename(self, codecs, channel):
     reply = ""
     # construct release name
     release_name = ""
@@ -107,7 +115,7 @@ class Checker():
       release_name += '.' + ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
       release_name += codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
       # source (ex. BluRay.REMUX)
-      release_name += '.' + source
+      release_name += '.' + SOURCE
       # video format (ex. AVC)
       release_name += '.' + self.mediainfo['video'][0]['format']
       main_audio_title = self.mediainfo['audio'][0]['title'].split(' / ')
@@ -124,15 +132,21 @@ class Checker():
         release_name += '.' + main_audio_title[0]
         release_name += '.' + main_audio_title[1]
       # release group
-      release_name += '-' + release_group + '.mkv'
+      release_name += '-'
+      if channel in INTERNAL_CHANNELS:
+        release_name += RELEASE_GROUP + '.mkv'
       complete_name = self.mediainfo['general'][0]['complete_name']
       if '\\' in complete_name:
         complete_name = complete_name.split('\\')[-1]
       elif '/' in complete_name:
         complete_name = complete_name.split('/')[-1]
-      if release_name == complete_name:
-        reply += self.print_report("correct", "Filename: `" + release_name + "`\n")
+      if channel in INTERNAL_CHANNELS and release_name == complete_name:
+        reply += self.print_report("correct", "Filename: `" + complete_name + "`\n")
+      elif release_name in complete_name:
+        reply += self.print_report("correct", "Filename: `" + complete_name + "`\n")
       else:
+        if channel not in INTERNAL_CHANNELS:
+          release_name += 'GRouP.mkv'
         reply += self.print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + release_name + "```")
     else:
       reply += self.print_report("error", "Cannot validate filename\n")
