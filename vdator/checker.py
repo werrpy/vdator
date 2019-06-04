@@ -106,14 +106,18 @@ class Checker():
       'format' in self.mediainfo['video'][0] and \
       'audio' in self.mediainfo and len(self.mediainfo['audio']) >= 1 and \
       'title' in self.mediainfo['audio'][0]:
-      # name.year
-      movie_name_search = re.search(r'(.*)\s\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
+      # Name.Year
+      movie_name_search = re.search(r'(.+)\s\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
+      # Name.S01E01
+      tv_show_name_search = re.search(r'(.+)\s-\s(S\d{2}E\d{2})', self.mediainfo['general'][0]['movie_name'])
       if movie_name_search:
-        title = movie_name_search.group(1).strip().replace(' ', '.')
-        title_remove_chars = [':', '?']
-        title = ''.join(i for i in title if not i in title_remove_chars)
+        title = self._format_title(movie_name_search.group(1))
         year = movie_name_search.group(2).strip()
         release_name += title + '.' + year
+      elif tv_show_name_search:
+        title = self._format_title(tv_show_name_search.group(1))
+        season_episode = tv_show_name_search.group(2).strip()
+        release_name += title + '.' + season_episode
       # resolution (ex. 1080p)
       release_name += '.' + ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
       release_name += codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
@@ -155,6 +159,12 @@ class Checker():
       reply += self.print_report("error", "Cannot validate filename\n")
       
     return reply
+    
+  def _format_title(self, title):
+    title = title.strip().replace(' ', '.')
+    title_remove_chars = [':', '?']
+    title = ''.join(i for i in title if not i in title_remove_chars)
+    return title
     
   def check_tracks_have_language(self):
     reply, is_valid = "", True
