@@ -78,11 +78,14 @@ class Checker():
   def check_movie_name(self):
     reply = ""
     
-    # movie name in format "Name (Year)"    
     if 'general' in self.mediainfo and len(self.mediainfo['general']) >= 1 and \
       'movie_name' in self.mediainfo['general'][0]:
+      # movie name in format "Name (Year)"
       if re.search(r'^.+\(\d{4}\)', self.mediainfo['general'][0]['movie_name']):
         reply += self.print_report("correct", "Movie name format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
+      # tv show name in format "Name - S01E01"
+      elif re.search(r'^.+\s-\sS\d{2}E\d{2}', self.mediainfo['general'][0]['movie_name']):
+        reply += self.print_report("correct", "TV show name format `Name - S01E01`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
       else:
         reply += self.print_report("error", "Movie name does not match format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
     else:
