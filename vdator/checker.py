@@ -588,10 +588,14 @@ class Checker():
     return self.report
     
   def display_report(self):
-    reply = str(self.report['correct']) + " correct, " + str(self.report['warning']) + " warning"
-    reply += "" if self.report['error'] == 1 else "s"
+    reply = str(self.report['correct']) + " correct, "
+    
+    reply += str(self.report['warning']) + " warning"
+    reply += "" if self.report['warning'] == 1 else "s"
+    
     reply += ", " + str(self.report['error']) + " error"
     reply += "" if self.report['error'] == 1 else "s"
+    
     reply += ", and " + str(self.report['info']) + " info"
     return reply
     
