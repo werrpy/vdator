@@ -18,6 +18,7 @@ from checker import Checker
 load_dotenv()
 
 # environment variables
+IN_GAME = os.environ.get("IN_GAME").strip()
 IGNORE_AFTER_LINE = os.environ.get("IGNORE_AFTER_LINE").strip()
 
 # channels to listen in and add reactions
@@ -70,7 +71,7 @@ client = discord.Client()
 async def on_ready():
   print("I'm in")
   print(client.user)
-  await client.change_presence(game=discord.Game(name="Remux n00b"))
+  await client.change_presence(game=discord.Game(name=IN_GAME))
 
 @client.event
 async def on_message(message):
