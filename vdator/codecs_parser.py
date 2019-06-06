@@ -23,15 +23,6 @@ class CodecsParser():
       'RAW/PCM' : '.pcm',
       'TrueHD/AC3' : '.thd+ac3',
     }
-    
-    # map audio codec names used in track title to names used in file title
-    self.audio_codec_title_names = {
-      'DTS Audio' : 'DTS',
-      'DTS-HD Master Audio' : 'DTS-HD.MA',
-      'Dolby Digital Audio' : 'DD',
-      'Dolby TrueHD Audio' : 'TrueHD',
-      'FLAC Audio' : 'FLAC',
-    }
 
     self.sub_codecs = {
       'Subtitle (PGS)' : '.sup',
@@ -41,7 +32,22 @@ class CodecsParser():
     self.chapter_codecs = {
       'Chapters' : '.txt',
     }
-
+    
+    # map audio codec names used in track title to names used in file title
+    self.video_codec_title_names = {
+      'MPEG-2 Video' : 'MPEG-2',
+      'MPEG-4 AVC Video' : 'AVC',
+      'MPEG-H HEVC Video' : 'HEVC',
+    }
+    
+    self.audio_codec_title_names = {
+      'DTS Audio' : 'DTS',
+      'DTS-HD Master Audio' : 'DTS-HD.MA',
+      'Dolby Digital Audio' : 'DD',
+      'Dolby TrueHD Audio' : 'TrueHD',
+      'FLAC Audio' : 'FLAC',
+    }
+    
     self.scan_type_title_names = {
       'interlaced' : 'i',
       'mbaff' : 'i',
@@ -135,6 +141,23 @@ class CodecsParser():
     if codec not in self.codec_ext:
       return ''
     return self.codec_ext[codec]
+    
+  def get_video_codec_title_name(self, codec):
+    """
+    Get name of video codec for title. Checks if video codec is valid.
+    
+    Parameters
+    ----------
+    codec : str
+      codec
+      
+    Returns
+    -------
+    str codec title name
+    """
+    if codec not in self.video_codec_title_names:
+      return ''
+    return self.video_codec_title_names[codec]
     
   def get_audio_codec_title_name(self, codec):
     """

@@ -124,9 +124,9 @@ class Checker():
       # source (ex. BluRay.REMUX)
       release_name += '.' + SOURCE
       # video format (ex. AVC)
-      main_video_title = self.mediainfo['video'][0]['title'].split()
+      main_video_title = self.mediainfo['video'][0]['title'].split(' / ')
       if len(main_video_title) >= 1:
-        release_name += '.' + main_video_title[0]
+        release_name += '.' + codecs.get_video_codec_title_name(main_video_title[0].strip())
       main_audio_title = self.mediainfo['audio'][0]['title'].split(' / ')
       if len(main_audio_title) >= 2:
         # audio codec name for title (ex. DTS-HD.MA)

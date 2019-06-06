@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import re
+import traceback
 
 # APIs
 import discord
@@ -69,6 +70,7 @@ client = discord.Client()
 async def on_ready():
   print("I'm in")
   print(client.user)
+  await client.change_presence(game=discord.Game(name="Remux n00b"))
 
 @client.event
 async def on_message(message):
@@ -131,6 +133,7 @@ async def on_message(message):
       # report
       reply += checker.display_report()
     except:
+      traceback.print_exc()
       reply += "\n[ERROR] vdator failed to parse\n"
     
     # limit reply length
