@@ -33,7 +33,7 @@ class CodecsParser():
       'Chapters' : '.txt',
     }
     
-    # map audio codec names used in track title to names used in file title
+    # map codec names used in track title to names used in file title
     self.video_codec_title_names = {
       'MPEG-2 Video' : 'MPEG-2',
       'MPEG-4 AVC Video' : 'AVC',
