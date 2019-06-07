@@ -16,6 +16,7 @@ class CodecsParser():
 
     self.audio_codecs = {
       'AC3' : '.ac3',
+      'AC3 Surround' : '.ac3',
       'DTS Master Audio' : '.dtsma',
       'DTS' : '.dts',
       'E-AC3' : 'eac3',
