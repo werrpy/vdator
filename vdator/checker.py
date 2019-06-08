@@ -3,6 +3,7 @@ import os
 import string
 import re
 import requests
+import unicodedata
 from iso639 import languages as iso639_languages
 
 # APIs
@@ -111,11 +112,11 @@ class Checker():
       # Name.S01E01
       tv_show_name_search = re.search(r'(.+)\s-\s(S\d{2}E\d{2})', self.mediainfo['general'][0]['movie_name'])
       if movie_name_search:
-        title = self._format_title(movie_name_search.group(1))
+        title = self._format_filename_title(movie_name_search.group(1))
         year = movie_name_search.group(2).strip()
         release_name += title + '.' + year
       elif tv_show_name_search:
-        title = self._format_title(tv_show_name_search.group(1))
+        title = self._format_filename_title(tv_show_name_search.group(1))
         season_episode = tv_show_name_search.group(2).strip()
         release_name += title + '.' + season_episode
       # resolution (ex. 1080p)
@@ -162,10 +163,14 @@ class Checker():
       
     return reply
     
-  def _format_title(self, title):
-    title = title.strip().replace(' ', '.')
-    title_remove_chars = [':', '?']
-    title = ''.join(i for i in title if not i in title_remove_chars)
+  def _format_filename_title(self, title):
+    title = title.strip()
+    # remove diacritical marks
+    title = unicodedata.normalize('NFKD', title).encode('ASCII', 'ignore')
+    # remove punctuation
+    title = ''.join(i for i in title if not i in string.punctuation)
+    # replace spaces with dots
+    title = title.replace(' ', '.')
     return title
     
   def check_tracks_have_language(self):
