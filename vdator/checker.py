@@ -166,9 +166,9 @@ class Checker():
   def _format_filename_title(self, title):
     title = title.strip()
     # remove diacritical marks
-    title = unicodedata.normalize('NFKD', title).encode('ASCII', 'ignore')
+    title = unicodedata.normalize('NFKD', title).encode('ASCII', 'ignore').decode('ASCII')
     # remove punctuation
-    title = ''.join(i for i in title if not i in string.punctuation)
+    title = ''.join([i for i in title if not i in string.punctuation])
     # replace spaces with dots
     title = title.replace(' ', '.')
     return title
