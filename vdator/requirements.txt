@@ -8,6 +8,7 @@ hunspell==0.5.5
 idna==2.8
 IMDbPY==6.6
 iso-639==0.4.5
+langdetect==1.0.7
 lxml==4.3.1
 multidict==4.5.2
 nltk==3.4

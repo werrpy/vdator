@@ -5,6 +5,7 @@ import re
 import requests
 import unicodedata
 from iso639 import languages as iso639_languages
+from langdetect import detect as langdetect_detect
 
 # APIs
 import tmdbsimple as tmdb
@@ -571,6 +572,26 @@ class Checker():
         reply += self.print_report("error", "Must have at most 1 chapter menu\n")
     else:
       reply += self.print_report("info", "No chapters\n")
+    return reply
+    
+  def chapters_detect_language(self):
+    reply = ""
+    # concatenate all chapter titles
+    chapter_phrase = ""
+    if 'menu' in self.mediainfo and len(self.mediainfo['menu']) > 0:
+      if len(self.mediainfo['menu']) == 1:
+        for i, _ in enumerate(self.mediainfo['menu']):
+          if len(self.mediainfo['menu'][i]) > 0:
+            for j, item in enumerate(self.mediainfo['menu'][i]):
+              if 'title' in item:
+                chapter_phrase += item['title'] + "\n"
+    if chapter_phrase:
+      try:
+        lang = langdetect_detect(chapter_phrase)
+        ch_lang = iso639_languages.get(alpha2=lang)
+        reply += self.print_report("info", "Detected chapters language: `" + ch_lang.name + "`\n")
+      except KeyError:
+        pass
     return reply
     
   def _is_commentary_track(self, title):
