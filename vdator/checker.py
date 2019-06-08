@@ -548,19 +548,26 @@ class Checker():
     
   def chapter_language(self):
     reply = ""
+    
     if 'menu' in self.mediainfo and len(self.mediainfo['menu']) > 0:
       if len(self.mediainfo['menu']) == 1:
         for i, _ in enumerate(self.mediainfo['menu']):
           invalid_lang_list = list()
+          # concatenate all chapter titles
+          chapter_phrase = ""
+          chapter_langs = list()
           if len(self.mediainfo['menu'][i]) > 0:
-            for j, _ in enumerate(self.mediainfo['menu'][i]):
+            for j, item in enumerate(self.mediainfo['menu'][i]):
               if 'language' in self.mediainfo['menu'][i][j]:
                 try:
-                  iso639_languages.get(alpha2=self.mediainfo['menu'][i][j]['language'])
+                  ch_lang = iso639_languages.get(alpha2=self.mediainfo['menu'][i][j]['language'])
+                  chapter_langs.append(ch_lang)
                 except KeyError:
                   invalid_lang_list.append(str(j + 1))
               else:
                 invalid_lang_list.append(str(j + 1))
+              if 'title' in item:
+                chapter_phrase += item['title'] + "\n"
           if len(invalid_lang_list) > 0:
             if len(invalid_lang_list) == len(self.mediainfo['menu'][i]):
               reply += self.print_report("error", "Chapters " + str(i) + ": All chapters are do not have a language set\n")
@@ -568,30 +575,23 @@ class Checker():
               reply += self.print_report("error", "Chapters " + str(i) + ": The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
           else:
             reply += self.print_report("correct", "Chapters " + str(i) + ": All chapters have a language set\n")
+          if chapter_phrase:
+            chapter_langs = list(set(chapter_langs))
+            try:
+              lang = langdetect_detect(chapter_phrase)
+              ch_lang = iso639_languages.get(alpha2=lang)
+              if ch_lang in chapter_langs:
+                reply += self.print_report("correct", "Chapters " + str(i) + ": Chapters language matches detected language: `" + ch_lang.name + "`\n")
+              else:
+                chapter_langs_names = ", ".join(list(set([lang.name for lang in chapter_langs])))
+                reply += self.print_report("error", "Chapters " + str(i) + ": Chapters languages: `" + chapter_langs_names + "` do not match detected language: `" + ch_lang.name + "`\n")
+            except KeyError:
+              reply += self.print_report("warning", "Could not detect chapters language\n")
       else:
         reply += self.print_report("error", "Must have at most 1 chapter menu\n")
     else:
       reply += self.print_report("info", "No chapters\n")
-    return reply
-    
-  def chapters_detect_language(self):
-    reply = ""
-    # concatenate all chapter titles
-    chapter_phrase = ""
-    if 'menu' in self.mediainfo and len(self.mediainfo['menu']) > 0:
-      if len(self.mediainfo['menu']) == 1:
-        for i, _ in enumerate(self.mediainfo['menu']):
-          if len(self.mediainfo['menu'][i]) > 0:
-            for j, item in enumerate(self.mediainfo['menu'][i]):
-              if 'title' in item:
-                chapter_phrase += item['title'] + "\n"
-    if chapter_phrase:
-      try:
-        lang = langdetect_detect(chapter_phrase)
-        ch_lang = iso639_languages.get(alpha2=lang)
-        reply += self.print_report("info", "Detected chapters language: `" + ch_lang.name + "`\n")
-      except KeyError:
-        pass
+      
     return reply
     
   def _is_commentary_track(self, title):

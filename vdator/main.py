@@ -133,7 +133,6 @@ async def on_message(message):
       
       # check chapters
       reply += checker.chapter_language()
-      reply += checker.chapters_detect_language()
       
       # report
       reply += checker.display_report()
