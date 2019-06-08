@@ -6,11 +6,14 @@ Takes a Pastebin link with BDInfo and MediaInfo dump, and validates the remux.
 Checks:
 ```
 Video track names
-Movie name format
+Movie/TV name format
+Filename
+Video language matches first audio language
+No muxing mode
+Uses latest mkvtoolnix
 Video and audio track names
 DTS-HD MA 1.0/2.0 to FLAC, LPCM 1.0/2.0 to FLAC, LPCM > 2.0 to DTS-HD MA
 Commentary to AC-3 @ 224 kbps
-Text muxing mode
 Commentary track people and spellcheck
 Subtitle order
 Chapter languages
