@@ -317,7 +317,7 @@ class Checker():
               reply += self._check_audio_conversion(i, "LPCM Audio", "DTS-HD MA")
           else:
             if 'title' in self.mediainfo['audio'][i]:
-              if title in self.mediainfo['audio'][i]['title']:
+              if title == self.mediainfo['audio'][i]['title']:
                 reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + ": Track names match\n")
               else:
                 is_bad_audio_format = False
