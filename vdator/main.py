@@ -9,6 +9,7 @@ from discord import Emoji
 from discord.utils import get
 
 # parsers
+from url_parser import URLParser
 from paste_parser import PasteParser
 from media_info_parser import MediaInfoParser
 from codecs_parser import CodecsParser
@@ -78,6 +79,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+  url_parser = URLParser()
+  
   # only listens in bot and review channels
   if not (message.channel.name in BOT_CHANNELS or message.channel.name in REVIEW_CHANNELS):
     return
@@ -93,12 +96,14 @@ async def on_message(message):
     # add status reactions to own messages
     await add_status_reactions(client, message, message.content)
     return
-
-  if "pastebin.com" in message.content:
-    # extract url from message
-    url = re.search("(?P<url>https?://[^\s]+)", message.content).group("url")
+    
+  supported_urls = url_parser.extract_supported_urls(message.content)
+  
+  for url in supported_urls:
     paste_parser = PasteParser()
-    bdinfo, mediainfo = paste_parser.paste(url)
+    paste = url_parser.get_paste(url)
+    bdinfo, mediainfo = paste_parser.parse(paste)
+    
     reply = "<" + url + ">" + "\n"
 
     try:

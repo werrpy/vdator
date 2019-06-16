@@ -33,13 +33,7 @@ class PasteParser():
     PLAYLIST_INNER_VIDEO = 1
     PLAYLIST_INNER_AUDIO = 2
 
-  def _get_paste(self, url):
-    o = urlparse(url)
-    link = "https://pastebin.com/raw" + o.path
-    r = requests.get(link)
-    return r.text
-
-  def _parse_paste(self, text):
+  def parse(self, text):
     bdinfo = dict()
     bdinfo['video'] = list()
     bdinfo['audio'] = list()
@@ -179,11 +173,4 @@ class PasteParser():
       if IGNORE_AFTER_LINE in l:
         return True
     return False
-
-  def paste(self, url):
-    self.url = url
     
-    data = self._get_paste(self.url)
-    bdinfo, mediainfo = self._parse_paste(data)
-    return bdinfo, mediainfo
-  
