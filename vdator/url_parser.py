@@ -34,10 +34,19 @@ class URLParser():
       o = urlparse(url)
       # check if url is supported
       if o.hostname in self.urls:
-        # get url to raw content
-        raw_url = self.urls[o.hostname] + o.path
+        raw_url = self.get_raw_url(url, o.hostname, o.path)
         raw_urls.append(raw_url)
     return raw_urls
+    
+  def get_raw_url(self, url, hostname, path):
+    # get url to raw content
+    baseraw = self.urls[hostname]
+    # check if its not already a raw url
+    if baseraw not in url:
+      raw_url = self.urls[hostname] + path
+    else:
+      raw_url = url
+    return raw_url
     
   def get_paste(self, raw_url):
     r = requests.get(raw_url)
