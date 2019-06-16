@@ -8,8 +8,9 @@ class URLParser():
     
     self.urls = dict()
     self.add_url('pastebin.com', 'https://pastebin.com/raw')
+    self.add_url('hastebin.com', 'https://hastebin.com/raw')
     
-  def add_url(self, hostname, regex, baseraw):
+  def add_url(self, hostname, baseraw):
     """
     Add a url
     
@@ -27,7 +28,7 @@ class URLParser():
 
   def extract_supported_urls(self, text):
     # list of urls
-    urls = re.findall(self.urls_regex, message.content)
+    urls = re.findall(self.urls_regex, text)
     raw_urls = list()
     for url in urls:
       o = urlparse(url)
