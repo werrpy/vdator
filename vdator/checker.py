@@ -268,8 +268,8 @@ class Checker():
       if mkvtoolnix_version_num == mediainfo_version_num and mkvtoolnix_version_name == mediainfo_version_name:
         reply += self.print_report("correct", "Uses latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name + "\"`\n")
       else:
-        reply += self.print_report("warning", "Not using latest mkvtoolnix: `" + mediainfo_version_num + " " + mediainfo_version_name +
-          "` latest is: `" + mkvtoolnix_version_num + " \"" + mkvtoolnix_version_name + "\"`\n")
+        reply += self.print_report("warning", "Not using latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name +
+          "\"` latest is: `" + mkvtoolnix_version_num + " \"" + mkvtoolnix_version_name + "\"`\n")
     return reply
     
   def print_audio_track_names(self):
