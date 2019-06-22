@@ -440,10 +440,10 @@ class Checker():
                 matched_names.append(n)
           matched_names = set(matched_names)
           if len(matched_names) > 0:
-            reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + " Matched: " + ", ".join(matched_names) + "\n")
+            reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + " Matched: `" + ", ".join(matched_names) + "`\n")
           unmatched_names = set(names) - set(matched_names)
           if len(unmatched_names) > 0:
-            reply += self.print_report("warning", "Audio " + self._section_id("audio", i) + " Unmatched: " + ", ".join(unmatched_names) + "\n")
+            reply += self.print_report("warning", "Audio " + self._section_id("audio", i) + " Unmatched: `" + ", ".join(unmatched_names) + "`\n")
           
     return reply
     
