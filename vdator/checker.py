@@ -4,10 +4,10 @@ import string
 import re
 import requests
 import unicodedata
-from iso639 import languages as iso639_languages
-from langdetect import detect as langdetect_detect
 
 # APIs
+from iso639 import languages as iso639_languages
+from langdetect import detect as langdetect_detect, DetectorFactory
 import tmdbsimple as tmdb
 from imdb import IMDb
 import hunspell
@@ -24,6 +24,9 @@ load_dotenv()
 
 tmdb.API_KEY = os.environ.get("TMDB_API_KEY")
 ia = IMDb()
+
+# make language detection deterministic
+DetectorFactory.seed = 0
 
 HUNSPELL_LANG = [x.strip() for x in os.environ.get("HUNSPELL_LANG").split(',')]
 
