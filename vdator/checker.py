@@ -173,6 +173,8 @@ class Checker():
     title = unicodedata.normalize('NFKD', title).encode('ASCII', 'ignore').decode('ASCII')
     # remove punctuation
     title = ''.join([i for i in title if not i in string.punctuation])
+    # force single spaces
+    title = ' '.join(title.split())
     # replace spaces with dots
     title = title.replace(' ', '.')
     return title
