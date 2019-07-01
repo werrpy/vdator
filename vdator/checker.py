@@ -458,10 +458,13 @@ class Checker():
       if 'title' in self.mediainfo['audio'][i]:
         title = self.mediainfo['audio'][i]['title']
         if self._is_commentary_track(title):
-          # ignore names and punctuation
+          # map punctuation to space
+          translator = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+          title = title.translate(translator)
+          
+          # ignore names
           ignore_list = extract_names(title)
           ignore_list = [a for b in ignore_list for a in b.split()]
-          ignore_list.extend(list(string.punctuation))
           
           # tokenize
           tokens = nltk.word_tokenize(title)
