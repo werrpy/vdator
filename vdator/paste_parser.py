@@ -46,7 +46,7 @@ class PasteParser():
 
     # parse bdinfo
     lines = text.splitlines()
-    ignore_next_lines = False
+    ignore_next_lines, did_first_mediainfo, did_first_bdinfo = False, False, False
     for l in lines:
       # break after ignore line
       if self._isIgnoreAfterLine(l):
@@ -70,14 +70,27 @@ class PasteParser():
         l2 = l.strip().lower()
 
         # determine current section
+        # limit to first bdinfo and mediainfo
         if l2.startswith("quick summary"):
-          sect = self.Section.QUICK_SUMMARY
-          bdinfo['type'] = BDInfoType.QUICK_SUMMARY
-        elif l2 == "general":
-          sect = self.Section.MEDIAINFO
+          if did_first_bdinfo:
+            sect = None
+          else:
+            sect = self.Section.QUICK_SUMMARY
+            bdinfo['type'] = BDInfoType.QUICK_SUMMARY
+            did_first_bdinfo = True
         elif l2.startswith("playlist report"):
-          sect = self.Section.PLAYLIST_REPORT
-          bdinfo['type'] = BDInfoType.PLAYLIST_REPORT
+          if did_first_bdinfo:
+            sect = None
+          else:
+            sect = self.Section.PLAYLIST_REPORT
+            bdinfo['type'] = BDInfoType.PLAYLIST_REPORT
+            did_first_bdinfo = True
+        elif l2.startswith("general"):
+          if did_first_mediainfo:
+            sect = None
+          else:
+            sect = self.Section.MEDIAINFO
+            did_first_mediainfo = True
 
         if sect == self.Section.QUICK_SUMMARY:
           if l2.startswith("video:"):
