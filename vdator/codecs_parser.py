@@ -39,6 +39,7 @@ class CodecsParser():
       'MPEG-2 Video' : 'MPEG-2',
       'MPEG-4 AVC Video' : 'AVC',
       'MPEG-H HEVC Video' : 'HEVC',
+      'VC-1 Video' : 'VC-1',
     }
     
     self.audio_codec_title_names = {
