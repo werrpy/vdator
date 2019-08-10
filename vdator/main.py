@@ -110,12 +110,13 @@ async def on_message(message):
       # parse mediainfo
       mediainfo_parser = MediaInfoParser()
       mediainfo = mediainfo_parser.parse(mediainfo)
-      checker = Checker(bdinfo, mediainfo)
+      codecs = CodecsParser()
+      checker = Checker(bdinfo, mediainfo, codecs)
       
       # check metadata
       reply += checker.check_movie_name()
-      codecs = CodecsParser()
-      reply += checker.check_filename(codecs, message.channel.name)
+      
+      reply += checker.check_filename(message.channel.name)
       reply += checker.check_tracks_have_language()
       reply += checker.check_video_language_matches_first_audio_language()
       reply += checker.check_muxing_mode()
@@ -126,7 +127,7 @@ async def on_message(message):
       
       # check audio
       reply += checker.print_audio_track_names()
-      reply += checker.check_audio_track_conversions()
+      reply += checker.check_audio_tracks()
       
       # TMDB and IMDb People API
       reply += checker.check_people()

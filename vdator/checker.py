@@ -40,9 +40,10 @@ INTERNAL_CHANNELS = [x.strip() for x in os.environ.get("INTERNAL_CHANNELS").spli
 
 class Checker():
 
-  def __init__(self, bdinfo, mediainfo):
+  def __init__(self, bdinfo, mediainfo, codecs):
     self.bdinfo = bdinfo
     self.mediainfo = mediainfo
+    self.codecs = codecs
     
     self.report =	{
       "correct": 0,
@@ -98,7 +99,7 @@ class Checker():
       
     return reply
     
-  def check_filename(self, codecs, channel):
+  def check_filename(self, channel):
     reply = ""
     # construct release name
     release_name = ""
@@ -125,18 +126,18 @@ class Checker():
         release_name += title + '.' + season_episode
       # resolution (ex. 1080p)
       release_name += '.' + ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
-      release_name += codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
+      release_name += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
       # source (ex. BluRay.REMUX)
       release_name += '.' + SOURCE
       # video format (ex. AVC)
       main_video_title = self.mediainfo['video'][0]['title'].split(' / ')
       if len(main_video_title) >= 1:
-        release_name += '.' + codecs.get_video_codec_title_name(main_video_title[0].strip())
+        release_name += '.' + self.codecs.get_video_codec_title_name(main_video_title[0].strip())
       main_audio_title = self.mediainfo['audio'][0]['title'].split(' / ')
       if len(main_audio_title) >= 2:
         # audio codec name for title (ex. DTS-HD.MA)
         audio_codec = main_audio_title[0].strip()
-        title = codecs.get_audio_codec_title_name(audio_codec)
+        title = self.codecs.get_audio_codec_title_name(audio_codec)
         if title:
           main_audio_title[0] = title
         else:
@@ -288,7 +289,7 @@ class Checker():
       reply = self.print_report("error", "No audio tracks\n")
     return reply
     
-  def check_audio_track_conversions(self):
+  def check_audio_tracks(self):
     reply = ""
     
     if len(self.bdinfo['audio']) == len(self.mediainfo['audio']):
@@ -327,14 +328,18 @@ class Checker():
               else:
                 is_bad_audio_format = False
                 if '/' in title and '/' in self.mediainfo['audio'][i]['title']:
-                  bdinfo_audio_format = title.split('/')[0]
-                  mediainfo_audio_format = self.mediainfo['audio'][i]['title'].split('/')[0]
-                  if bdinfo_audio_format != mediainfo_audio_format:
+                  bdinfo_audio_format = title.split('/')[0].strip()
+                  if self.codecs.is_codec(self.mediainfo['audio'][i]['title'][0]):
+                    mediainfo_audio_title = self.mediainfo['audio'][i]['title'].strip()
+                  else:
+                    # remove first part since its not a codec
+                    mediainfo_audio_title = ' / '.join(self.mediainfo['audio'][i]['title'].split(' / ')[1:]).strip()
+                  if title != mediainfo_audio_title:
                     is_bad_audio_format = True
                 if is_bad_audio_format:
                   reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Bad conversion:\n```fix\nBDInfo: " + title + "\nMediaInfo: " + self.mediainfo['audio'][i]['title'] + "```")
                 else:
-                  reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Track names mismatch:\n```fix\nBDInfo: " + title + "\nMediaInfo: " + self.mediainfo['audio'][i]['title'] + "```")
+                  reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + ": Track names match\n")
             else:
               reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Missing track name\n")
     else:

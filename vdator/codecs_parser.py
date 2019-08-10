@@ -127,6 +127,21 @@ class CodecsParser():
       return True
     return False
     
+  def is_codec(self, codec):
+    """
+    Is this a valid codec?
+    
+    Parameters
+    ----------
+    codec : str
+      codec
+      
+    Returns
+    -------
+    True if valid codec, False otherwise.
+    """
+    return codec in self.codec_ext
+    
   def get_codec_ext(self, codec):
     """
     Get codec extension. Checks if codec is valid.
