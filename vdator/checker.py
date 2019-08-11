@@ -583,7 +583,7 @@ class Checker():
                 chapter_phrase += item['title'] + "\n"
           if len(invalid_lang_list) > 0:
             if len(invalid_lang_list) == len(self.mediainfo['menu'][i]):
-              reply += self.print_report("error", "Chapters " + str(i) + ": All chapters are do not have a language set\n")
+              reply += self.print_report("error", "Chapters " + str(i) + ": All chapters do not have a language set\n")
             else:
               reply += self.print_report("error", "Chapters " + str(i) + ": The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
           else:
