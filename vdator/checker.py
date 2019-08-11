@@ -607,6 +607,26 @@ class Checker():
       
     return reply
     
+  def chapter_padding(self):
+    reply, padded_correctly = "", True
+    
+    if 'menu' in self.mediainfo and len(self.mediainfo['menu']) > 0:
+      if len(self.mediainfo['menu']) == 1:
+        num_chapters = len(self.mediainfo['menu'][0])
+        for i, ch in enumerate(self.mediainfo['menu'][0]):
+          if re.search(r'^chapter\s\d+', ch['title'], re.IGNORECASE):
+            # numbered chapter
+            ch_num = ''.join(re.findall(r'[\d]+', ch['title']))
+            if ch_num != ch_num.zfill(len(str(num_chapters))):
+              padded_correctly = False
+              break
+    if padded_correctly:
+      reply += self.print_report("correct", "Chapters properly padded\n")
+    else:
+      reply += self.print_report("error", "Incorrect chapter padding\n")
+      
+    return reply
+    
   def _is_commentary_track(self, title):
     return "commentary" in title.lower()
     

@@ -139,6 +139,7 @@ async def on_message(message):
       
       # check chapters
       reply += checker.chapter_language()
+      reply += checker.chapter_padding()
       
       # report
       reply += checker.display_report()
