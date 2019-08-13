@@ -32,7 +32,6 @@ HUNSPELL_LANG = [x.strip() for x in os.environ.get("HUNSPELL_LANG").split(',')]
 
 # used for filename
 RELEASE_GROUP = os.environ.get("RELEASE_GROUP").strip()
-SOURCE = os.environ.get("SOURCE").strip()
 
 # channels
 TRAINEE_CHANNELS = [x.strip() for x in os.environ.get("TRAINEE_CHANNELS").split(',')]
@@ -125,10 +124,15 @@ class Checker():
         season_episode = tv_show_name_search.group(2).strip()
         release_name += title + '.' + season_episode
       # resolution (ex. 1080p)
-      release_name += '.' + ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
-      release_name += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
-      # source (ex. BluRay.REMUX)
-      release_name += '.' + SOURCE
+      height = ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
+      if height != '480':
+        release_name += '.' + height
+        release_name += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
+        # source BluRay
+        release_name += '.BluRay.REMUX'
+      else:
+        # source DVD
+        release_name += '.DVD.REMUX'
       # video format (ex. AVC)
       main_video_title = self.mediainfo['video'][0]['title'].split(' / ')
       if len(main_video_title) >= 1:
@@ -254,25 +258,41 @@ class Checker():
     
   def check_mkvmerge(self):
     reply = ""
-    r = requests.get(os.environ.get("MKVTOOLNIX_NEWS"))
+    
     version_name_regex_mkvtoolnix = '"(.*)"'
     version_name_regex_mediainfo = '\'(.*)\''
     version_num_regex = '(\d+\.\d+\.\d+)'
-    if r.status_code == 200:
-      ## Version 32.0.0 "Astral Progressions" 2019-03-12
-      mkvtoolnix_version_line = r.text.splitlines()[0]
+    
+    mediainfo_version_num = re.search(version_num_regex, self.mediainfo['general'][0]['writing_application'])
+    if mediainfo_version_num:
+      mediainfo_version_num = mediainfo_version_num.group(1)
       
-      mkvtoolnix_version_num = re.search(version_num_regex, mkvtoolnix_version_line).group(1)
-      mkvtoolnix_version_name = re.search(version_name_regex_mkvtoolnix, mkvtoolnix_version_line).group(1)
-      
-      mediainfo_version_num = re.search(version_num_regex, self.mediainfo['general'][0]['writing_application']).group(1)
-      mediainfo_version_name = re.search(version_name_regex_mediainfo, self.mediainfo['general'][0]['writing_application']).group(1)
-      
-      if mkvtoolnix_version_num == mediainfo_version_num and mkvtoolnix_version_name == mediainfo_version_name:
-        reply += self.print_report("correct", "Uses latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name + "\"`\n")
-      else:
-        reply += self.print_report("warning", "Not using latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name +
-          "\"` latest is: `" + mkvtoolnix_version_num + " \"" + mkvtoolnix_version_name + "\"`\n")
+    mediainfo_version_name = re.search(version_name_regex_mediainfo, self.mediainfo['general'][0]['writing_application'])
+    if mediainfo_version_name:
+      mediainfo_version_name = mediainfo_version_name.group(1)
+    
+    if not mediainfo_version_num or not mediainfo_version_name:
+      reply += self.print_report("info", "Not using mkvtoolnix\n")
+    else:
+      r = requests.get(os.environ.get("MKVTOOLNIX_NEWS"))
+      if r.status_code == 200:
+        ## Version 32.0.0 "Astral Progressions" 2019-03-12
+        mkvtoolnix_version_line = r.text.splitlines()[0]
+        
+        mkvtoolnix_version_num = re.search(version_num_regex, mkvtoolnix_version_line)
+        if mkvtoolnix_version_num:
+          mkvtoolnix_version_num = mkvtoolnix_version_num.group(1)
+          
+        mkvtoolnix_version_name = re.search(version_name_regex_mkvtoolnix, mkvtoolnix_version_line)
+        if mkvtoolnix_version_name:
+          mkvtoolnix_version_name = mkvtoolnix_version_name.group(1)
+        
+        
+        if mkvtoolnix_version_num == mediainfo_version_num and mkvtoolnix_version_name == mediainfo_version_name:
+          reply += self.print_report("correct", "Uses latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name + "\"`\n")
+        else:
+          reply += self.print_report("warning", "Not using latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name +
+            "\"` latest is: `" + mkvtoolnix_version_num + " \"" + mkvtoolnix_version_name + "\"`\n")
     return reply
     
   def print_audio_track_names(self):
