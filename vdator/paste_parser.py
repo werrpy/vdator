@@ -94,7 +94,9 @@ class PasteParser():
 
         if sect == self.Section.QUICK_SUMMARY:
           if l2.startswith("video:"):
-            bdinfo['video'].append(self._format_track_name(l.split(':', 1)[1]))
+            track_name = l.split(':', 1)[1]
+            track_name = self._remove_3d(track_name)
+            bdinfo['video'].append(self._format_track_name(track_name))
           elif l2.startswith("audio:"):
             audio_name = l.split(':', 1)[1].strip()
             if "ac3 embedded" in audio_name.lower():
@@ -136,8 +138,9 @@ class PasteParser():
                 kbps_i = parts.index("kbps")
                 before = " ".join(parts[:kbps_i - 1]).strip()
                 after = " ".join(parts[kbps_i + 1:]).strip()
-                l = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
-                bdinfo['video'].append(self._format_track_name(l))
+                track_name = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
+                track_name = self._remove_3d(track_name)
+                bdinfo['video'].append(self._format_track_name(track_name))
               except ValueError:
                 continue
                 
@@ -176,6 +179,11 @@ class PasteParser():
   def _remove_dialog_normalization(self, name):
     if 'DN' in name.upper():
       return name.rpartition(' / ')[0]
+    return name
+    
+  def _remove_3d(self, name):
+    name = name.replace(" / Left Eye", "")
+    name = name.replace(" / Right Eye", "")
     return name
     
   def _isIgnoreAfterLine(self, l):
