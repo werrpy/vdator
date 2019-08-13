@@ -95,8 +95,8 @@ class PasteParser():
         if sect == self.Section.QUICK_SUMMARY:
           if l2.startswith("video:"):
             track_name = l.split(':', 1)[1]
-            track_name = self._remove_3d(track_name)
-            bdinfo['video'].append(self._format_track_name(track_name))
+            track_name = self._format_video_track_name(track_name)
+            bdinfo['video'].append(track_name)
           elif l2.startswith("audio:"):
             audio_name = l.split(':', 1)[1].strip()
             if "ac3 embedded" in audio_name.lower():
@@ -139,8 +139,8 @@ class PasteParser():
                 before = " ".join(parts[:kbps_i - 1]).strip()
                 after = " ".join(parts[kbps_i + 1:]).strip()
                 track_name = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
-                track_name = self._remove_3d(track_name)
-                bdinfo['video'].append(self._format_track_name(track_name))
+                track_name = self._format_video_track_name(track_name)
+                bdinfo['video'].append(track_name)
               except ValueError:
                 continue
                 
@@ -169,6 +169,12 @@ class PasteParser():
     name = " ".join(l_parts0[:-4]) + " / " + l_parts0[-1] + " / " + l_parts1
     return name
     
+  def _format_video_track_name(self, name):
+    track_name = self._remove_3d(name)
+    track_name = self._format_track_name(track_name)
+    track_name = self._video_fps_force_decimal(track_name)
+    return track_name
+    
   def _format_track_name(self, name):
     # remove multiple and trailing spaces
     track_name = ' '.join(name.split()).strip()
@@ -185,6 +191,13 @@ class PasteParser():
     name = name.replace(" / Left Eye", "")
     name = name.replace(" / Right Eye", "")
     return name
+    
+  def _video_fps_force_decimal(self, name):
+    # bdinfo force decimal instead of comma in fps
+    new_name = name.split('/')
+    new_name[3] = new_name[3].replace(',', '.')
+    new_name = "/".join(new_name)
+    return new_name
     
   def _isIgnoreAfterLine(self, l):
     if IGNORE_AFTER_LINE_METHOD == "equals":

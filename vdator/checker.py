@@ -62,19 +62,21 @@ class Checker():
     reply = ""
     
     if 'video' in self.bdinfo and 'video' in self.mediainfo:
-      if len(self.bdinfo['video']) == 1 and len(self.mediainfo['video']) == 1 and \
-        'title' in self.mediainfo['video'][0]:
-        # bdinfo force decimal instead of comma in fps
-        new_name = self.bdinfo['video'][0].split('/')
-        new_name[3] = new_name[3].replace(',', '.')
-        self.bdinfo['video'][0] = "/".join(new_name)
+      if len(self.bdinfo['video']) != 1:
+        reply += self.print_report("error", "Missing bdinfo video track\n")
+        return reply
+      elif len(self.mediainfo['video']) != 1:
+        reply += self.print_report("error", "Missing mediainfo video track\n")
+        return reply
         
+      if 'title' in self.mediainfo['video'][0]:
         if self.bdinfo['video'][0] == self.mediainfo['video'][0]['title']:
           reply += self.print_report("correct", "Video track names match: ```" + self.bdinfo['video'][0] + "```")
         else:
           reply += self.print_report("error", "Video track names missmatch:\n```fix\nBDInfo: " + self.bdinfo['video'][0] + "\nMediaInfo: " + self.mediainfo['video'][0]['title'] + "```")
       else:
-        reply += self.print_report("error", "Must have 1 video track\n")
+        reply += self.print_report("error", "Missing mediainfo video track\n")
+        return reply
     else:
       reply += self.print_report("error", "Could not verify video track\n")
       
