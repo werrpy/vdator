@@ -335,14 +335,14 @@ class Checker():
           if bdinfo_audio_parts[audio_split_index] == "DTS-HD Master Audio" and \
             self._is_number(bdinfo_audio_parts[audio_split_index + 1]) and float(bdinfo_audio_parts[audio_split_index + 1]) < 3:
             # DTS-HD MA 1.0 or 2.0 to FLAC
-            reply += self._check_audio_conversion(i, "DTS-HD MA", "FLAC Audio")
+            reply += self._check_audio_conversion(i, "DTS-HD Master Audio", "FLAC Audio")
           elif bdinfo_audio_parts[audio_split_index] == "LPCM Audio":
             if self._is_number(bdinfo_audio_parts[audio_split_index + 1]) and float(bdinfo_audio_parts[audio_split_index + 1]) < 3:
               # LPCM 1.0 or 2.0 to FLAC
               reply += self._check_audio_conversion(i, "LPCM Audio", "FLAC Audio")
             else:
               # LPCM > 2.0 to DTS-HD MA
-              reply += self._check_audio_conversion(i, "LPCM Audio", "DTS-HD MA")
+              reply += self._check_audio_conversion(i, "LPCM Audio", "DTS-HD Master Audio")
           else:
             if 'title' in self.mediainfo['audio'][i]:
               if title == self.mediainfo['audio'][i]['title']:
