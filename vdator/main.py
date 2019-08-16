@@ -115,6 +115,7 @@ async def on_message(message):
       
       # check metadata
       reply += checker.check_movie_name()
+      reply += checker.check_ids()
       
       reply += checker.check_filename(message.channel.name)
       reply += checker.check_tracks_have_language()

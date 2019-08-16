@@ -4,11 +4,13 @@ import string
 import re
 import requests
 import unicodedata
+import datetime
 
 # APIs
 from iso639 import languages as iso639_languages
 from langdetect import detect as langdetect_detect, DetectorFactory
 import tmdbsimple as tmdb
+import imdb
 from imdb import IMDb
 import hunspell
 
@@ -98,6 +100,45 @@ class Checker():
     else:
       reply += self.print_report("error", "Missing movie name\n")
       
+    return reply
+    
+  def check_ids(self):
+    reply = ""
+    
+    if 'general' in self.mediainfo and len(self.mediainfo['general']) >= 1 and \
+      'movie_name' in self.mediainfo['general'][0]:
+      movie_name = re.search(r'^(.+)\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
+      name = movie_name.group(1).strip()
+      year = movie_name.group(2).strip()
+    
+    if 'imdb' in self.mediainfo['general'][0]:
+      imdb_id = ''.join(re.findall(r'[\d]+', self.mediainfo['general'][0]['imdb']))
+      try:
+        imdb_movie = ia.get_movie(imdb_id)
+      except imdb._exceptions.IMDbParserError:
+        reply += self.print_report("error", "Invalid IMDB id: `" + self.mediainfo['general'][0]['imdb'] + "`\n")
+      else:
+        if name == imdb_movie['title'] and year == str(imdb_movie['year']):
+          reply += self.print_report("correct", "Matched IMDB name and year\n")
+        else:
+          reply += self.print_report("error", "IMDB: Name: `" + imdb_movie['title'] + "` Year: `" + str(imdb_movie['year']) + "`\n")
+        
+    if 'tmdb' in self.mediainfo['general'][0]:
+      tmdb_id = ''.join(re.findall(r'[\d]+', self.mediainfo['general'][0]['tmdb']))
+      tmdb_movie = tmdb.Movies(tmdb_id)
+      try:
+        tmdb_movie_info = tmdb_movie.info()
+      except requests.exceptions.HTTPError:
+        reply += self.print_report("error", "Invalid TMDB id: `" + self.mediainfo['general'][0]['tmdb'] + "`\n")
+      else:
+        datetime_obj = datetime.datetime.strptime(tmdb_movie_info['release_date'], '%Y-%m-%d')
+        tmdb_year = str(datetime_obj.year)
+        
+        if name == tmdb_movie_info['original_title'] and year == tmdb_year:
+          reply += self.print_report("correct", "Matched TMDB name and year\n")
+        else:
+          reply += self.print_report("error", "TMDB: Name: `" + tmdb_movie_info['original_title'] + "` Year: `" + tmdb_year + "`\n")
+        
     return reply
     
   def check_filename(self, channel):
