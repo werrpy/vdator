@@ -7,16 +7,18 @@ Checks:
 ```
 Video track names
 Movie/TV name format
+IMDB/TMDB ids
 Filename
 Video language matches first audio language
 No muxing mode
 Uses latest mkvtoolnix
-Video and audio track names
+Video and audio track names match
 DTS-HD MA 1.0/2.0 to FLAC, LPCM 1.0/2.0 to FLAC, LPCM > 2.0 to DTS-HD MA
 Commentary to AC-3 @ 224 kbps
 Commentary track people and spellcheck
 Subtitle order
 Chapter languages
+Chapter padding
 ```
 
 ### Setup

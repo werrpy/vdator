@@ -42,18 +42,19 @@ def print_help():
     " and post full summaries in: `" + ", ".join(BOT_CHANNELS) + "`." \
     " Add a minus (-) sign in front of unused audio tracks in BDInfo." \
     " I check:```" \
-    "Video track names\n" \
     "Movie/TV name format\n" \
+    "IMDB/TMDB ids\n" \
     "Filename\n" \
     "Video language matches first audio language\n" \
     "No muxing mode\n" \
     "Uses latest mkvtoolnix\n" \
-    "Video and audio track names\n" \
+    "Video and audio track names match\n" \
     "DTS-HD MA 1.0/2.0 to FLAC, LPCM 1.0/2.0 to FLAC, LPCM > 2.0 to DTS-HD MA\n" \
     "Commentary to AC-3 @ 224 kbps\n" \
     "Commentary track people and spellcheck\n" \
     "Subtitle order\n" \
-    "Chapter languages```"
+    "Chapter languages\n" \
+    "Chapter padding```"
 
 async def add_status_reactions(client, message, content):
   # ignore help
