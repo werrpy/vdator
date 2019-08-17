@@ -53,6 +53,7 @@ def print_help():
     "Commentary to AC-3 @ 224 kbps\n" \
     "Commentary track people and spellcheck\n" \
     "Subtitle order\n" \
+    "Should have chapters\n" \
     "Chapter languages\n" \
     "Chapter padding```"
 
@@ -103,7 +104,7 @@ async def on_message(message):
   for url in supported_urls:
     paste_parser = PasteParser()
     paste = url_parser.get_paste(url)
-    bdinfo, mediainfo = paste_parser.parse(paste)
+    bdinfo, mediainfo, eac3to = paste_parser.parse(paste)
     
     reply = "<" + url + ">" + "\n"
 
@@ -140,6 +141,7 @@ async def on_message(message):
       reply += checker.text_order()
       
       # check chapters
+      reply += checker.has_chapers(eac3to)
       reply += checker.chapter_language()
       reply += checker.chapter_padding()
       

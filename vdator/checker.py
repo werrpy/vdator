@@ -690,6 +690,19 @@ class Checker():
       
     return reply
     
+  def has_chapers(self, eac3to):
+    reply, should_have_chapters = "", False
+    for log in eac3to:
+      for l in log:
+        if "chapters" in l:
+          should_have_chapters = True
+    if should_have_chapters:
+      if len(self.mediainfo['menu']) > 0:
+        reply += self.print_report("correct", "Has chapters\n")
+      else:
+        reply += self.print_report("error", "Should have chapters\n")
+    return reply
+    
   def _is_commentary_track(self, title):
     return "commentary" in title.lower()
     

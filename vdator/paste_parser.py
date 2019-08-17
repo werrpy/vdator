@@ -11,7 +11,7 @@ load_dotenv()
 # environment variables
 IGNORE_AFTER_LINE = os.environ.get("IGNORE_AFTER_LINE").strip()
 IGNORE_AFTER_LINE_METHOD = os.environ.get("IGNORE_AFTER_LINE_METHOD").strip()
-IGNORE_UNTIL_BLANK_LINE_PREFIXES = [x.strip() for x in os.environ.get("IGNORE_UNTIL_BLANK_LINE_PREFIXES").split(',')]
+IGNORE_UNTIL_BLANK_LINE_PREFIXES = [x.strip() for x in os.getenv("IGNORE_UNTIL_BLANK_LINE_PREFIXES", "").strip().split(',')]
 
 class BDInfoType(Enum):
   QUICK_SUMMARY = 1
@@ -23,6 +23,7 @@ class PasteParser():
     QUICK_SUMMARY = 1
     MEDIAINFO = 2
     PLAYLIST_REPORT = 3
+    EAC3TO_LOG = 4
     
   class Section2(Enum):
     PLAYLIST_VIDEO = 1
@@ -39,6 +40,8 @@ class PasteParser():
     bdinfo['audio'] = list()
     bdinfo['subtitle'] = list()
     mediainfo = list()
+    eac3to = list()
+    eac3to_index = -1
 
     sect = None
     sect2 = None
@@ -61,102 +64,113 @@ class PasteParser():
       if ignore_next_lines:
         continue
         
-      l3 = l.strip().lower()
-      for x in IGNORE_UNTIL_BLANK_LINE_PREFIXES:
-        if l3.startswith(x):
-          ignore_next_lines = True
-          break
-      else:
-        l2 = l.strip().lower()
+      if IGNORE_UNTIL_BLANK_LINE_PREFIXES and IGNORE_UNTIL_BLANK_LINE_PREFIXES[0] != '':
+        l3 = l.strip().lower()
+        for x in IGNORE_UNTIL_BLANK_LINE_PREFIXES:
+          if l3.startswith(x):
+            ignore_next_lines = True
+            break
+          
+      l2 = l.strip().lower()
 
-        # determine current section
-        # limit to first bdinfo and mediainfo
-        if l2.startswith("quick summary"):
-          if did_first_bdinfo:
-            sect = None
-          else:
-            sect = self.Section.QUICK_SUMMARY
-            bdinfo['type'] = BDInfoType.QUICK_SUMMARY
-            did_first_bdinfo = True
-        elif l2.startswith("playlist report"):
-          if did_first_bdinfo:
-            sect = None
-          else:
-            sect = self.Section.PLAYLIST_REPORT
-            bdinfo['type'] = BDInfoType.PLAYLIST_REPORT
-            did_first_bdinfo = True
-        elif l2.startswith("general"):
-          if did_first_mediainfo:
-            sect = None
-          else:
-            sect = self.Section.MEDIAINFO
-            did_first_mediainfo = True
+      # determine current section
+      # limit to first bdinfo and mediainfo
+      if l2.startswith("quick summary"):
+        if did_first_bdinfo:
+          sect = None
+        else:
+          sect = self.Section.QUICK_SUMMARY
+          bdinfo['type'] = BDInfoType.QUICK_SUMMARY
+          did_first_bdinfo = True
+      elif l2.startswith("playlist report"):
+        if did_first_bdinfo:
+          sect = None
+        else:
+          sect = self.Section.PLAYLIST_REPORT
+          bdinfo['type'] = BDInfoType.PLAYLIST_REPORT
+          did_first_bdinfo = True
+      elif l2.startswith("eac3to v"):
+        sect = self.Section.EAC3TO_LOG
+        eac3to.append(list())
+        eac3to_index += 1
+      elif l2.startswith("general"):
+        if did_first_mediainfo:
+          sect = None
+        else:
+          sect = self.Section.MEDIAINFO
+          did_first_mediainfo = True
 
-        if sect == self.Section.QUICK_SUMMARY:
-          if l2.startswith("video:"):
-            track_name = l.split(':', 1)[1]
-            track_name = self._format_video_track_name(track_name)
-            bdinfo['video'].append(track_name)
-          elif l2.startswith("audio:"):
-            audio_name = l.split(':', 1)[1].strip()
-            if "ac3 embedded" in audio_name.lower():
-              audio_parts = re.split("\(ac3 embedded:", audio_name, flags=re.IGNORECASE)
-              bdinfo['audio'].append(self._format_track_name(audio_parts[0]))
-              compat_track = "Compatibility Track / Dolby Digital Audio / " + audio_parts[1].strip().rstrip(")")
-              bdinfo['audio'].append(self._format_track_name(compat_track))
-            else:
-              if "(" in l:
-                l = l.split("(")[0]
-              l = l.strip()
-              bdinfo['audio'].append(self._format_track_name(l.split(':', 1)[1]))
-          elif l2.startswith("subtitle:"):
-            bdinfo['subtitle'].append(self._format_track_name(l.split(':', 1)[1]))
+      if sect == self.Section.QUICK_SUMMARY:
+        if l2.startswith("video:"):
+          track_name = l.split(':', 1)[1]
+          track_name = self._format_video_track_name(track_name)
+          bdinfo['video'].append(track_name)
+        elif l2.startswith("audio:"):
+          audio_name = l.split(':', 1)[1].strip()
+          if "ac3 embedded" in audio_name.lower():
+            audio_parts = re.split("\(ac3 embedded:", audio_name, flags=re.IGNORECASE)
+            bdinfo['audio'].append(self._format_track_name(audio_parts[0]))
+            compat_track = "Compatibility Track / Dolby Digital Audio / " + audio_parts[1].strip().rstrip(")")
+            bdinfo['audio'].append(self._format_track_name(compat_track))
+          else:
+            if "(" in l:
+              l = l.split("(")[0]
+            l = l.strip()
+            bdinfo['audio'].append(self._format_track_name(l.split(':', 1)[1]))
+        elif l2.startswith("subtitle:"):
+          bdinfo['subtitle'].append(self._format_track_name(l.split(':', 1)[1]))
+          
+      elif sect == self.Section.PLAYLIST_REPORT:
+      
+        if l2.startswith("video:"):
+          sect2 = self.Section2.PLAYLIST_VIDEO
+        elif l2.startswith("audio:"):
+          sect2 = self.Section2.PLAYLIST_AUDIO
+        elif l2.startswith("subtitles:"):
+          sect2 = self.Section2.PLAYLIST_SUBTITLES
             
-        elif sect == self.Section.PLAYLIST_REPORT:
-        
-          if l2.startswith("video:"):
-            sect2 = self.Section2.PLAYLIST_VIDEO
-          elif l2.startswith("audio:"):
-            sect2 = self.Section2.PLAYLIST_AUDIO
-          elif l2.startswith("subtitles:"):
-            sect2 = self.Section2.PLAYLIST_SUBTITLES
-              
-          if l2.startswith("-----"):
-            if sect2 == self.Section2.PLAYLIST_VIDEO:
-              sect3 = self.Section3.PLAYLIST_INNER_VIDEO
-            elif sect2 == self.Section2.PLAYLIST_AUDIO:
-              sect3 = self.Section3.PLAYLIST_INNER_AUDIO
-          else:
-            # skip tracks that start with minus sign
-            if l.startswith("-"):
+        if l2.startswith("-----"):
+          if sect2 == self.Section2.PLAYLIST_VIDEO:
+            sect3 = self.Section3.PLAYLIST_INNER_VIDEO
+          elif sect2 == self.Section2.PLAYLIST_AUDIO:
+            sect3 = self.Section3.PLAYLIST_INNER_AUDIO
+        else:
+          # skip tracks that start with minus sign
+          if l.startswith("-"):
+            continue
+            
+          if sect2 == self.Section2.PLAYLIST_VIDEO and sect3 == self.Section3.PLAYLIST_INNER_VIDEO:
+            # format video track name with slashes
+            try:
+              parts = l.split()
+              kbps_i = parts.index("kbps")
+              before = " ".join(parts[:kbps_i - 1]).strip()
+              after = " ".join(parts[kbps_i + 1:]).strip()
+              track_name = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
+              track_name = self._format_video_track_name(track_name)
+              bdinfo['video'].append(track_name)
+            except ValueError:
               continue
               
-            if sect2 == self.Section2.PLAYLIST_VIDEO and sect3 == self.Section3.PLAYLIST_INNER_VIDEO:
-              # format video track name with slashes
-              try:
-                parts = l.split()
-                kbps_i = parts.index("kbps")
-                before = " ".join(parts[:kbps_i - 1]).strip()
-                after = " ".join(parts[kbps_i + 1:]).strip()
-                track_name = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
-                track_name = self._format_video_track_name(track_name)
-                bdinfo['video'].append(track_name)
-              except ValueError:
-                continue
-                
-            elif sect2 == self.Section2.PLAYLIST_AUDIO and sect3 == self.Section3.PLAYLIST_INNER_AUDIO:              
-              name = self._name_from_parts(l)
-              bdinfo['audio'].append(self._format_track_name(name))
+          elif sect2 == self.Section2.PLAYLIST_AUDIO and sect3 == self.Section3.PLAYLIST_INNER_AUDIO:              
+            name = self._name_from_parts(l)
+            bdinfo['audio'].append(self._format_track_name(name))
+            
+            if "ac3 embedded" in l.lower():
+              audio_parts = re.split("\(ac3 embedded:", l, flags=re.IGNORECASE)
+              compat_track = "Compatibility Track / Dolby Digital Audio / " + "/".join(audio_parts[1].split("/")[:-1]).strip().rstrip(")")
+              bdinfo['audio'].append(self._format_track_name(compat_track))
               
-              if "ac3 embedded" in l.lower():
-                audio_parts = re.split("\(ac3 embedded:", l, flags=re.IGNORECASE)
-                compat_track = "Compatibility Track / Dolby Digital Audio / " + "/".join(audio_parts[1].split("/")[:-1]).strip().rstrip(")")
-                bdinfo['audio'].append(self._format_track_name(compat_track))
-                
-        elif sect == self.Section.MEDIAINFO:
-          mediainfo.append(l)
+      elif sect == self.Section.MEDIAINFO:
+        mediainfo.append(l)
+        
+      elif sect == self.Section.EAC3TO_LOG:
+        if l.startswith("Done."):
+          sect = None
+        else:
+          eac3to[eac3to_index].append(l)
     
-    return bdinfo, mediainfo
+    return bdinfo, mediainfo, eac3to
     
   def _name_from_parts(self, l):
     l2 = l
