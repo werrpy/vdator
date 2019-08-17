@@ -220,6 +220,7 @@ class Checker():
     # remove diacritical marks
     title = unicodedata.normalize('NFKD', title).encode('ASCII', 'ignore').decode('ASCII')
     # remove punctuation
+    title = title.replace('&', 'and')
     title = ''.join([i for i in title if not i in string.punctuation])
     # force single spaces
     title = ' '.join(title.split())
