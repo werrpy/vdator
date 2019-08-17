@@ -17,6 +17,7 @@ DTS-HD MA 1.0/2.0 to FLAC, LPCM 1.0/2.0 to FLAC, LPCM > 2.0 to DTS-HD MA
 Commentary to AC-3 @ 224 kbps
 Commentary track people and spellcheck
 Subtitle order
+Should have chapters
 Chapter languages
 Chapter padding
 ```
