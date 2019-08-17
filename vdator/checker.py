@@ -89,12 +89,12 @@ class Checker():
     
     if 'general' in self.mediainfo and len(self.mediainfo['general']) >= 1 and \
       'movie_name' in self.mediainfo['general'][0]:
-      # movie name in format "Name (Year)"
-      if re.search(r'^.+\(\d{4}\)', self.mediainfo['general'][0]['movie_name']):
-        reply += self.print_report("correct", "Movie name format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
       # tv show name in format "Name - S01E01"
-      elif re.search(r'^.+\s-\sS\d{2}E\d{2}', self.mediainfo['general'][0]['movie_name']):
+      if re.search(r'^.+\s-\sS\d{2}E\d{2}', self.mediainfo['general'][0]['movie_name']):
         reply += self.print_report("correct", "TV show name format `Name - S01E01`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
+      # movie name in format "Name (Year)"
+      elif re.search(r'^.+\(\d{4}\)', self.mediainfo['general'][0]['movie_name']):
+        reply += self.print_report("correct", "Movie name format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
       else:
         reply += self.print_report("error", "Movie name does not match format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
     else:
@@ -154,18 +154,18 @@ class Checker():
       'format' in self.mediainfo['video'][0] and \
       'audio' in self.mediainfo and len(self.mediainfo['audio']) >= 1 and \
       'title' in self.mediainfo['audio'][0]:
-      # Name.Year
-      movie_name_search = re.search(r'(.+)\s\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
       # Name.S01E01
       tv_show_name_search = re.search(r'(.+)\s-\s(S\d{2}E\d{2})', self.mediainfo['general'][0]['movie_name'])
-      if movie_name_search:
-        title = self._format_filename_title(movie_name_search.group(1))
-        year = movie_name_search.group(2).strip()
-        release_name += title + '.' + year
-      elif tv_show_name_search:
+      # Name.Year
+      movie_name_search = re.search(r'(.+)\s\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
+      if tv_show_name_search:
         title = self._format_filename_title(tv_show_name_search.group(1))
         season_episode = tv_show_name_search.group(2).strip()
         release_name += title + '.' + season_episode
+      elif movie_name_search:
+        title = self._format_filename_title(movie_name_search.group(1))
+        year = movie_name_search.group(2).strip()
+        release_name += title + '.' + year
       # resolution (ex. 1080p)
       height = ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
       if height != '480':
