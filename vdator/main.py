@@ -59,19 +59,24 @@ def print_help():
     "Chapter padding```"
 
 async def add_status_reactions(client, message, content):
-  # ignore help
-  if re.match(r'vdator (\d+\.)(\d+\.)(\d+) help', content):
-    return
-  
   # add status reactions to message based on content
-  if "WARNING" not in content and "ERROR" not in content:
-    await client.add_reaction(message, '✅')
-  else:
-    if "WARNING" in content:
-      await client.add_reaction(message, '⚠')
-    if "ERROR" in content:
-      await client.add_reaction(message, '❌')
+  report_re = re.search(r'(\d+)\scorrect,\s(\d+)\swarnings?,\s(\d+)\serrors?,\sand\s(\d+)\sinfo', content)
+  if report_re:
+    report = {
+      "correct": int(report_re.group(1)),
+      "warning": int(report_re.group(2)),
+      "error": int(report_re.group(3)),
+      "info": int(report_re.group(4))
+    }
     
+    if report['warning'] == 0 and report['error'] == 0:
+      await client.add_reaction(message, '✅')
+    else:
+      if report['warning'] != 0:
+        await client.add_reaction(message, '⚠')
+      if report['error'] != 0:
+        await client.add_reaction(message, '❌')
+      
 client = discord.Client()
 
 @client.event
