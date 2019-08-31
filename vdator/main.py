@@ -9,6 +9,7 @@ from discord import Emoji
 from discord.utils import get
 
 # parsers
+from helpers import balanced_blockquotes, split_string
 from url_parser import URLParser
 from paste_parser import PasteParser
 from media_info_parser import MediaInfoParser
@@ -152,12 +153,23 @@ async def on_message(message):
       traceback.print_exc()
       reply += "\n[ERROR] vdator failed to parse\n"
     
-    # limit reply length
-    reply = reply[:int(os.environ.get("DISCORD_MSG_CHAR_LIMIT"))]
+    # split into multiple messages based on reply length
+    BLOCK_QUOTES = "```"
+    len_block_quotes = len(BLOCK_QUOTES)
+    replies = split_string(reply, int(os.environ.get("DISCORD_MSG_CHAR_LIMIT")) - len_block_quotes, "\n")
     
+    # preserve blockquotes
+    for i, r in enumerate(replies):
+      if i == len(replies) - 1:
+        break
+      if not balanced_blockquotes(r):
+        replies[i] += BLOCK_QUOTES
+        replies[i + 1] = BLOCK_QUOTES + replies[i + 1]
+        
     if message.channel.name in BOT_CHANNELS:
       # reply in bot channel
-      await client.send_message(message.channel, reply)
+      for reply in replies:
+        await client.send_message(message.channel, reply)
     elif message.channel.name in REVIEW_CHANNELS:
       # add reactions in review channel
       await add_status_reactions(client, message, reply)
@@ -165,7 +177,8 @@ async def on_message(message):
       # and send reply to
       for ch in REVIEW_REPLY_CHANNELS:
         channel = get(message.server.channels, name=ch, type=discord.ChannelType.text)
-        await client.send_message(channel, reply)
+        for reply in replies:
+          await client.send_message(channel, reply)
       
 token = os.environ.get("DISCORD_BOT_SECRET")
 client.run(token)
