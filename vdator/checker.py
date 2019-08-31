@@ -574,7 +574,7 @@ class Checker():
       reply = self.print_report("info", "No text tracks\n")
     return reply
     
-  def text_order(self):
+  def check_text_order(self):
     reply = ""
     
     if len(self.mediainfo['text']) > 0:
@@ -603,12 +603,38 @@ class Checker():
         reply += self.print_report("correct", "Rest of the subtitles are in alphabetical order\n")
       else:
         if english_first:
-          reply += self.print_report("error", "English subtitles are first, but rest should be in alphabetical order\n")
+          reply += self.print_report("error", "Rest of the subtitles should be in alphabetical order\n")
         elif has_english:
           reply += self.print_report("error", "English subtitles should be first, rest should be in alphabetical order\n")
         else:
           reply += self.print_report("error", "Subtitles should be in alphabetical order\n")
     
+    return reply
+    
+  def check_text_default_flag(self):
+    # english subs for foreign films should be default=yes
+    reply = ""
+    
+    if len(self.mediainfo['text']) > 0:
+      first_audio_language, has_english_subs, english_subs_index = False, False, False
+      
+      if 'audio' in self.mediainfo and len(self.mediainfo['audio']) >= 1 and \
+      'language' in self.mediainfo['audio'][0]:
+        first_audio_language = self.mediainfo['audio'][0]['language'].lower()
+      
+      if first_audio_language != 'english':
+        for i, item in enumerate(self.mediainfo['text']):
+          if 'language' in item:
+            if item['language'].lower() == 'english':
+              has_english_subs, english_subs_index = True, i
+              
+        if has_english_subs:
+          # foreign audio and has english subs. english subs should be default=yes
+          if self.mediainfo['text'][english_subs_index]['default'].lower() == 'yes':
+            reply += self.print_report("correct", "Foreign film with English subs `default=yes`\n")
+          else:
+            reply += self.print_report("error", "English subs on foreign film should be `default=yes`\n")
+            
     return reply
     
   def print_chapters(self):
@@ -651,21 +677,21 @@ class Checker():
                 chapter_phrase += item['title'] + "\n"
           if len(invalid_lang_list) > 0:
             if len(invalid_lang_list) == len(self.mediainfo['menu'][i]):
-              reply += self.print_report("error", "Chapters " + str(i) + ": All chapters do not have a language set\n")
+              reply += self.print_report("error", "All chapters do not have a language set\n")
             else:
-              reply += self.print_report("error", "Chapters " + str(i) + ": The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
+              reply += self.print_report("error", "The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
           else:
-            reply += self.print_report("correct", "Chapters " + str(i) + ": All chapters have a language set\n")
+            reply += self.print_report("correct", "All chapters have a language set\n")
           if chapter_phrase:
             chapter_langs = list(set(chapter_langs))
             try:
               lang = langdetect_detect(chapter_phrase)
               ch_lang = iso639_languages.get(alpha2=lang)
               if ch_lang in chapter_langs:
-                reply += self.print_report("correct", "Chapters " + str(i) + ": Chapters language matches detected language: `" + ch_lang.name + "`\n")
+                reply += self.print_report("correct", "Chapters language matches detected language: `" + ch_lang.name + "`\n")
               else:
                 chapter_langs_names = ", ".join(list(set([lang.name for lang in chapter_langs])))
-                reply += self.print_report("error", "Chapters " + str(i) + ": Chapters languages: `" + chapter_langs_names + "` do not match detected language: `" + ch_lang.name + "`\n")
+                reply += self.print_report("error", "Chapters languages: `" + chapter_langs_names + "` do not match detected language: `" + ch_lang.name + "`\n")
             except KeyError:
               reply += self.print_report("warning", "Could not detect chapters language\n")
       else:

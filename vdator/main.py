@@ -138,7 +138,8 @@ async def on_message(message):
       
       # check text
       reply += checker.print_text_tracks()
-      reply += checker.text_order()
+      reply += checker.check_text_order()
+      reply += checker.check_text_default_flag()
       
       # check chapters
       reply += checker.has_chapers(eac3to)
