@@ -54,6 +54,7 @@ def print_help():
     "Commentary to AC-3 @ 224 kbps\n" \
     "Commentary track people and spellcheck\n" \
     "Subtitle order\n" \
+    "Subtitle default flag\n" \
     "Should have chapters\n" \
     "Chapter languages\n" \
     "Chapter padding```"
