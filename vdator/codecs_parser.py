@@ -16,6 +16,7 @@ class CodecsParser():
 
     self.audio_codecs = {
       'AC3' : '.ac3',
+      'AC3 EX' : '.ac3',
       'AC3 Surround' : '.ac3',
       'DTS Master Audio' : '.dtsma',
       'DTS' : '.dts',
@@ -46,6 +47,7 @@ class CodecsParser():
       'DTS Audio' : 'DTS',
       'DTS-HD Master Audio' : 'DTS-HD.MA',
       'Dolby Digital Audio' : 'DD',
+      'Dolby Digital EX Audio' : 'DD-EX',
       'Dolby TrueHD Audio' : 'TrueHD',
       'FLAC Audio' : 'FLAC',
     }
