@@ -78,6 +78,23 @@ class CodecsParser():
       return True
     return False
     
+  def is_video_title(self, codec):
+    """
+    Is this a video title codec?
+    
+    Parameters
+    ----------
+    codec : str
+      codec
+      
+    Returns
+    -------
+    True if codec is a video title codec, False otherwise.
+    """
+    if codec in self.video_codec_title_names:
+      return True
+    return False
+    
   def is_audio(self, codec):
     """
     Is this an audio codec?
@@ -92,6 +109,23 @@ class CodecsParser():
     True if codec is an audio codec, False otherwise.
     """
     if codec in self.audio_codecs:
+      return True
+    return False
+    
+  def is_audio_title(self, codec):
+    """
+    Is this an audio title codec?
+    
+    Parameters
+    ----------
+    codec : str
+      codec
+      
+    Returns
+    -------
+    True if codec is an audio title codec, False otherwise.
+    """
+    if codec in self.audio_codec_title_names:
       return True
     return False
     

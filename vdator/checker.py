@@ -497,11 +497,12 @@ class Checker():
   def check_people(self):
     reply = ""
     
+    # check people in audio track names
     for i, _ in enumerate(self.mediainfo['audio']):
       if 'title' in self.mediainfo['audio'][i]:
-        title = self.mediainfo['audio'][i]['title']
-        # check names only on commentary tracks
-        if self._is_commentary_track(title):
+        title = self.mediainfo['audio'][i]['title'].split('/')[0].strip()
+        # ignore codecs
+        if not self.codecs.is_audio_title(title):
           matched_names = list()
           names = extract_names(title)
           search = tmdb.Search()
@@ -524,15 +525,16 @@ class Checker():
           
     return reply
     
-  def spell_check_commentary(self):
+  def spell_check_track_name(self):
     reply = ""
     
+    # spellcheck audio track names
     for i, _ in enumerate(self.mediainfo['audio']):
-      # spellcheck only commentary tracks
       misspelled_words = list()
       if 'title' in self.mediainfo['audio'][i]:
         title = self.mediainfo['audio'][i]['title'].split('/')[0].strip()
-        if self._is_commentary_track(title):
+        # ignore codecs
+        if not self.codecs.is_audio_title(title):
           # map punctuation to space
           translator = str.maketrans(string.punctuation, ' '*len(string.punctuation))
           title = title.translate(translator)
@@ -551,7 +553,7 @@ class Checker():
               misspelled_words.append(t)
         misspelled_words = set(misspelled_words)
         if len(misspelled_words) > 0:
-          reply += self.print_report("error", "Audio " + self._section_id("audio", i) + " Misspelled: " + ", ".join(misspelled_words) + "\n")
+          reply += self.print_report("error", "Audio " + self._section_id("audio", i) + " Misspelled: `" + ", ".join(misspelled_words) + "`\n")
         
     return reply
     

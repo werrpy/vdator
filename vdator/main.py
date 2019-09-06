@@ -141,7 +141,7 @@ async def on_message(message):
       
       # TMDB and IMDb People API
       reply += checker.check_people()
-      reply += checker.spell_check_commentary()
+      reply += checker.spell_check_track_name()
       
       # check text
       reply += checker.print_text_tracks()
