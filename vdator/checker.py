@@ -531,7 +531,7 @@ class Checker():
       # spellcheck only commentary tracks
       misspelled_words = list()
       if 'title' in self.mediainfo['audio'][i]:
-        title = self.mediainfo['audio'][i]['title']
+        title = self.mediainfo['audio'][i]['title'].split('/')[0].strip()
         if self._is_commentary_track(title):
           # map punctuation to space
           translator = str.maketrans(string.punctuation, ' '*len(string.punctuation))
