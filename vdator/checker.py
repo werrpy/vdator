@@ -778,7 +778,13 @@ class Checker():
     return "commentary" in title.lower()
     
   def _is_dvd(self):
-    return self.mediainfo['video'][0]['standard'] == 'NTSC' or self.mediainfo['video'][0]['standard'] == 'PAL'
+    is_dvd = False
+    
+    if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 and \
+      'standard' in self.mediainfo['video'][0]:
+      is_dvd = self.mediainfo['video'][0]['standard'] == 'NTSC' or self.mediainfo['video'][0]['standard'] == 'PAL'
+      
+    return is_dvd
     
   def _section_id(self, section, i):
     reply = ""
