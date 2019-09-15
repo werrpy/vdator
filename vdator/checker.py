@@ -63,7 +63,39 @@ class Checker():
   def check_video_track(self):
     reply = ""
     
-    if 'video' in self.bdinfo and 'video' in self.mediainfo:
+    if self._is_dvd():
+      video_title = ""
+      # MPEG-
+      video_title += self.mediainfo['video'][0]['format'].split()[0] + "-"
+      
+      # 1
+      video_title += ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['format_version']))
+      video_title += " Video / "
+      
+      # bitrate
+      video_title += ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['bit_rate'])) + " kbps"
+      video_title += " / "
+      
+      # height
+      video_title += ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
+      
+      # scantype (i or p)
+      video_title += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
+      video_title += " / "
+      
+      # fps (float)
+      video_title += str(int(float(''.join(re.findall(r'\d+\.\d+', self.mediainfo['video'][0]['frame_rate'])))))
+      video_title += " fps / "
+      
+      # aspect ratio
+      video_title += self.mediainfo['video'][0]['display_aspect_ratio']
+      
+      if self.mediainfo['video'][0]['title'] == video_title:
+        reply += self.print_report("correct", "Video track names match: ```" + self.mediainfo['video'][0]['title'] + "```")
+      else:
+        reply += self.print_report("error", "Video track names missmatch:\n```fix\nExpected: " + video_title + "\nMediaInfo: " + self.mediainfo['video'][0]['title'] + "```")
+      
+    elif 'video' in self.bdinfo and 'video' in self.mediainfo:
       if len(self.bdinfo['video']) != 1:
         reply += self.print_report("error", "Missing bdinfo video track\n")
         return reply
@@ -362,7 +394,11 @@ class Checker():
   def check_audio_tracks(self):
     reply = ""
     
-    if len(self.bdinfo['audio']) == len(self.mediainfo['audio']):
+    if self._is_dvd():
+      # audio track conversions not supported for dvds
+      reply += self.print_report("info", "Audio track conversions check not supported for DVDs\n")
+      return reply
+    elif len(self.bdinfo['audio']) == len(self.mediainfo['audio']):
       for i, title in enumerate(self.bdinfo['audio']):
         bdinfo_audio_parts = re.sub(r'\s+', ' ', title).split(' / ')
         
