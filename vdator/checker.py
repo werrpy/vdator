@@ -172,14 +172,14 @@ class Checker():
         release_name += title + '.' + year
       # resolution (ex. 1080p)
       height = ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
-      if height != '480':
+      if not self._is_dvd():
         release_name += '.' + height
         release_name += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
         # source BluRay
         release_name += '.BluRay.REMUX'
       else:
         # source DVD
-        release_name += '.DVD.REMUX'
+        release_name += '.' + self.mediainfo['video'][0]['standard'] + '.DVD.REMUX'
       # video format (ex. AVC)
       main_video_title = self.mediainfo['video'][0]['title'].split(' / ')
       if len(main_video_title) >= 1:
@@ -740,6 +740,9 @@ class Checker():
     
   def _is_commentary_track(self, title):
     return "commentary" in title.lower()
+    
+  def _is_dvd(self):
+    return self.mediainfo['video'][0]['standard'] == 'NTSC' or self.mediainfo['video'][0]['standard'] == 'PAL'
     
   def _section_id(self, section, i):
     reply = ""
