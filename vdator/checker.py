@@ -780,11 +780,29 @@ class Checker():
   def _is_dvd(self):
     is_dvd = False
     
-    if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 and \
-      'standard' in self.mediainfo['video'][0]:
-      is_dvd = self.mediainfo['video'][0]['standard'] == 'NTSC' or self.mediainfo['video'][0]['standard'] == 'PAL'
+    if not self._has_bdinfo():
+      # no bdinfo given, assume dvds
+      is_dvd = True
       
+    #if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 \
+    #  and 'height' in self.mediainfo['video'][0]:
+    #    height = int(''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height'])))
+    #    if height <= 576:
+    #      # height is 480p or 576p for dvds
+    #      # Note: checking standard is NTSC or PAL won't work, as some BDs are NTSC
+    #      is_dvd = True
+    
     return is_dvd
+    
+  def _has_bdinfo(self):
+    has_bdinfo = False
+    
+    if len(self.bdinfo['video']) == 0 and len(self.bdinfo['audio']) == 0 and len(self.bdinfo['subtitle']) == 0:
+      has_bdinfo = False
+    else:
+      has_bdinfo = True
+      
+    return has_bdinfo
     
   def _section_id(self, section, i):
     reply = ""
