@@ -11,7 +11,7 @@ iso-639==0.4.5
 langdetect==1.0.7
 lxml==4.3.1
 multidict==4.5.2
-nltk==3.4
+nltk==3.4.5
 numpy==1.16.0
 python-dotenv==0.10.1
 requests==2.21.0
