@@ -82,13 +82,17 @@ class Checker():
       
       # height
       video_title += ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
-      
-      # scantype (i or p)
-      video_title += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
+
+      # scan type must come from bdinfo
+      bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
+      scan_type = bdinfo_video_parts[2].strip()[-1].lower()
+      video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
+
+      video_title += self.codecs.get_scan_type_title_name(scan_type, video_fps)
       video_title += " / "
-      
-      # fps (float)
-      video_title += str(int(float(''.join(re.findall(r'\d+\.\d+', self.mediainfo['video'][0]['frame_rate'])))))
+
+      # fps (int)
+      video_title += str(round(video_fps))
       video_title += " fps / "
       
       # aspect ratio
@@ -185,12 +189,16 @@ class Checker():
     reply = ""
     # construct release name
     release_name = ""
-    
+
+    # scan type must come from bdinfo
+    bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
+    scan_type = bdinfo_video_parts[2].strip()[-1].lower()
+    video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
+
     if 'general' in self.mediainfo and len(self.mediainfo['general']) >= 1 and \
       'movie_name' in self.mediainfo['general'][0] and \
       'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 and \
       'height' in self.mediainfo['video'][0] and \
-      'scan_type' in self.mediainfo['video'][0] and len(self.mediainfo['video'][0]['scan_type']) >= 1 and \
       'format' in self.mediainfo['video'][0] and \
       'audio' in self.mediainfo and len(self.mediainfo['audio']) >= 1 and \
       'title' in self.mediainfo['audio'][0]:
@@ -210,7 +218,7 @@ class Checker():
       height = ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
       if not self._is_dvd():
         release_name += '.' + height
-        release_name += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower())
+        release_name += self.codecs.get_scan_type_title_name(scan_type, video_fps)
         # source BluRay
         release_name += '.BluRay.REMUX'
       else:
