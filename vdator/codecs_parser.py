@@ -229,7 +229,7 @@ class CodecsParser():
       return ''
     return self.audio_codec_title_names[codec]
     
-  def get_scan_type_title_name(self, scan_type):
+  def get_scan_type_title_name(self, scan_type, video_fps):
     """
     Get name of video scan type for title. Checks if scan type is valid.
     
@@ -238,10 +238,23 @@ class CodecsParser():
     scan_type : str
       scan type
       
+    video_fps : str
+      frame rate
+      
     Returns
     -------
     str scan type title name
     """
+
+    scan_type = scan_type.strip()
+    
+    if len(scan_type) == 1:
+      scan_type = 'progressive' if scan_type == 'p' else 'interlaced'
+
+    # interlaced @ 25fps is actually progressive
+    if scan_type == 'interlaced' and int(video_fps) == 25:
+      scan_type = 'progressive'
+      
     if scan_type not in self.scan_type_title_names:
       return ''
     return self.scan_type_title_names[scan_type]
