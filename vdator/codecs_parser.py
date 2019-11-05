@@ -243,9 +243,9 @@ class CodecsParser():
       
     Returns
     -------
-    str scan type title name
+    str scan type title name, boolean if actually progressive
     """
-
+    actually_progressive = False
     scan_type = scan_type.strip()
     
     if len(scan_type) == 1:
@@ -254,8 +254,9 @@ class CodecsParser():
     # interlaced @ 25fps is actually progressive
     if scan_type == 'interlaced' and int(video_fps) == 25:
       scan_type = 'progressive'
+      actually_progressive = True
       
     if scan_type not in self.scan_type_title_names:
       return ''
-    return self.scan_type_title_names[scan_type]
+    return self.scan_type_title_names[scan_type], actually_progressive
     

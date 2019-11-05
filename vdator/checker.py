@@ -83,25 +83,22 @@ class Checker():
       # height
       video_title += ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
 
-      # scan type must come from bdinfo
-      bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
-      scan_type = bdinfo_video_parts[2].strip()[-1].lower()
-      video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
-
-      video_title += self.codecs.get_scan_type_title_name(scan_type, video_fps)
+      # scan type
+      video_title += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower(), 0)
       video_title += " / "
 
       # fps (int)
-      video_title += str(round(video_fps))
+      video_title += str(round(float(''.join(re.findall(r'\d+\.\d+', self.mediainfo['video'][0]['frame_rate'])))))
       video_title += " fps / "
       
       # aspect ratio
       video_title += self.mediainfo['video'][0]['display_aspect_ratio']
+      mediainfo_title = self.mediainfo['video'][0]['title']
       
-      if self.mediainfo['video'][0]['title'] == video_title:
-        reply += self.print_report("correct", "Video track names match: ```" + self.mediainfo['video'][0]['title'] + "```")
+      if mediainfo_title == video_title:
+        reply += self.print_report("correct", "Video track names match: ```" + mediainfo_title + "```")
       else:
-        reply += self.print_report("error", "Video track names missmatch:\n```fix\nExpected: " + video_title + "\nMediaInfo: " + self.mediainfo['video'][0]['title'] + "```")
+        reply += self.print_report("error", "Video track names missmatch:\n```fix\nExpected: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
       
     elif 'video' in self.bdinfo and 'video' in self.mediainfo:
       if len(self.bdinfo['video']) != 1:
@@ -111,11 +108,19 @@ class Checker():
         reply += self.print_report("error", "Missing mediainfo video track\n")
         return reply
         
-      if 'title' in self.mediainfo['video'][0]:
-        if self.bdinfo['video'][0] == self.mediainfo['video'][0]['title']:
-          reply += self.print_report("correct", "Video track names match: ```" + self.bdinfo['video'][0] + "```")
+      if 'title' in self.mediainfo['video'][0] and 'video' in self.mediainfo and 'title' in self.mediainfo['video'][0]:
+        mediainfo_title = self.mediainfo['video'][0]['title']
+        bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
+        scan_type = bdinfo_video_parts[2].strip()[-1].lower()
+        video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
+        new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
+        if actually_progressive:
+          bdinfo_video_parts[2] = bdinfo_video_parts[2][:-1] + 'p'
+          video_title = " / ".join(bdinfo_video_parts)
+        if video_title == mediainfo_title:
+          reply += self.print_report("correct", "Video track names match: ```" + video_title + "```")
         else:
-          reply += self.print_report("error", "Video track names missmatch:\n```fix\nBDInfo: " + self.bdinfo['video'][0] + "\nMediaInfo: " + self.mediainfo['video'][0]['title'] + "```")
+          reply += self.print_report("error", "Video track names missmatch:\n```fix\nBDInfo: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
       else:
         reply += self.print_report("error", "Missing mediainfo video track\n")
         return reply
@@ -218,7 +223,8 @@ class Checker():
       height = ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
       if not self._is_dvd():
         release_name += '.' + height
-        release_name += self.codecs.get_scan_type_title_name(scan_type, video_fps)
+        new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
+        release_name += new_scan_type
         # source BluRay
         release_name += '.BluRay.REMUX'
       else:
