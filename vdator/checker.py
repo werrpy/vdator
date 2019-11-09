@@ -116,7 +116,7 @@ class Checker():
         new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
         if actually_progressive:
           bdinfo_video_parts[2] = bdinfo_video_parts[2][:-1] + 'p'
-          video_title = " / ".join(bdinfo_video_parts)
+        video_title = " / ".join(bdinfo_video_parts)
         if video_title == mediainfo_title:
           reply += self.print_report("correct", "Video track names match: ```" + video_title + "```")
         else:
