@@ -71,6 +71,7 @@ class Checker():
     
     if has_many(self.mediainfo, 'video.0', [
         'format',
+        'format_version',
         'bit_rate',
         'height',
         'scan_type',
@@ -209,8 +210,8 @@ class Checker():
     scan_type = bdinfo_video_parts[2].strip()[-1].lower()
     video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
 
-    if has(self.mediainfo, 'general.0.movie_name') and \
-      has_many(self.mediainfo, 'video.0', ['video', 'height', 'format']) and \
+    if has_many(self.mediainfo, 'general.0', ['movie_name', 'complete_name']) and \
+      has_many(self.mediainfo, 'video.0', ['height', 'title']) and \
       has(self.mediainfo, 'audio.0.title'):
       # Name.S01E01
       tv_show_name_search = re.search(r'(.+)\s-\s(S\d{2}E\d{2})', self.mediainfo['general'][0]['movie_name'])
@@ -234,7 +235,8 @@ class Checker():
         release_name += '.BluRay.REMUX'
       else:
         # source DVD
-        release_name += '.' + self.mediainfo['video'][0]['standard'] + '.DVD.REMUX'
+        if 'standard' in self.mediainfo['video'][0]:
+          release_name += '.' + self.mediainfo['video'][0]['standard'] + '.DVD.REMUX'
       # video format (ex. AVC)
       main_video_title = self.mediainfo['video'][0]['title'].split(' / ')
       if len(main_video_title) >= 1:
