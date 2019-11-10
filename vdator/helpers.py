@@ -1,3 +1,5 @@
+from pydash import has
+
 def balanced_blockquotes(my_string): 
   brackets = ['``````'] 
   while any(x in my_string for x in brackets): 
@@ -24,4 +26,13 @@ def split_string(str, limit, sep="\n"):
     res.append(part)
     
   return res
-  
+
+def has_many(obj, base, keys):
+  for key in keys:
+    lookup = ''
+    if base:
+      lookup += base + '.'
+    lookup += key
+    if not has(obj, lookup):
+      return False
+  return True

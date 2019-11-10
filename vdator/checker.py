@@ -5,6 +5,7 @@ import re
 import requests
 import unicodedata
 import datetime
+from pydash import has
 
 # APIs
 from iso639 import languages as iso639_languages
@@ -15,6 +16,7 @@ from imdb import IMDb
 import hunspell
 
 # parsers
+from helpers import has_many
 from paste_parser import BDInfoType
 import nltk
 import nltk_people
@@ -67,7 +69,16 @@ class Checker():
   def check_video_track(self):
     reply = ""
     
-    if self._is_dvd():
+    if has_many(self.mediainfo, 'video.0', [
+        'format',
+        'bit_rate',
+        'height',
+        'scan_type',
+        'frame_rate',
+        'display_aspect_ratio',
+        'title',
+      ]) and \
+      self._is_dvd():
       video_title = ""
       # MPEG-
       video_title += self.mediainfo['video'][0]['format'].split()[0] + "-"
@@ -100,7 +111,7 @@ class Checker():
       else:
         reply += self.print_report("error", "Video track names missmatch:\n```fix\nExpected: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
       
-    elif 'video' in self.bdinfo and 'video' in self.mediainfo:
+    elif has(self.bdinfo, 'video') and has(self.mediainfo, 'video'):
       if len(self.bdinfo['video']) != 1:
         reply += self.print_report("error", "Missing bdinfo video track\n")
         return reply
@@ -108,7 +119,7 @@ class Checker():
         reply += self.print_report("error", "Missing mediainfo video track\n")
         return reply
         
-      if 'title' in self.mediainfo['video'][0] and 'video' in self.mediainfo and 'title' in self.mediainfo['video'][0]:
+      if has(self.mediainfo, 'video.0.title') and has(self.bdinfo, 'video.0'):
         mediainfo_title = self.mediainfo['video'][0]['title']
         bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
         scan_type = bdinfo_video_parts[2].strip()[-1].lower()
@@ -132,8 +143,7 @@ class Checker():
   def check_movie_name(self):
     reply = ""
     
-    if 'general' in self.mediainfo and len(self.mediainfo['general']) >= 1 and \
-      'movie_name' in self.mediainfo['general'][0]:
+    if has(self.mediainfo, 'general.0.movie_name'):
       # tv show name in format "Name - S01E01"
       if re.search(r'^.+\s-\sS\d{2}E\d{2}', self.mediainfo['general'][0]['movie_name']):
         reply += self.print_report("correct", "TV show name format `Name - S01E01`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
@@ -150,14 +160,13 @@ class Checker():
   def check_ids(self):
     reply, name, year, imdb_movie, tmdb_movie_info, matched_imdb, matched_tmdb = "", None, None, None, None, False, False
     
-    if 'general' in self.mediainfo and len(self.mediainfo['general']) >= 1 and \
-      'movie_name' in self.mediainfo['general'][0]:
+    if has(self.mediainfo, 'general.0.movie_name'):
       movie_name = re.search(r'^(.+)\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
       if movie_name:
         name = movie_name.group(1).strip()
         year = movie_name.group(2).strip()
     
-    if 'imdb' in self.mediainfo['general'][0]:
+    if has(self.mediainfo, 'general.0.imdb'):
       imdb_id = ''.join(re.findall(r'[\d]+', self.mediainfo['general'][0]['imdb']))
       try:
         imdb_movie = ia.get_movie(imdb_id)
@@ -168,7 +177,7 @@ class Checker():
           reply += self.print_report("correct", "Matched IMDB name and year\n")
           matched_imdb = True
           
-    if 'tmdb' in self.mediainfo['general'][0]:
+    if has(self.mediainfo, 'general.0.tmdb'):
       tmdb_id = ''.join(re.findall(r'[\d]+', self.mediainfo['general'][0]['tmdb']))
       tmdb_movie = tmdb.Movies(tmdb_id)
       try:
@@ -183,7 +192,7 @@ class Checker():
           matched_tmdb = True
           
     if not matched_imdb and not matched_tmdb:
-      if imdb_movie and 'title' in imdb_movie and 'year' in imdb_movie:
+      if imdb_movie and has_many(imdb_movie, None, ['title', 'year']):
         reply += self.print_report("error", "IMDB: Name: `" + imdb_movie['title'] + "` Year: `" + str(imdb_movie['year']) + "`\n")
       if tmdb_movie_info and 'original_title' in tmdb_movie_info and tmdb_year:
         reply += self.print_report("error", "TMDB: Name: `" + tmdb_movie_info['original_title'] + "` Year: `" + tmdb_year + "`\n")
@@ -200,13 +209,9 @@ class Checker():
     scan_type = bdinfo_video_parts[2].strip()[-1].lower()
     video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
 
-    if 'general' in self.mediainfo and len(self.mediainfo['general']) >= 1 and \
-      'movie_name' in self.mediainfo['general'][0] and \
-      'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 and \
-      'height' in self.mediainfo['video'][0] and \
-      'format' in self.mediainfo['video'][0] and \
-      'audio' in self.mediainfo and len(self.mediainfo['audio']) >= 1 and \
-      'title' in self.mediainfo['audio'][0]:
+    if has(self.mediainfo, 'general.0.movie_name') and \
+      has_many(self.mediainfo, 'video.0', ['video', 'height', 'format']) and \
+      has(self.mediainfo, 'audio.0.title'):
       # Name.S01E01
       tv_show_name_search = re.search(r'(.+)\s-\s(S\d{2}E\d{2})', self.mediainfo['general'][0]['movie_name'])
       # Name.Year
@@ -305,12 +310,10 @@ class Checker():
   def check_video_language_matches_first_audio_language(self):
     reply = ""
     
-    if 'video' not in self.mediainfo or len(self.mediainfo['video']) < 1 or \
-      'language' not in self.mediainfo['video'][0]:
+    if not has(self.mediainfo, 'video.0.language'):
       reply += self.print_report("error", "Video language not set" + "\n")
       return reply
-    if 'audio' not in self.mediainfo or len(self.mediainfo['audio']) < 1 or \
-      'language' not in self.mediainfo['audio'][0]:
+    if not has(self.mediainfo, 'audio.0.language'):
       reply += self.print_report("error", "First audio language not set" + "\n")
       return reply
     if self.mediainfo['video'][0]['language'] == self.mediainfo['audio'][0]['language']:
@@ -351,7 +354,7 @@ class Checker():
   def _check_muxing_mode_section(self, section):
     reply, is_valid = "", True
     for i, _ in enumerate(self.mediainfo[section]):
-      if "muxing_mode" in self.mediainfo[section][i]:
+      if 'muxing_mode' in self.mediainfo[section][i]:
         reply += self.print_report("error", section.capitalize() + " #" + self.mediainfo[section][i]['id'] + " has muxing mode: " + self.mediainfo[section][i]["muxing_mode"] + "\n")
         is_valid = False
     return reply, is_valid
@@ -676,8 +679,7 @@ class Checker():
     if len(self.mediainfo['text']) > 0:
       first_audio_language, has_english_subs, english_subs_index = False, False, False
       
-      if 'audio' in self.mediainfo and len(self.mediainfo['audio']) >= 1 and \
-      'language' in self.mediainfo['audio'][0]:
+      if has(self.mediainfo, 'audio.0.language'):
         first_audio_language = self.mediainfo['audio'][0]['language'].lower()
       
       if first_audio_language != 'english':
