@@ -161,8 +161,8 @@ async def on_message(message):
     
     # split into multiple messages based on reply length
     BLOCK_QUOTES = "```"
-    len_block_quotes = len(BLOCK_QUOTES)
-    replies = split_string(reply, int(os.environ.get("DISCORD_MSG_CHAR_LIMIT")) - len_block_quotes, "\n")
+    len_limit = int(os.environ.get("DISCORD_MSG_CHAR_LIMIT")) - len(BLOCK_QUOTES)
+    replies = split_string(reply, len_limit, "\n")
     
     # preserve blockquotes
     for i, r in enumerate(replies):

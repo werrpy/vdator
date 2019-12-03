@@ -1,11 +1,9 @@
 from pydash import has
 
-def balanced_blockquotes(my_string): 
-  brackets = ['``````'] 
-  while any(x in my_string for x in brackets): 
-    for br in brackets: 
-      my_string = my_string.replace(br, '') 
-  return not my_string
+def balanced_blockquotes(str):
+  num_blockquotes = str.count('```')
+  # balanced if even number of blockquotes
+  return (num_blockquotes % 2) == 0
   
 def split_string(str, limit, sep="\n"):
   limit = int(limit)
