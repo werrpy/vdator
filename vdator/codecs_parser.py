@@ -24,6 +24,7 @@ class CodecsParser():
       'FLAC Audio' : '.flac',
       'RAW/PCM' : '.pcm',
       'TrueHD/AC3' : '.thd+ac3',
+      'TrueHD/AC3 (Atmos)' : '.thd+ac3',
     }
 
     self.sub_codecs = {
@@ -50,6 +51,7 @@ class CodecsParser():
       'Dolby Digital Audio' : 'DD',
       'Dolby Digital EX Audio' : 'DD-EX',
       'Dolby TrueHD Audio' : 'TrueHD',
+      'Dolby TrueHD/Atmos Audio' : 'TrueHD.Atmos',
       'FLAC Audio' : 'FLAC',
     }
     
