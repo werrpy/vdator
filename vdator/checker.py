@@ -592,7 +592,7 @@ class Checker():
     for i, _ in enumerate(self.mediainfo['audio']):
       misspelled_words = list()
       if 'title' in self.mediainfo['audio'][i]:
-        title = self.mediainfo['audio'][i]['title'].split('/')[0].strip()
+        title = self.mediainfo['audio'][i]['title'].split(' / ')[0].strip()
         # ignore codecs
         if not self.codecs.is_audio_title(title):
           # map punctuation to space
