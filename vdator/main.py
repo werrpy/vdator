@@ -1,7 +1,5 @@
 from dotenv import load_dotenv
-import os
-import re
-import traceback
+import os, re, traceback
 
 # APIs
 import discord
@@ -15,6 +13,7 @@ from paste_parser import PasteParser
 from media_info_parser import MediaInfoParser
 from codecs_parser import CodecsParser
 from checker import Checker
+from source_detector import SourceDetector
 
 # load environment variables
 load_dotenv()
@@ -120,7 +119,8 @@ async def on_message(message):
       mediainfo_parser = MediaInfoParser()
       mediainfo = mediainfo_parser.parse(mediainfo)
       codecs = CodecsParser()
-      checker = Checker(bdinfo, mediainfo, codecs)
+      source_detect = SourceDetector(bdinfo, mediainfo)
+      checker = Checker(bdinfo, mediainfo, codecs, source_detect)
       
       # check metadata
       reply += checker.check_movie_name()

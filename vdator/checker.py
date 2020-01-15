@@ -1,10 +1,5 @@
 from dotenv import load_dotenv
-import os
-import string
-import re
-import requests
-import unicodedata
-import datetime
+import datetime, os, re, requests, string, unicodedata
 from pydash import has
 
 # APIs
@@ -41,16 +36,13 @@ RELEASE_GROUP = os.environ.get("RELEASE_GROUP").strip()
 TRAINEE_CHANNELS = [x.strip() for x in os.environ.get("TRAINEE_CHANNELS").split(',')]
 INTERNAL_CHANNELS = [x.strip() for x in os.environ.get("INTERNAL_CHANNELS").split(',')]
 
-# 'mediainfo' to use mediainfo fields
-# 'nobdinfo' to assume DVD if no bdinfo given
-DVD_CHECK_MODE = os.environ.get("DVD_CHECK_MODE").strip()
-
 class Checker():
 
-  def __init__(self, bdinfo, mediainfo, codecs):
+  def __init__(self, bdinfo, mediainfo, codecs, source_detect):
     self.bdinfo = bdinfo
     self.mediainfo = mediainfo
     self.codecs = codecs
+    self.source_detect = source_detect
     
     self.report =	{
       "correct": 0,
@@ -79,7 +71,7 @@ class Checker():
         'display_aspect_ratio',
         'title',
       ]) and \
-      self._is_dvd():
+      self.source_detect.is_dvd():
       video_title = ""
       # MPEG-
       video_title += self.mediainfo['video'][0]['format'].split()[0] + "-"
@@ -229,11 +221,11 @@ class Checker():
       # resolution (ex. 1080p)
       height = ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
       
-      if self._is_dvd():
+      if self.source_detect.is_dvd():
         # source DVD
         if 'standard' in self.mediainfo['video'][0]:
           release_name += '.' + self.mediainfo['video'][0]['standard'] + '.DVD.REMUX'
-      elif self._is_uhd():
+      elif self.source_detect.is_uhd():
         # source UHD BluRay
         release_name += '.' + height
         new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
@@ -431,7 +423,7 @@ class Checker():
   def check_audio_tracks(self):
     reply = ""
     
-    if self._is_dvd():
+    if self.source_detect.is_dvd():
       # audio track conversions not supported for dvds
       reply += self.print_report("info", "Audio track conversions check not supported for DVDs\n")
       return reply
@@ -812,45 +804,6 @@ class Checker():
     
   def _is_commentary_track(self, title):
     return "commentary" in title.lower()
-    
-  def _is_dvd(self):
-    is_dvd = False
-    
-    if DVD_CHECK_MODE == 'nobdinfo':
-      if not self._has_bdinfo():
-        # no bdinfo given, assume dvds
-        is_dvd = True
-    elif DVD_CHECK_MODE == 'mediainfo':
-      if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 \
-        and 'height' in self.mediainfo['video'][0]:
-          height = int(''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height'])))
-          if height <= 576:
-            # height is 480p or 576p for dvds
-            # Note: checking standard is NTSC or PAL won't work, as some BDs are NTSC
-            is_dvd = True
-    
-    return is_dvd
-    
-  def _is_uhd(self):
-    is_uhd = False
-    
-    if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 \
-      and 'height' in self.mediainfo['video'][0]:
-        height = int(''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height'])))
-        if height == 2160:
-          is_uhd = True
-    
-    return is_uhd
-    
-  def _has_bdinfo(self):
-    has_bdinfo = False
-    
-    if len(self.bdinfo['video']) == 0 and len(self.bdinfo['audio']) == 0 and len(self.bdinfo['subtitle']) == 0:
-      has_bdinfo = False
-    else:
-      has_bdinfo = True
-      
-    return has_bdinfo
     
   def _section_id(self, section, i):
     reply = ""

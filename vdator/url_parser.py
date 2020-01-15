@@ -1,6 +1,5 @@
 from urllib.parse import urlparse
-import requests
-import re
+import re, requests
 
 class URLParser():
   def __init__(self):
