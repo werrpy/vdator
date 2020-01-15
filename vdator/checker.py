@@ -228,16 +228,29 @@ class Checker():
         release_name += title + '.' + year
       # resolution (ex. 1080p)
       height = ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
-      if not self._is_dvd():
-        release_name += '.' + height
-        new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
-        release_name += new_scan_type
-        # source BluRay
-        release_name += '.BluRay.REMUX'
-      else:
+      
+      if self._is_dvd():
         # source DVD
         if 'standard' in self.mediainfo['video'][0]:
           release_name += '.' + self.mediainfo['video'][0]['standard'] + '.DVD.REMUX'
+      elif self._is_uhd():
+        # source UHD BluRay
+        release_name += '.' + height
+        new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
+        release_name += new_scan_type
+        release_name += '.UHD.BluRay.REMUX'
+        # SDR/HDR
+        if self.mediainfo['video'][0]['color_primaries'] == 'BT.2020':
+          release_name += '.HDR'
+        else:
+          release_name += '.SDR'
+      else:
+        # source HD BluRay
+        release_name += '.' + height
+        new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
+        release_name += new_scan_type
+        release_name += '.BluRay.REMUX'
+        
       # video format (ex. AVC)
       main_video_title = self.mediainfo['video'][0]['title'].split(' / ')
       if len(main_video_title) >= 1:
@@ -817,6 +830,17 @@ class Checker():
             is_dvd = True
     
     return is_dvd
+    
+  def _is_uhd(self):
+    is_uhd = False
+    
+    if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 \
+      and 'height' in self.mediainfo['video'][0]:
+        height = int(''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height'])))
+        if height == 2160:
+          is_uhd = True
+    
+    return is_uhd
     
   def _has_bdinfo(self):
     has_bdinfo = False
