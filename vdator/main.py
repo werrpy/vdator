@@ -120,38 +120,10 @@ async def on_message(message):
       mediainfo = mediainfo_parser.parse(mediainfo)
       codecs = CodecsParser()
       source_detect = SourceDetector(bdinfo, mediainfo)
-      checker = Checker(bdinfo, mediainfo, codecs, source_detect)
+      checker = Checker(bdinfo, mediainfo, eac3to, codecs, source_detect, message.channel.name)
       
-      # check metadata
-      reply += checker.check_movie_name()
-      reply += checker.check_ids()
-      
-      reply += checker.check_filename(message.channel.name)
-      reply += checker.check_tracks_have_language()
-      reply += checker.check_video_language_matches_first_audio_language()
-      reply += checker.check_muxing_mode()
-      reply += checker.check_mkvmerge()
-      
-      # check video
-      reply += checker.check_video_track()
-      
-      # check audio
-      reply += checker.print_audio_track_names()
-      reply += checker.check_audio_tracks()
-      
-      # TMDB and IMDb People API
-      reply += checker.check_people()
-      reply += checker.spell_check_track_name()
-      
-      # check text
-      reply += checker.print_text_tracks()
-      reply += checker.check_text_order()
-      reply += checker.check_text_default_flag()
-      
-      # check chapters
-      reply += checker.has_chapers(eac3to)
-      reply += checker.chapter_language()
-      reply += checker.chapter_padding()
+      # run all checks
+      reply += checker.run_checks()
       
       # report
       reply += checker.display_report()

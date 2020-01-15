@@ -38,11 +38,13 @@ INTERNAL_CHANNELS = [x.strip() for x in os.environ.get("INTERNAL_CHANNELS").spli
 
 class Checker():
 
-  def __init__(self, bdinfo, mediainfo, codecs, source_detect):
-    self.bdinfo = bdinfo
-    self.mediainfo = mediainfo
+  def __init__(self, bdinfo, mediainfo, eac3to, codecs, source_detect, channel_name):
     self.codecs = codecs
     self.source_detect = source_detect
+    self.bdinfo = bdinfo
+    self.mediainfo = mediainfo
+    self.eac3to = eac3to
+    self.channel_name = channel_name
     
     self.report =	{
       "correct": 0,
@@ -53,10 +55,41 @@ class Checker():
     
     self.hobj = hunspell.HunSpell(HUNSPELL_LANG[0], HUNSPELL_LANG[1])
     
-  def print_report(self, type, content, record=True):
-    if record:
-      self.report[type.lower()] += 1
-    return "[" + type.upper() + "] " + content
+  def run_checks(self):
+    reply = ""
+    
+    # check metadata
+    reply += self.check_movie_name()
+    reply += self.check_ids()
+    
+    reply += self.check_filename()
+    reply += self.check_tracks_have_language()
+    reply += self.check_video_language_matches_first_audio_language()
+    reply += self.check_muxing_mode()
+    reply += self.check_mkvmerge()
+    
+    # check video
+    reply += self.check_video_track()
+    
+    # check audio
+    reply += self.print_audio_track_names()
+    reply += self.check_audio_tracks()
+    
+    # TMDB and IMDb People API
+    reply += self.check_people()
+    reply += self.spell_check_track_name()
+    
+    # check text
+    reply += self.print_text_tracks()
+    reply += self.check_text_order()
+    reply += self.check_text_default_flag()
+    
+    # check chapters
+    reply += self.has_chapers()
+    reply += self.chapter_language()
+    reply += self.chapter_padding()
+    
+    return reply
     
   def check_video_track(self):
     reply = ""
@@ -100,16 +133,16 @@ class Checker():
       mediainfo_title = self.mediainfo['video'][0]['title']
       
       if mediainfo_title == video_title:
-        reply += self.print_report("correct", "Video track names match: ```" + mediainfo_title + "```")
+        reply += self._print_report("correct", "Video track names match: ```" + mediainfo_title + "```")
       else:
-        reply += self.print_report("error", "Video track names missmatch:\n```fix\nExpected: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
+        reply += self._print_report("error", "Video track names missmatch:\n```fix\nExpected: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
       
     elif has(self.bdinfo, 'video') and has(self.mediainfo, 'video'):
       if len(self.bdinfo['video']) != 1:
-        reply += self.print_report("error", "Missing bdinfo video track\n")
+        reply += self._print_report("error", "Missing bdinfo video track\n")
         return reply
       elif len(self.mediainfo['video']) != 1:
-        reply += self.print_report("error", "Missing mediainfo video track\n")
+        reply += self._print_report("error", "Missing mediainfo video track\n")
         return reply
         
       if has(self.mediainfo, 'video.0.title') and has(self.bdinfo, 'video.0'):
@@ -119,18 +152,18 @@ class Checker():
         video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
         new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
         if actually_progressive:
-          reply += self.print_report("info", "Note: 1080i @ 25fps is actually progressive\n")
+          reply += self._print_report("info", "Note: 1080i @ 25fps is actually progressive\n")
           bdinfo_video_parts[2] = bdinfo_video_parts[2][:-1] + 'p'
         video_title = " / ".join(bdinfo_video_parts)
         if video_title == mediainfo_title:
-          reply += self.print_report("correct", "Video track names match: ```" + video_title + "```")
+          reply += self._print_report("correct", "Video track names match: ```" + video_title + "```")
         else:
-          reply += self.print_report("error", "Video track names missmatch:\n```fix\nBDInfo: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
+          reply += self._print_report("error", "Video track names missmatch:\n```fix\nBDInfo: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
       else:
-        reply += self.print_report("error", "Missing mediainfo video track\n")
+        reply += self._print_report("error", "Missing mediainfo video track\n")
         return reply
     else:
-      reply += self.print_report("error", "Could not verify video track\n")
+      reply += self._print_report("error", "Could not verify video track\n")
       
     return reply
     
@@ -140,14 +173,14 @@ class Checker():
     if has(self.mediainfo, 'general.0.movie_name'):
       # tv show name in format "Name - S01E01"
       if re.search(r'^.+\s-\sS\d{2}E\d{2}', self.mediainfo['general'][0]['movie_name']):
-        reply += self.print_report("correct", "TV show name format `Name - S01E01`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
+        reply += self._print_report("correct", "TV show name format `Name - S01E01`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
       # movie name in format "Name (Year)"
       elif re.search(r'^.+\(\d{4}\)', self.mediainfo['general'][0]['movie_name']):
-        reply += self.print_report("correct", "Movie name format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
+        reply += self._print_report("correct", "Movie name format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
       else:
-        reply += self.print_report("error", "Movie name does not match format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
+        reply += self._print_report("error", "Movie name does not match format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
     else:
-      reply += self.print_report("error", "Missing movie name\n")
+      reply += self._print_report("error", "Missing movie name\n")
       
     return reply
     
@@ -165,10 +198,10 @@ class Checker():
       try:
         imdb_movie = ia.get_movie(imdb_id)
       except imdb._exceptions.IMDbParserError:
-        reply += self.print_report("error", "Invalid IMDB id: `" + self.mediainfo['general'][0]['imdb'] + "`\n")
+        reply += self._print_report("error", "Invalid IMDB id: `" + self.mediainfo['general'][0]['imdb'] + "`\n")
       else:
         if name == imdb_movie['title'] and year == str(imdb_movie['year']):
-          reply += self.print_report("correct", "Matched IMDB name and year\n")
+          reply += self._print_report("correct", "Matched IMDB name and year\n")
           matched_imdb = True
           
     if has(self.mediainfo, 'general.0.tmdb'):
@@ -177,23 +210,23 @@ class Checker():
       try:
         tmdb_movie_info = tmdb_movie.info()
       except requests.exceptions.HTTPError:
-        reply += self.print_report("error", "Invalid TMDB id: `" + self.mediainfo['general'][0]['tmdb'] + "`\n")
+        reply += self._print_report("error", "Invalid TMDB id: `" + self.mediainfo['general'][0]['tmdb'] + "`\n")
       else:
         datetime_obj = datetime.datetime.strptime(tmdb_movie_info['release_date'], '%Y-%m-%d')
         tmdb_year = str(datetime_obj.year)
         if name == tmdb_movie_info['original_title'] and year == tmdb_year:
-          reply += self.print_report("correct", "Matched TMDB name and year\n")
+          reply += self._print_report("correct", "Matched TMDB name and year\n")
           matched_tmdb = True
           
     if not matched_imdb and not matched_tmdb:
       if imdb_movie and has_many(imdb_movie, None, ['title', 'year']):
-        reply += self.print_report("error", "IMDB: Name: `" + imdb_movie['title'] + "` Year: `" + str(imdb_movie['year']) + "`\n")
+        reply += self._print_report("error", "IMDB: Name: `" + imdb_movie['title'] + "` Year: `" + str(imdb_movie['year']) + "`\n")
       if tmdb_movie_info and 'original_title' in tmdb_movie_info and tmdb_year:
-        reply += self.print_report("error", "TMDB: Name: `" + tmdb_movie_info['original_title'] + "` Year: `" + tmdb_year + "`\n")
+        reply += self._print_report("error", "TMDB: Name: `" + tmdb_movie_info['original_title'] + "` Year: `" + tmdb_year + "`\n")
         
     return reply
     
-  def check_filename(self, channel):
+  def check_filename(self):
     reply = ""
     # construct release name
     release_name = ""
@@ -255,7 +288,7 @@ class Checker():
         if title:
           main_audio_title[0] = title
         else:
-          reply += self.print_report("error", "No title name found for audio codec: `" + audio_codec + "`\n")
+          reply += self._print_report("error", "No title name found for audio codec: `" + audio_codec + "`\n")
         # audio channel (ex. 5.1)
         main_audio_title[1] = main_audio_title[1].strip()
         # extract float
@@ -264,23 +297,23 @@ class Checker():
         release_name += '.' + main_audio_title[1]
       # release group
       release_name += '-'
-      if channel in INTERNAL_CHANNELS:
+      if self.channel_name in INTERNAL_CHANNELS:
         release_name += RELEASE_GROUP + '.mkv'
       complete_name = self.mediainfo['general'][0]['complete_name']
       if '\\' in complete_name:
         complete_name = complete_name.split('\\')[-1]
       elif '/' in complete_name:
         complete_name = complete_name.split('/')[-1]
-      if channel in INTERNAL_CHANNELS and release_name == complete_name:
-        reply += self.print_report("correct", "Filename: `" + complete_name + "`\n")
+      if self.channel_name in INTERNAL_CHANNELS and release_name == complete_name:
+        reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
       elif release_name in complete_name:
-        reply += self.print_report("correct", "Filename: `" + complete_name + "`\n")
+        reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
       else:
-        if channel not in INTERNAL_CHANNELS:
+        if self.channel_name not in INTERNAL_CHANNELS:
           release_name += 'GRouP.mkv'
-        reply += self.print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + release_name + "```")
+        reply += self._print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + release_name + "```")
     else:
-      reply += self.print_report("error", "Cannot validate filename\n")
+      reply += self._print_report("error", "Cannot validate filename\n")
       
     return reply
     
@@ -311,7 +344,7 @@ class Checker():
     is_valid &= n_is_valid
     
     if is_valid:
-      reply += self.print_report("correct", "All tracks have a language chosen\n")
+      reply += self._print_report("correct", "All tracks have a language chosen\n")
     
     return reply
     
@@ -319,22 +352,22 @@ class Checker():
     reply = ""
     
     if not has(self.mediainfo, 'video.0.language'):
-      reply += self.print_report("error", "Video language not set" + "\n")
+      reply += self._print_report("error", "Video language not set" + "\n")
       return reply
     if not has(self.mediainfo, 'audio.0.language'):
-      reply += self.print_report("error", "First audio language not set" + "\n")
+      reply += self._print_report("error", "First audio language not set" + "\n")
       return reply
     if self.mediainfo['video'][0]['language'] == self.mediainfo['audio'][0]['language']:
-      reply += self.print_report("correct", "Video language matches first audio language: `" + self.mediainfo['video'][0]['language'] + "`\n")
+      reply += self._print_report("correct", "Video language matches first audio language: `" + self.mediainfo['video'][0]['language'] + "`\n")
     else:
-      reply += self.print_report("error", "Video language does not match first audio language: `" + self.mediainfo['video'][0]['language'] + "` vs `" + self.mediainfo['audio'][0]['language'] + "`\n")
+      reply += self._print_report("error", "Video language does not match first audio language: `" + self.mediainfo['video'][0]['language'] + "` vs `" + self.mediainfo['audio'][0]['language'] + "`\n")
     return reply
     
   def _check_tracks_have_language_section(self, section):
     reply, is_valid = "", True
     for i, _ in enumerate(self.mediainfo[section]):
       if 'language' not in self.mediainfo[section][i]:
-        reply += self.print_report("error", section.capitalize() + " " + self._section_id(section, i) + ": Does not have a language chosen\n")
+        reply += self._print_report("error", section.capitalize() + " " + self._section_id(section, i) + ": Does not have a language chosen\n")
         is_valid = False
     return reply, is_valid
     
@@ -355,7 +388,7 @@ class Checker():
     is_valid &= n_is_valid
     
     if is_valid:
-      reply += self.print_report("correct", "All tracks do not have a muxing mode\n")
+      reply += self._print_report("correct", "All tracks do not have a muxing mode\n")
     
     return reply
     
@@ -363,7 +396,7 @@ class Checker():
     reply, is_valid = "", True
     for i, _ in enumerate(self.mediainfo[section]):
       if 'muxing_mode' in self.mediainfo[section][i]:
-        reply += self.print_report("error", section.capitalize() + " #" + self.mediainfo[section][i]['id'] + " has muxing mode: " + self.mediainfo[section][i]["muxing_mode"] + "\n")
+        reply += self._print_report("error", section.capitalize() + " #" + self.mediainfo[section][i]['id'] + " has muxing mode: " + self.mediainfo[section][i]["muxing_mode"] + "\n")
         is_valid = False
     return reply, is_valid
     
@@ -383,7 +416,7 @@ class Checker():
       mediainfo_version_name = mediainfo_version_name.group(1)
     
     if not mediainfo_version_num or not mediainfo_version_name:
-      reply += self.print_report("info", "Not using mkvtoolnix\n")
+      reply += self._print_report("info", "Not using mkvtoolnix\n")
     else:
       r = requests.get(os.environ.get("MKVTOOLNIX_NEWS"))
       if r.status_code == 200:
@@ -400,9 +433,9 @@ class Checker():
         
         
         if mkvtoolnix_version_num == mediainfo_version_num and mkvtoolnix_version_name == mediainfo_version_name:
-          reply += self.print_report("correct", "Uses latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name + "\"`\n")
+          reply += self._print_report("correct", "Uses latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name + "\"`\n")
         else:
-          reply += self.print_report("warning", "Not using latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name +
+          reply += self._print_report("warning", "Not using latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name +
             "\"` latest is: `" + mkvtoolnix_version_num + " \"" + mkvtoolnix_version_name + "\"`\n")
     return reply
     
@@ -417,7 +450,7 @@ class Checker():
           reply += self.mediainfo['audio'][i]['title'] + "\n"
       reply += "```"
     else:
-      reply = self.print_report("error", "No audio tracks\n")
+      reply = self._print_report("error", "No audio tracks\n")
     return reply
     
   def check_audio_tracks(self):
@@ -425,7 +458,7 @@ class Checker():
     
     if self.source_detect.is_dvd():
       # audio track conversions not supported for dvds
-      reply += self.print_report("info", "Audio track conversions check not supported for DVDs\n")
+      reply += self._print_report("info", "Audio track conversions check not supported for DVDs\n")
       return reply
     elif len(self.bdinfo['audio']) == len(self.mediainfo['audio']):
       for i, title in enumerate(self.bdinfo['audio']):
@@ -459,7 +492,7 @@ class Checker():
           else:
             if 'title' in self.mediainfo['audio'][i]:
               if title == self.mediainfo['audio'][i]['title']:
-                reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + ": Track names match\n")
+                reply += self._print_report("correct", "Audio " + self._section_id("audio", i) + ": Track names match\n")
               else:
                 is_bad_audio_format = False
                 if '/' in title and '/' in self.mediainfo['audio'][i]['title']:
@@ -472,13 +505,13 @@ class Checker():
                   if title != mediainfo_audio_title:
                     is_bad_audio_format = True
                 if is_bad_audio_format:
-                  reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Bad conversion:\n```fix\nBDInfo: " + title + "\nMediaInfo: " + self.mediainfo['audio'][i]['title'] + "```")
+                  reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Bad conversion:\n```fix\nBDInfo: " + title + "\nMediaInfo: " + self.mediainfo['audio'][i]['title'] + "```")
                 else:
-                  reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + ": Track names match\n")
+                  reply += self._print_report("correct", "Audio " + self._section_id("audio", i) + ": Track names match\n")
             else:
-              reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Missing track name\n")
+              reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Missing track name\n")
     else:
-      reply += self.print_report("error", "Cannot verify audio track conversions, " +
+      reply += self._print_report("error", "Cannot verify audio track conversions, " +
         str(len(self.bdinfo['audio'])) + " BDInfo Audio Track(s) vs " + str(len(self.mediainfo['audio'])) +
         " MediaInfo Audio Track(s).\n")
       if len(self.bdinfo['audio']) > len(self.mediainfo['audio']):
@@ -499,27 +532,27 @@ class Checker():
         if bdinfo_audio_format == 'Dolby Digital Audio':
           if 'format' in self.mediainfo['audio'][i]:
             if self.mediainfo['audio'][i]['format'] == 'AC-3':
-              reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + ": Commentary already AC-3\n")
+              reply += self._print_report("correct", "Audio " + self._section_id("audio", i) + ": Commentary already AC-3\n")
             else:
-              reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary should be AC-3 instead of " + self.mediainfo['audio'][i]['format'] + "\n")
+              reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary should be AC-3 instead of " + self.mediainfo['audio'][i]['format'] + "\n")
           else:
-            reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary does not have a format\n")
+            reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary does not have a format\n")
             
           return is_commentary, reply
       else:
-        reply += self.print_report("warning", "Audio #" + self._section_id("audio", i) + ": Cannot verify commentary audio conversion\n")
+        reply += self._print_report("warning", "Audio #" + self._section_id("audio", i) + ": Cannot verify commentary audio conversion\n")
         return is_commentary, reply
           
       if 'format' in self.mediainfo['audio'][i] and self.mediainfo['audio'][i]['format'] == 'AC-3':
         if 'bit_rate' in self.mediainfo['audio'][i]:
           if '224' in self.mediainfo['audio'][i]['bit_rate']:
-            reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + ": Commentary converted to AC-3 @ 224 kbps\n")
+            reply += self._print_report("correct", "Audio " + self._section_id("audio", i) + ": Commentary converted to AC-3 @ 224 kbps\n")
           else:
-            reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary AC-3 bitrate should be 224 kbps instead of " + self.mediainfo['audio'][i]['bit_rate'] + "\n")
+            reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary AC-3 bitrate should be 224 kbps instead of " + self.mediainfo['audio'][i]['bit_rate'] + "\n")
         else:
-          reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary AC-3 does not have a bitrate\n")
+          reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary AC-3 does not have a bitrate\n")
       else:
-        reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary should be converted to AC-3\n")
+        reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary should be converted to AC-3\n")
           
     return is_commentary, reply
     
@@ -529,33 +562,33 @@ class Checker():
     # verify audio track titles
     if ' / ' not in self.bdinfo['audio'][i] or \
       'title' not in self.mediainfo['audio'][i] or ' / ' not in self.mediainfo['audio'][i]['title']:
-      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
+      reply += self._print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
       return reply
       
     bdinfo_audio_parts = re.sub(r'\s+', ' ', self.bdinfo['audio'][i]).split(' / ')
     if len(bdinfo_audio_parts) <= 5:
-      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
+      reply += self._print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
       return reply
 
     mediainfo_parts = self.mediainfo['audio'][i]['title'].split(' / ')
     if len(mediainfo_parts) <= 4:
-      reply += self.print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
+      reply += self._print_report("warning", "Could not verify audio " + self._section_id("audio", i) + "\n")
       return reply
 
     # verify audio conversions
     if mediainfo_parts[0] == audio_to:
       if (mediainfo_parts[1] != bdinfo_audio_parts[2]):
-        reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": Channel Mismatch, " + audio_from + " " + mediainfo_parts[1] + " and " + audio_to + bdinfo_audio_parts[2] + "\n")
+        reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Channel Mismatch, " + audio_from + " " + mediainfo_parts[1] + " and " + audio_to + bdinfo_audio_parts[2] + "\n")
 
       bdbitrate = bdinfo_audio_parts[4].strip()
       mbitrate = mediainfo_parts[3].strip()
 
       if bdbitrate == mbitrate:
-        reply += self.print_report("error", "Audio " + self._section_id("audio", i) + ": " + audio_from + " " + bdinfo_audio_parts[2] + " to " + audio_to + " " + mediainfo_parts[1] + " same bitrate: " + str(bdbitrate) + "\n")
+        reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": " + audio_from + " " + bdinfo_audio_parts[2] + " to " + audio_to + " " + mediainfo_parts[1] + " same bitrate: " + str(bdbitrate) + "\n")
       else:
-        reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + ": " + audio_from + " " + bdinfo_audio_parts[2] + " to " + audio_to + " " + mediainfo_parts[1] + " (" + str(bdbitrate) + " to " + str(mbitrate) + ")\n")
+        reply += self._print_report("correct", "Audio " + self._section_id("audio", i) + ": " + audio_from + " " + bdinfo_audio_parts[2] + " to " + audio_to + " " + mediainfo_parts[1] + " (" + str(bdbitrate) + " to " + str(mbitrate) + ")\n")
     else:
-      reply += self.print_report("error", "Audio " + self._section_id("audio", i) + " should be converted to " + audio_to + "\n")
+      reply += self._print_report("error", "Audio " + self._section_id("audio", i) + " should be converted to " + audio_to + "\n")
       
     return reply
     
@@ -583,10 +616,10 @@ class Checker():
                 matched_names.append(n)
           matched_names = set(matched_names)
           if len(matched_names) > 0:
-            reply += self.print_report("correct", "Audio " + self._section_id("audio", i) + " Matched: `" + ", ".join(matched_names) + "`\n")
+            reply += self._print_report("correct", "Audio " + self._section_id("audio", i) + " Matched: `" + ", ".join(matched_names) + "`\n")
           unmatched_names = set(names) - set(matched_names)
           if len(unmatched_names) > 0:
-            reply += self.print_report("warning", "Audio " + self._section_id("audio", i) + " Unmatched: `" + ", ".join(unmatched_names) + "`\n")
+            reply += self._print_report("warning", "Audio " + self._section_id("audio", i) + " Unmatched: `" + ", ".join(unmatched_names) + "`\n")
           
     return reply
     
@@ -618,7 +651,7 @@ class Checker():
               misspelled_words.append(t)
         misspelled_words = set(misspelled_words)
         if len(misspelled_words) > 0:
-          reply += self.print_report("error", "Audio " + self._section_id("audio", i) + " Misspelled: `" + ", ".join(misspelled_words) + "`\n")
+          reply += self._print_report("error", "Audio " + self._section_id("audio", i) + " Misspelled: `" + ", ".join(misspelled_words) + "`\n")
         
     return reply
     
@@ -640,7 +673,7 @@ class Checker():
         reply += "\n"
       reply += "```"
     else:
-      reply = self.print_report("info", "No text tracks\n")
+      reply = self._print_report("info", "No text tracks\n")
     return reply
     
   def check_text_order(self):
@@ -661,22 +694,22 @@ class Checker():
         if 'english' in text_langs_without_title:
           has_english = True
           if text_langs_without_title[0] == 'english':
-            reply += self.print_report("correct", "English subtitles are first\n")
+            reply += self._print_report("correct", "English subtitles are first\n")
             english_first = True
           else:
-            reply += self.print_report("error", "English subtitles should be first\n")
+            reply += self._print_report("error", "English subtitles should be first\n")
             
       # check if all other languages are in alphabetical order
       text_langs_without_title_and_english = [x for x in text_langs_without_title if x != 'english']
       if text_langs_without_title_and_english == sorted(text_langs_without_title_and_english):
-        reply += self.print_report("correct", "Rest of the subtitles are in alphabetical order\n")
+        reply += self._print_report("correct", "Rest of the subtitles are in alphabetical order\n")
       else:
         if english_first:
-          reply += self.print_report("error", "Rest of the subtitles should be in alphabetical order\n")
+          reply += self._print_report("error", "Rest of the subtitles should be in alphabetical order\n")
         elif has_english:
-          reply += self.print_report("error", "English subtitles should be first, rest should be in alphabetical order\n")
+          reply += self._print_report("error", "English subtitles should be first, rest should be in alphabetical order\n")
         else:
-          reply += self.print_report("error", "Subtitles should be in alphabetical order\n")
+          reply += self._print_report("error", "Subtitles should be in alphabetical order\n")
     
     return reply
     
@@ -699,9 +732,9 @@ class Checker():
         if has_english_subs:
           # foreign audio and has english subs. english subs should be default=yes
           if self.mediainfo['text'][english_subs_index]['default'].lower() == 'yes':
-            reply += self.print_report("correct", "Foreign film with English subs `default=yes`\n")
+            reply += self._print_report("correct", "Foreign film with English subs `default=yes`\n")
           else:
-            reply += self.print_report("error", "English subs on foreign film should be `default=yes`\n")
+            reply += self._print_report("error", "English subs on foreign film should be `default=yes`\n")
             
     return reply
     
@@ -745,27 +778,27 @@ class Checker():
                 chapter_phrase += item['title'] + "\n"
           if len(invalid_lang_list) > 0:
             if len(invalid_lang_list) == len(self.mediainfo['menu'][i]):
-              reply += self.print_report("error", "All chapters do not have a language set\n")
+              reply += self._print_report("error", "All chapters do not have a language set\n")
             else:
-              reply += self.print_report("error", "The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
+              reply += self._print_report("error", "The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
           else:
-            reply += self.print_report("correct", "All chapters have a language set\n")
+            reply += self._print_report("correct", "All chapters have a language set\n")
           if chapter_phrase:
             chapter_langs = list(set(chapter_langs))
             try:
               lang = langdetect_detect(chapter_phrase)
               ch_lang = iso639_languages.get(alpha2=lang)
               if ch_lang in chapter_langs:
-                reply += self.print_report("correct", "Chapters language matches detected language: `" + ch_lang.name + "`\n")
+                reply += self._print_report("correct", "Chapters language matches detected language: `" + ch_lang.name + "`\n")
               else:
                 chapter_langs_names = ", ".join(list(set([lang.name for lang in chapter_langs])))
-                reply += self.print_report("error", "Chapters languages: `" + chapter_langs_names + "` do not match detected language: `" + ch_lang.name + "`\n")
+                reply += self._print_report("error", "Chapters languages: `" + chapter_langs_names + "` do not match detected language: `" + ch_lang.name + "`\n")
             except KeyError:
-              reply += self.print_report("warning", "Could not detect chapters language\n")
+              reply += self._print_report("warning", "Could not detect chapters language\n")
       else:
-        reply += self.print_report("error", "Must have at most 1 chapter menu\n")
+        reply += self._print_report("error", "Must have at most 1 chapter menu\n")
     else:
-      reply += self.print_report("info", "No chapters\n")
+      reply += self._print_report("info", "No chapters\n")
       
     return reply
     
@@ -783,23 +816,23 @@ class Checker():
               padded_correctly = False
               break
     if padded_correctly:
-      reply += self.print_report("correct", "Chapters properly padded\n")
+      reply += self._print_report("correct", "Chapters properly padded\n")
     else:
-      reply += self.print_report("error", "Incorrect chapter padding\n")
+      reply += self._print_report("error", "Incorrect chapter padding\n")
       
     return reply
     
-  def has_chapers(self, eac3to):
+  def has_chapers(self):
     reply, should_have_chapters = "", False
-    for log in eac3to:
+    for log in self.eac3to:
       for l in log:
         if "chapters" in l:
           should_have_chapters = True
     if should_have_chapters:
       if len(self.mediainfo['menu']) > 0:
-        reply += self.print_report("correct", "Has chapters\n")
+        reply += self._print_report("correct", "Has chapters\n")
       else:
-        reply += self.print_report("error", "Should have chapters\n")
+        reply += self._print_report("error", "Should have chapters\n")
     return reply
     
   def _is_commentary_track(self, title):
@@ -819,6 +852,11 @@ class Checker():
       return True
     except ValueError:
       return False
+      
+  def _print_report(self, type, content, record=True):
+    if record:
+      self.report[type.lower()] += 1
+    return "[" + type.upper() + "] " + content
     
   def get_report(self):
     return self.report
