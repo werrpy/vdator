@@ -150,10 +150,9 @@ class Checker():
         bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
         scan_type = bdinfo_video_parts[2].strip()[-1].lower()
         video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
-        new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
+        _, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
         if actually_progressive:
           reply += self._print_report("info", "Note: 1080i @ 25fps is actually progressive\n")
-          bdinfo_video_parts[2] = bdinfo_video_parts[2][:-1] + 'p'
         video_title = " / ".join(bdinfo_video_parts)
         if video_title == mediainfo_title:
           reply += self._print_report("correct", "Video track names match: ```" + video_title + "```")
@@ -261,8 +260,7 @@ class Checker():
       elif self.source_detect.is_uhd():
         # source UHD BluRay
         release_name += '.' + height
-        new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
-        release_name += new_scan_type
+        release_name += scan_type
         release_name += '.UHD.BluRay.REMUX'
         # SDR/HDR
         if self.mediainfo['video'][0]['color_primaries'] == 'BT.2020':
@@ -272,8 +270,7 @@ class Checker():
       else:
         # source HD BluRay
         release_name += '.' + height
-        new_scan_type, actually_progressive = self.codecs.get_scan_type_title_name(scan_type, video_fps)
-        release_name += new_scan_type
+        release_name += scan_type
         release_name += '.BluRay.REMUX'
         
       # video format (ex. AVC)

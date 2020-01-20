@@ -255,8 +255,9 @@ class CodecsParser():
       scan_type = 'progressive' if scan_type == 'p' else 'interlaced'
 
     # interlaced @ 25fps is actually progressive
+    # but it's still called interlaced
     if scan_type == 'interlaced' and int(video_fps) == 25:
-      scan_type = 'progressive'
+      #scan_type = 'progressive'
       actually_progressive = True
       
     if scan_type not in self.scan_type_title_names:
