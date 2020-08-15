@@ -3,27 +3,52 @@ import re, requests
 
 class URLParser():
   def __init__(self):
+    # regex used to extract urls from message
     self.urls_regex = "(?P<url>https?://[^\s]+)"
     
+    '''
+    'example.com': {
+        # regex to get paste's unique identifier
+        'slug_regex': 'https://example.com/(.*)',
+        
+        # link to raw text using the unique identifier
+        'raw_url': 'https://example.com/raw/{}'
+    }
+    '''
     self.urls = {
-        'pastebin.com': {
-            # regex to get paste's unique identifier
-            'slug_regex': 'https://pastebin.com/(.*)',
-            # regex to check if it's already a raw url
-            'raw_regex': 'https://pastebin.com/raw/(.*)',
-            # link to raw text using the unique identifier
-            'raw_url': 'https://pastebin.com/raw/{}'
-        },
-        'hastebin.com': {
-            'slug_regex': 'https://hastebin.com/(.*)',
-            'raw_regex': 'https://hastebin.com/raw/(.*)',
-            'raw_url': 'https://hastebin.com/raw/{}'
+        'dpaste.com': {
+            'slug_regex': 'https://dpaste.com/(.*)',
+            'raw_url': 'https://dpaste.com/{}.txt'
         },
         'ghostbin.co': {
             'slug_regex': 'https://ghostbin.co/paste/(.*)',
-            'raw_regex': 'https://ghostbin.co/paste/(.*)/raw',
             'raw_url': 'https://ghostbin.co/paste/{}/raw'
-        }
+        },
+        'hastebin.com': {
+            'slug_regex': 'https://hastebin.com/(.*)',
+            'raw_url': 'https://hastebin.com/raw/{}'
+        },
+        'www.heypasteit.com': {
+            'slug_regex': 'https://www.heypasteit.com/clip/(.*)',
+            'raw_url': 'https://www.heypasteit.com/download/{}'
+        },
+        'paste.centos.org': {
+            'slug_regex': 'https://paste.centos.org/view/(.*)',
+            'raw_url': 'https://paste.centos.org/view/raw/{}'
+        },
+        'paste.opensuse.org': {
+            'slug_regex': 'https://paste.opensuse.org/(.*)',
+            'raw_url': 'https://paste.opensuse.org/view/raw/{}'
+        },
+        'pastebin.com': {
+            # regex to get paste's unique identifier
+            'slug_regex': 'https://pastebin.com/(.*)',
+            # link to raw text using the unique identifier
+            'raw_url': 'https://pastebin.com/raw/{}'
+        },
+        'termbin.com': {
+            'raw_url': 'https://termbin.com/{}'
+        },
     }
 
   def extract_supported_urls(self, text):
@@ -43,7 +68,7 @@ class URLParser():
     raw_url = url
     
     # check if its not already a raw url
-    is_already_raw_url = re.search(self.urls[hostname]['raw_regex'], url)
+    is_already_raw_url = re.search(self.urls[hostname]['raw_url'].format('(.*)'), url)
     
     if not is_already_raw_url:
       slug = re.search(self.urls[hostname]['slug_regex'], url)

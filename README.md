@@ -3,6 +3,17 @@ Remux validator Discord bot
 
 Takes a Pastebin link with BDInfo and MediaInfo dump, and validates the remux.
 
+### Supported pastebin sites
+
+- [Pastebin](https://pastebin.com/)
+- [Hastebin](https://hastebin.com/)
+- [termbin](https://termbin.com/)
+- [{d}paste](https://dpaste.com/)
+- [ghostbin.co](https://ghostbin.co/)
+- [Hey! Paste it](https://www.heypasteit.com/)
+- [CentOS Pastebin Service](https://paste.centos.org/)
+- [openSUSE Paste](https://paste.opensuse.org/)
+
 Pastebin, Hastebin, and Ghostbin links are supported.
 
 Checks:
