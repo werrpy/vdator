@@ -70,12 +70,12 @@ async def add_status_reactions(client, message, content):
     }
     
     if report['warning'] == 0 and report['error'] == 0:
-      await client.add_reaction(message, '✅')
+      await message.add_reaction('✅')
     else:
       if report['warning'] != 0:
-        await client.add_reaction(message, '⚠')
+        await message.add_reaction('⚠')
       if report['error'] != 0:
-        await client.add_reaction(message, '❌')
+        await message.add_reaction('❌')
       
 client = discord.Client()
 
@@ -83,7 +83,7 @@ client = discord.Client()
 async def on_ready():
   print("I'm in")
   print(client.user)
-  await client.change_presence(game=discord.Game(name=IN_GAME))
+  await client.change_presence(activity=discord.Game(name=IN_GAME))
 
 @client.event
 async def on_message(message):
@@ -96,7 +96,7 @@ async def on_message(message):
   # help command
   if message.content == "!help":
     reply = print_help()
-    await client.send_message(message.channel, reply)
+    await message.channel.send(reply)
     return
   
   # self
@@ -147,16 +147,16 @@ async def on_message(message):
     if message.channel.name in BOT_CHANNELS:
       # reply in bot channel
       for reply in replies:
-        await client.send_message(message.channel, reply)
+        await message.channel.send(reply)
     elif message.channel.name in REVIEW_CHANNELS:
       # add reactions in review channel
       await add_status_reactions(client, message, reply)
         
       # and send reply to
       for ch in REVIEW_REPLY_CHANNELS:
-        channel = get(message.server.channels, name=ch, type=discord.ChannelType.text)
+        channel = get(message.guild.channels, name=ch, type=discord.ChannelType.text)
         for reply in replies:
-          await client.send_message(channel, reply)
+          await channel.send(reply)
       
 token = os.environ.get("DISCORD_BOT_SECRET")
 client.run(token)
