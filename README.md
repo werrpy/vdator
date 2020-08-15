@@ -3,6 +3,8 @@ Remux validator Discord bot
 
 Takes a Pastebin link with BDInfo and MediaInfo dump, and validates the remux.
 
+Pastebin, Hastebin, and Ghostbin links are supported.
+
 Checks:
 ```
 Video track names
