@@ -14,8 +14,6 @@ Takes a Pastebin link with BDInfo and MediaInfo dump, and validates the remux.
 - [CentOS Pastebin Service](https://paste.centos.org/)
 - [openSUSE Paste](https://paste.opensuse.org/)
 
-Pastebin, Hastebin, and Ghostbin links are supported.
-
 Checks:
 ```
 Video track names
