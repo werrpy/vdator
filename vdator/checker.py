@@ -289,7 +289,7 @@ class Checker():
         # audio channel (ex. 5.1)
         main_audio_title[1] = main_audio_title[1].strip()
         # extract float
-        main_audio_title[1] = re.search("\d+\.\d+", main_audio_title[1]).group(0)
+        main_audio_title[1] = re.search("\d+(?:\.\d+)?", main_audio_title[1]).group(0)
         release_name += '.' + main_audio_title[0]
         release_name += '.' + main_audio_title[1]
       # release group
