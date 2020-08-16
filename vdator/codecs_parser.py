@@ -18,6 +18,7 @@ class CodecsParser():
       'AC3' : '.ac3',
       'AC3 EX' : '.ac3',
       'AC3 Surround' : '.ac3',
+      'DTS-HD High-Res Audio': '.dtshr',
       'DTS Master Audio' : '.dtsma',
       'DTS' : '.dts',
       'E-AC3' : 'eac3',
@@ -46,6 +47,7 @@ class CodecsParser():
     
     self.audio_codec_title_names = {
       'DTS Audio' : 'DTS',
+      'DTS-HD High-Res Audio' : 'DTS-HD.HR',
       'DTS-HD Master Audio' : 'DTS-HD.MA',
       'DTS:X Master Audio' : 'DTS-X',
       'Dolby Digital Audio' : 'DD',
