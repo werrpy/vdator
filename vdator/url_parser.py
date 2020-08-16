@@ -36,6 +36,10 @@ class URLParser():
             'slug_regex': 'https://paste.centos.org/view/(.*)',
             'raw_url': 'https://paste.centos.org/view/raw/{}'
         },
+        'paste.ee': {
+            'slug_regex': 'https://paste.ee/p/(.*)',
+            'raw_url': 'https://paste.ee/d/{}'
+        },
         'paste.opensuse.org': {
             'slug_regex': 'https://paste.opensuse.org/(.*)',
             'raw_url': 'https://paste.opensuse.org/view/raw/{}'

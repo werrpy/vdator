@@ -32,6 +32,7 @@ Chapter padding
 - [ghostbin.co](https://ghostbin.co/)
 - [Hey! Paste it](https://www.heypasteit.com/)
 - [CentOS Pastebin Service](https://paste.centos.org/)
+- [Paste.ee](https://paste.ee/)
 - [openSUSE Paste](https://paste.opensuse.org/)
 
 ### Setup
