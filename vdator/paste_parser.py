@@ -74,21 +74,13 @@ class PasteParser():
       l2 = l.strip().lower()
 
       # determine current section
-      # limit to first bdinfo and mediainfo
+      # limit to first mediainfo
       if l2.startswith("quick summary"):
-        if did_first_bdinfo:
-          sect = None
-        else:
-          sect = self.Section.QUICK_SUMMARY
-          bdinfo['type'] = BDInfoType.QUICK_SUMMARY
-          did_first_bdinfo = True
+        sect = self.Section.QUICK_SUMMARY
+        bdinfo['type'] = BDInfoType.QUICK_SUMMARY
       elif l2.startswith("playlist report"):
-        if did_first_bdinfo:
-          sect = None
-        else:
-          sect = self.Section.PLAYLIST_REPORT
-          bdinfo['type'] = BDInfoType.PLAYLIST_REPORT
-          did_first_bdinfo = True
+        sect = self.Section.PLAYLIST_REPORT
+        bdinfo['type'] = BDInfoType.PLAYLIST_REPORT
       elif l2.startswith("eac3to v"):
         sect = self.Section.EAC3TO_LOG
         eac3to.append(list())
