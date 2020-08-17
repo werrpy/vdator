@@ -36,6 +36,9 @@ RELEASE_GROUP = os.environ.get("RELEASE_GROUP").strip()
 TRAINEE_CHANNELS = [x.strip() for x in os.environ.get("TRAINEE_CHANNELS").split(',')]
 INTERNAL_CHANNELS = [x.strip() for x in os.environ.get("INTERNAL_CHANNELS").split(',')]
 
+# filename cuts
+CUTS = [None] + [x.strip() for x in os.environ.get("FILENAME_CUTS").split(',')]
+
 class Checker():
 
   def __init__(self, bdinfo, mediainfo, eac3to, codecs, source_detect, channel_name):
@@ -322,10 +325,8 @@ class Checker():
   def check_filename(self):
     reply = ""
     
-    # cuts to check
-    cuts = [None, "Directors.Cut", "Extended.Cut"]
     # possible release names
-    possible_release_names = [self._construct_release_name(cut) for cut in cuts]
+    possible_release_names = [self._construct_release_name(cut) for cut in CUTS]
 
     if has_many(self.mediainfo, 'general.0', ['movie_name', 'complete_name']):
       complete_name = self.mediainfo['general'][0]['complete_name']
@@ -341,7 +342,7 @@ class Checker():
         expected_release_name = possible_release_names[0]
         
         # pick the expected release name with the proper cut
-        for i, cut in enumerate(cuts[1:]):
+        for i, cut in enumerate(CUTS[1:]):
             if cut in complete_name:
                 expected_release_name = possible_release_names[i + 1]
                 
