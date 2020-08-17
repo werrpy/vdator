@@ -225,9 +225,7 @@ class Checker():
         
     return reply
     
-  def check_filename(self):
-    reply = ""
-    # construct release name
+  def _construct_release_name(self, cut=None):
     release_name = ""
 
     # scan type must come from bdinfo
@@ -235,8 +233,7 @@ class Checker():
     scan_type = bdinfo_video_parts[2].strip()[-1].lower()
     video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
 
-    if has_many(self.mediainfo, 'general.0', ['movie_name', 'complete_name']) and \
-      has_many(self.mediainfo, 'video.0', ['height', 'title']) and \
+    if has_many(self.mediainfo, 'video.0', ['height', 'title']) and \
       has(self.mediainfo, 'audio.0.title'):
       # Name.S01E01
       tv_show_name_search = re.search(r'(.+)\s-\s(S\d{2}E\d{2})', self.mediainfo['general'][0]['movie_name'])
@@ -250,6 +247,11 @@ class Checker():
         title = self._format_filename_title(movie_name_search.group(1))
         year = movie_name_search.group(2).strip()
         release_name += title + '.' + year
+
+      # check cuts here
+      if cut is not None:
+        release_name += '.' + cut
+
       # resolution (ex. 1080p)
       height = ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
       
@@ -280,30 +282,60 @@ class Checker():
       main_audio_title = self.mediainfo['audio'][0]['title'].split(' / ')
       if len(main_audio_title) >= 2:
         # audio codec name for title (ex. DTS-HD.MA)
-        audio_codec = main_audio_title[0].strip()
+        # usually 0. 1 if we have a custom title (ex. commentary, surround upmix, etc.)
+        codec_title_index = 1 if (len(main_audio_title) > 5 ) else 0
+        audio_codec = main_audio_title[codec_title_index].strip()
         title = self.codecs.get_audio_codec_title_name(audio_codec)
         if title:
-          main_audio_title[0] = title
+          main_audio_title[codec_title_index] = title
         else:
           reply += self._print_report("error", "No title name found for audio codec: `" + audio_codec + "`\n")
         # audio channel (ex. 5.1)
-        main_audio_title[1] = main_audio_title[1].strip()
+        # usually 1. 2 if we have a custom title (ex. commentary, surround upmix, etc.)
+        audio_channel_index = 2 if (len(main_audio_title) > 5 ) else 1
+        main_audio_title[audio_channel_index] = main_audio_title[audio_channel_index].strip()
         # extract float
-        main_audio_title[1] = re.search("\d+(?:\.\d+)?", main_audio_title[1]).group(0)
-        release_name += '.' + main_audio_title[0]
-        release_name += '.' + main_audio_title[1]
+        main_audio_title[audio_channel_index] = re.search("\d+(?:\.\d+)?", main_audio_title[audio_channel_index]).group(0)
+        # codec
+        release_name += '.' + main_audio_title[codec_title_index]
+        # channel
+        release_name += '.' + main_audio_title[audio_channel_index]
       # release group
       release_name += '-'
       if self.channel_name in INTERNAL_CHANNELS:
         release_name += RELEASE_GROUP + '.mkv'
+
+    return release_name
+
+  def _partial_match(self, possible_names, name):
+    for n in possible_names:
+      if n in name:
+        return True
+    return False
+
+  def _exact_match(self, possible_names, name):
+    for n in possible_names:
+      if n == name:
+        return True
+    return False
+
+  def check_filename(self):
+    reply = ""
+    
+    # cuts to check
+    cuts = [None, "Directors.Cut", "Extended.Cut"]
+    # possible release names
+    possible_release_names = [self._construct_release_name(cut) for cut in cuts]
+
+    if has_many(self.mediainfo, 'general.0', ['movie_name', 'complete_name']):
       complete_name = self.mediainfo['general'][0]['complete_name']
       if '\\' in complete_name:
         complete_name = complete_name.split('\\')[-1]
       elif '/' in complete_name:
         complete_name = complete_name.split('/')[-1]
-      if self.channel_name in INTERNAL_CHANNELS and release_name == complete_name:
+      if self.channel_name in INTERNAL_CHANNELS and self._exact_match(possible_release_names, complete_name):
         reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
-      elif release_name in complete_name:
+      elif self._partial_match(possible_release_names, complete_name):
         reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
       else:
         if self.channel_name not in INTERNAL_CHANNELS:
@@ -471,7 +503,7 @@ class Checker():
         
         # check audio commentary
         is_commentary, commentary_reply = self._check_commentary(i)
-        
+
         if is_commentary:
           reply += commentary_reply
         elif len(bdinfo_audio_parts) >= 3:
@@ -493,7 +525,6 @@ class Checker():
               else:
                 is_bad_audio_format = False
                 if '/' in title and '/' in self.mediainfo['audio'][i]['title']:
-                  bdinfo_audio_format = title.split('/')[0].strip()
                   if self.codecs.is_codec(self.mediainfo['audio'][i]['title'][0]):
                     mediainfo_audio_title = self.mediainfo['audio'][i]['title'].strip()
                   else:
@@ -573,17 +604,20 @@ class Checker():
       return reply
 
     # verify audio conversions
-    if mediainfo_parts[0] == audio_to:
-      if (mediainfo_parts[1] != bdinfo_audio_parts[2]):
-        reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Channel Mismatch, " + audio_from + " " + mediainfo_parts[1] + " and " + audio_to + bdinfo_audio_parts[2] + "\n")
+    # mediainfo_parts size is usually 5. 6 if we have a custom title (ex. commentary, surround upmix, etc.)
+    mediainfo_offset = 1 if (len(mediainfo_parts) > 5 ) else 0
+
+    if mediainfo_parts[0 + mediainfo_offset] == audio_to:
+      if (mediainfo_parts[1 + mediainfo_offset] != bdinfo_audio_parts[2]):
+        reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Channel Mismatch, " + audio_from + " " + mediainfo_parts[1 + mediainfo_offset] + " and " + audio_to + bdinfo_audio_parts[2] + "\n")
 
       bdbitrate = bdinfo_audio_parts[4].strip()
-      mbitrate = mediainfo_parts[3].strip()
+      mbitrate = mediainfo_parts[3 + mediainfo_offset].strip()
 
       if bdbitrate == mbitrate:
-        reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": " + audio_from + " " + bdinfo_audio_parts[2] + " to " + audio_to + " " + mediainfo_parts[1] + " same bitrate: " + str(bdbitrate) + "\n")
+        reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": " + audio_from + " " + bdinfo_audio_parts[2] + " to " + audio_to + " " + mediainfo_parts[1 + mediainfo_offset] + " same bitrate: " + str(bdbitrate) + "\n")
       else:
-        reply += self._print_report("correct", "Audio " + self._section_id("audio", i) + ": " + audio_from + " " + bdinfo_audio_parts[2] + " to " + audio_to + " " + mediainfo_parts[1] + " (" + str(bdbitrate) + " to " + str(mbitrate) + ")\n")
+        reply += self._print_report("correct", "Audio " + self._section_id("audio", i) + ": " + audio_from + " " + bdinfo_audio_parts[2] + " to " + audio_to + " " + mediainfo_parts[1 + mediainfo_offset] + " (" + str(bdbitrate) + " to " + str(mbitrate) + ")\n")
     else:
       reply += self._print_report("error", "Audio " + self._section_id("audio", i) + " should be converted to " + audio_to + "\n")
       
