@@ -339,8 +339,8 @@ class Checker():
         reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
       else:
         if self.channel_name not in INTERNAL_CHANNELS:
-          release_name += 'GRouP.mkv'
-        reply += self._print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + release_name + "```")
+          possible_release_names = [name + 'GRouP.mkv' for name in possible_release_names]
+        reply += self._print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + possible_release_names[0] + "```")
     else:
       reply += self._print_report("error", "Cannot validate filename\n")
       
