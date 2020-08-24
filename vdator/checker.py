@@ -228,7 +228,7 @@ class Checker():
         
     return reply
     
-  def _construct_release_name(self, cut=None):
+  def _construct_release_name(self, cut=None, hybird=False):
     release_name = ""
 
     # scan type must come from bdinfo
@@ -250,7 +250,11 @@ class Checker():
         title = self._format_filename_title(movie_name_search.group(1))
         year = movie_name_search.group(2).strip()
         release_name += title + '.' + year
-
+      
+      # with or without hybrid
+      if hybird:
+          release_name += '.Hybrid'
+          
       # check cuts here
       if cut is not None:
         release_name += '.' + cut
@@ -324,9 +328,6 @@ class Checker():
 
   def check_filename(self):
     reply = ""
-    
-    # possible release names
-    possible_release_names = [self._construct_release_name(cut) for cut in CUTS]
 
     if has_many(self.mediainfo, 'general.0', ['movie_name', 'complete_name']):
       complete_name = self.mediainfo['general'][0]['complete_name']
@@ -334,22 +335,26 @@ class Checker():
         complete_name = complete_name.split('\\')[-1]
       elif '/' in complete_name:
         complete_name = complete_name.split('/')[-1]
-      if self.channel_name in INTERNAL_CHANNELS and self._exact_match(possible_release_names, complete_name):
-        reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
-      elif self._partial_match(possible_release_names, complete_name):
-        reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
-      else:
-        expected_release_name = possible_release_names[0]
         
-        # pick the expected release name with the proper cut
-        for i, cut in enumerate(CUTS[1:]):
+        # possible release names
+        possible_release_names = [self._construct_release_name(cut, hybird=('hybrid' in complete_name)) for cut in CUTS]
+        
+        if self.channel_name in INTERNAL_CHANNELS and self._exact_match(possible_release_names, complete_name):
+          reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
+        elif self._partial_match(possible_release_names, complete_name):
+          reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
+        else:
+          expected_release_name = possible_release_names[0]
+          
+          # pick the expected release name with the proper cut
+          for i, cut in enumerate(CUTS[1:]):
             if cut in complete_name:
-                expected_release_name = possible_release_names[i + 1]
-                
-        if self.channel_name not in INTERNAL_CHANNELS:
+              expected_release_name = possible_release_names[i + 1]
+                    
+          if self.channel_name not in INTERNAL_CHANNELS:
             expected_release_name += 'GRouP.mkv'
-        
-        reply += self._print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + expected_release_name + "```")
+            
+          reply += self._print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + expected_release_name + "```")
     else:
       reply += self._print_report("error", "Cannot validate filename\n")
       
