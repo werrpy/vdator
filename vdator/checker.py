@@ -643,9 +643,9 @@ class Checker():
     # check people in audio track names
     for i, _ in enumerate(self.mediainfo['audio']):
       if 'title' in self.mediainfo['audio'][i]:
-        title = self.mediainfo['audio'][i]['title'].split('/')[0].strip()
+        title = self.mediainfo['audio'][i]['title']
         # ignore codecs
-        if not self.codecs.is_audio_title(title):
+        if not self.codecs.is_audio_title(title.split('/')[0].strip()):
           matched_names = list()
           names = extract_names(title)
           search = tmdb.Search()
