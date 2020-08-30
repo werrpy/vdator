@@ -174,17 +174,30 @@ class Checker():
     
     if has(self.mediainfo, 'general.0.movie_name'):
       # tv show name in format "Name - S01E01"
-      if re.search(r'^.+\s-\sS\d{2}E\d{2}', self.mediainfo['general'][0]['movie_name']):
-        reply += self._print_report("correct", "TV show name format `Name - S01E01`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
+      if re.search(r'^\S.+\s-\sS\d{2}E\d{2}.*$', self.mediainfo['general'][0]['movie_name']):
+        reply += self._print_report("correct", "TV show name format `Name - S01E01`: `" + self.mediainfo['general'][0]['movie_name'] + "`\n")
       # movie name in format "Name (Year)"
-      elif re.search(r'^.+\(\d{4}\)', self.mediainfo['general'][0]['movie_name']):
-        reply += self._print_report("correct", "Movie name format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
+      elif re.search(r'^\S.+\(\d{4}\)$', self.mediainfo['general'][0]['movie_name']):
+        reply += self._print_report("correct", "Movie name format `Name (Year)`: `" + self.mediainfo['general'][0]['movie_name'] + "`\n")
       else:
-        reply += self._print_report("error", "Movie name does not match format `Name (Year)`: " + self.mediainfo['general'][0]['movie_name'] + "\n")
+        reply += self._print_report("error", "Movie name does not match format `Name (Year)`: `" + self.mediainfo['general'][0]['movie_name'] + "`\n")
+        reply += self._movie_name_extra_space(self.mediainfo['general'][0]['movie_name'])
     else:
       reply += self._print_report("error", "Missing movie name\n")
       
     return reply
+
+  def _movie_name_extra_space(self, movie_name):
+      reply = ""
+      
+      if movie_name.startswith(" "):
+          reply += self._print_report("error", "Movie name starts with an extra space!\n")
+          
+      if movie_name.endswith(" "):
+          reply += self._print_report("error", "Movie name ends with an extra space!\n")
+          
+      return reply
+          
     
   def check_ids(self):
     reply, name, year, imdb_movie, tmdb_movie_info, matched_imdb, matched_tmdb = "", None, None, None, None, False, False

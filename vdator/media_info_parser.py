@@ -66,32 +66,28 @@ class MediaInfoParser():
         continue
 
       if sect == self.MediaInfoSection.GENERAL:
-        curr = l.split(':', 1)
+        curr = l.split(' : ', 1)
         if len(curr) < 2:
           continue
         curr[0] = self.format_key(curr[0])
-        curr[1] = curr[1].strip()
         mediainfo['general'][index_general][curr[0]] = curr[1]
       elif sect == self.MediaInfoSection.VIDEO:
-        curr = l.split(':', 1)
+        curr = l.split(' : ', 1)
         if len(curr) < 2:
           continue
         curr[0] = self.format_key(curr[0])
-        curr[1] = curr[1].strip()
         mediainfo['video'][index_video][curr[0]] = curr[1]
       elif sect == self.MediaInfoSection.AUDIO:
-        curr = l.split(':', 1)
+        curr = l.split(' : ', 1)
         if len(curr) < 2:
           continue
         curr[0] = self.format_key(curr[0])
-        curr[1] = curr[1].strip()
         mediainfo['audio'][index_audio][curr[0]] = curr[1]
       elif sect == self.MediaInfoSection.TEXT:
-        curr = l.split(':', 1)
+        curr = l.split(' : ', 1)
         if len(curr) < 2:
           continue
         curr[0] = self.format_key(curr[0])
-        curr[1] = curr[1].strip()
         mediainfo['text'][index_text][curr[0]] = curr[1]
       elif sect == self.MediaInfoSection.MENU:
         curr = l.split(' : ', 1)
@@ -100,13 +96,12 @@ class MediaInfoParser():
           curr[0] = curr[0].strip()
           chapter['time'] = curr[0]
         if len(curr) >= 2:
-          curr[1] = curr[1].strip()
           if ':' in curr[1]:
             curr2 = curr[1].split(':', 1)
             chapter['language'] = curr2[0].strip()
-            chapter['title'] = curr2[1].strip()
+            chapter['title'] = curr2[1]
           else:
-            chapter['title'] = curr[1].strip()
+            chapter['title'] = curr[1]
         mediainfo['menu'][index_menu].append(chapter)
 
     return mediainfo
