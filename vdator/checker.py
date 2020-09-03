@@ -124,11 +124,12 @@ class Checker():
       video_title += ''.join(re.findall(r'[\d]+', self.mediainfo['video'][0]['height']))
 
       # scan type
-      video_title += self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower(), 0)
+      scan_type, _ = self.codecs.get_scan_type_title_name(self.mediainfo['video'][0]['scan_type'].lower(), 0)
+      video_title += scan_type
       video_title += " / "
 
-      # fps (int)
-      video_title += str(round(float(''.join(re.findall(r'\d+\.\d+', self.mediainfo['video'][0]['frame_rate'])))))
+      # fps
+      video_title += str(float(''.join(re.findall(r'\d+\.\d+', self.mediainfo['video'][0]['frame_rate']))))
       video_title += " fps / "
       
       # aspect ratio
