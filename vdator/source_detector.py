@@ -47,6 +47,42 @@ class SourceDetector():
             is_dvd = True
     
     return is_dvd
+
+  def is_ntsc_dvd(self):
+    """
+    Is this source an NTSC DVD?
+      
+    Returns
+    -------
+    boolean True if NTSC DVD, False otherwise
+    """
+    is_ntsc = False
+    
+    if is_dvd():
+      if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 \
+        and 'standard' in self.mediainfo['video'][0]:
+            if self.mediainfo['video'][0]['standard'].upper() == 'NTSC':
+                is_ntsc = True
+                
+    return is_ntsc
+
+  def is_pal_dvd(self):
+    """
+    Is this source a PAL DVD?
+      
+    Returns
+    -------
+    boolean True if PAL DVD, False otherwise
+    """
+    is_pal = False
+    
+    if is_dvd():
+      if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 \
+        and 'standard' in self.mediainfo['video'][0]:
+            if self.mediainfo['video'][0]['standard'].upper() == 'PAL':
+                is_pal = True
+                
+    return is_pal
     
   def is_uhd(self):
     """

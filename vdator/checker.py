@@ -129,8 +129,9 @@ class Checker():
       video_title += " / "
 
       # fps
-      video_title += str(float(''.join(re.findall(r'\d+\.\d+', self.mediainfo['video'][0]['frame_rate']))))
-      video_title += " fps / "
+      video_fps = float(''.join(re.findall(r'\d+\.\d+', self.mediainfo['video'][0]['frame_rate'])))
+      if video_fps.is_integer(): video_fps = int(video_fps)
+      video_title += str(video_fps) + " fps / "
       
       # aspect ratio
       video_title += self.mediainfo['video'][0]['display_aspect_ratio']
