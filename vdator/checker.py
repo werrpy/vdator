@@ -607,7 +607,7 @@ class Checker():
         else:
           reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary AC-3 does not have a bitrate\n")
       else:
-        reply += self._print_report("error", "Audio " + self._section_id("audio", i) + ": Commentary should be converted to AC-3\n")
+        reply += self._print_report("info", "Audio " + self._section_id("audio", i) + ": Commentary may be converted to AC-3\n")
           
     return is_commentary, reply
     
