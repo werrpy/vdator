@@ -454,7 +454,7 @@ class Checker():
     reply, is_valid = "", True
     for i, _ in enumerate(self.mediainfo[section]):
       if 'muxing_mode' in self.mediainfo[section][i]:
-        reply += self._print_report("error", section.capitalize() + " #" + self.mediainfo[section][i]['id'] + " has muxing mode: " + self.mediainfo[section][i]["muxing_mode"] + "\n")
+        reply += self._print_report("error", section.capitalize() + " #" + self.mediainfo[section][i]['id'] + " has muxing mode: `" + self.mediainfo[section][i]["muxing_mode"] + "`\n")
         is_valid = False
     return reply, is_valid
     
@@ -842,7 +842,7 @@ class Checker():
             if len(invalid_lang_list) == len(self.mediainfo['menu'][i]):
               reply += self._print_report("error", "All chapters do not have a language set\n")
             else:
-              reply += self._print_report("error", "The following chapters do not have a language set: " + ", ".join(invalid_lang_list) + "\n")
+              reply += self._print_report("error", "The following chapters do not have a language set: `" + ", ".join(invalid_lang_list) + "`\n")
           else:
             reply += self._print_report("correct", "All chapters have a language set\n")
           if chapter_phrase:
