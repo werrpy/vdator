@@ -778,7 +778,7 @@ class Checker():
     reply = ""
     
     if len(self.mediainfo['text']) > 0:
-      first_audio_language, has_english_subs, english_subs_index = False, False, False
+      first_audio_language, has_english_subs, english_subs_default_yes = False, False, False
       
       if has(self.mediainfo, 'audio.0.language'):
         first_audio_language = self.mediainfo['audio'][0]['language'].lower()
@@ -787,14 +787,16 @@ class Checker():
         for i, item in enumerate(self.mediainfo['text']):
           if 'language' in item:
             if item['language'].lower() == 'english':
-              has_english_subs, english_subs_index = True, i
+              has_english_subs = True
+              if self.mediainfo['text'][i]['default'].lower() == 'yes':
+                english_subs_default_yes = True
               
         if has_english_subs:
           # foreign audio and has english subs. english subs should be default=yes
-          if self.mediainfo['text'][english_subs_index]['default'].lower() == 'yes':
-            reply += self._print_report("correct", "Foreign film with English subs `default=yes`\n")
+          if english_subs_default_yes:
+            reply += self._print_report("correct", "Foreign film, one of the English subtitles are `default=yes`\n")
           else:
-            reply += self._print_report("error", "English subs on foreign film should be `default=yes`\n")
+            reply += self._print_report("error", "Foreign film, one of the English subtitles should be `default=yes`\n")
             
     return reply
     
