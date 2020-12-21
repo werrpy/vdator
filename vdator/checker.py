@@ -335,12 +335,6 @@ class Checker():
         return True
     return False
 
-  def _exact_match(self, possible_names, name):
-    for n in possible_names:
-      if n == name:
-        return True
-    return False
-
   def check_filename(self):
     reply = ""
 
@@ -354,7 +348,7 @@ class Checker():
         # possible release names
         possible_release_names = [self._construct_release_name(cut, hybird=('hybrid' in complete_name)) for cut in CUTS]
         
-        if self.channel_name in INTERNAL_CHANNELS and self._exact_match(possible_release_names, complete_name):
+        if self.channel_name in INTERNAL_CHANNELS and complete_name in possible_release_names:
           reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
         elif self._partial_match(possible_release_names, complete_name):
           reply += self._print_report("correct", "Filename: `" + complete_name + "`\n")
