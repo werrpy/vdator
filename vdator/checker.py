@@ -39,6 +39,9 @@ INTERNAL_CHANNELS = [x.strip() for x in os.environ.get("INTERNAL_CHANNELS").spli
 # filename cuts
 CUTS = [None] + [x.strip() for x in os.environ.get("FILENAME_CUTS").split(',')]
 
+# how many years off the movie year can be. (default: 1)
+MOVIE_YEAR_OFFSET = int(os.environ.get("MOVIE_YEAR_OFFSET", "1").strip())
+
 class Checker():
 
   def __init__(self, bdinfo, mediainfo, eac3to, codecs, source_detector, reporter, channel_name):
@@ -192,7 +195,6 @@ class Checker():
           reply += self.reporter.print_report("error", "Movie name ends with an extra space!\n")
           
       return reply
-          
     
   def check_ids(self):
     reply, name, year, imdb_movie, tmdb_movie_info, matched_imdb, matched_tmdb = "", None, None, None, None, False, False
@@ -210,7 +212,7 @@ class Checker():
       except imdb._exceptions.IMDbParserError:
         reply += self.reporter.print_report("error", "Invalid IMDB id: `" + self.mediainfo['general'][0]['imdb'] + "`\n")
       else:
-        if name == imdb_movie['title'] and year == str(imdb_movie['year']):
+        if name == imdb_movie['title'] and self._year_range(imdb_movie['year'], year):
           reply += self.reporter.print_report("correct", "Matched IMDB name and year\n")
           matched_imdb = True
           
@@ -224,7 +226,7 @@ class Checker():
       else:
         datetime_obj = datetime.datetime.strptime(tmdb_movie_info['release_date'], '%Y-%m-%d')
         tmdb_year = str(datetime_obj.year)
-        if name == tmdb_movie_info['original_title'] and year == tmdb_year:
+        if name == tmdb_movie_info['original_title'] and self._year_range(tmdb_year, year):
           reply += self.reporter.print_report("correct", "Matched TMDB name and year\n")
           matched_tmdb = True
           
@@ -235,6 +237,18 @@ class Checker():
         reply += self.reporter.print_report("error", "TMDB: Name: `" + tmdb_movie_info['original_title'] + "` Year: `" + tmdb_year + "`\n")
         
     return reply
+
+  def _year_range(self, year, test_year, offset=MOVIE_YEAR_OFFSET):
+    # self._year_range(year, test_year)
+    # example: with offset = 1, and year = 2004, test_year can be between 2003 and 2005 inclusive
+    # 2002 in range(2004 - 1, (2004 + 1) + 1) False
+    # 2003 in range(2004 - 1, (2004 + 1) + 1) True
+    # 2004 in range(2004 - 1, (2004 + 1) + 1) True
+    # 2005 in range(2004 - 1, (2004 + 1) + 1) True
+    # 2006 in range(2004 - 1, (2004 + 1) + 1) False
+    year = int(year)
+    test_year = int(test_year)
+    return test_year in range(year - offset, (year + offset) + 1)
     
   def _construct_release_name(self, cut=None, hybird=False):
     release_name = ""
@@ -261,7 +275,7 @@ class Checker():
       
       # with or without hybrid
       if hybird:
-          release_name += '.Hybrid'
+        release_name += '.Hybrid'
           
       # check cuts here
       if cut is not None:
