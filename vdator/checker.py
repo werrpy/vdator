@@ -172,10 +172,11 @@ class Checker():
     
     if has(self.mediainfo, 'general.0.movie_name'):
       # tv show name in format "Name - S01E01"
-      if re.search(r'^\S.+\s-\sS\d{2}E\d{2}.*$', self.mediainfo['general'][0]['movie_name']):
+      # [^/\\\s] means movie name can't start with a forward slash (/), backslash (\), or a space
+      if re.search(r'^[^/\\\s].+\s-\sS\d{2}E\d{2}.*$', self.mediainfo['general'][0]['movie_name']):
         reply += self.reporter.print_report("correct", "TV show name format `Name - S01E01`: `" + self.mediainfo['general'][0]['movie_name'] + "`\n")
       # movie name in format "Name (Year)"
-      elif re.search(r'^\S.+\(\d{4}\)$', self.mediainfo['general'][0]['movie_name']):
+      elif re.search(r'^[^/\\\s].+\(\d{4}\)$', self.mediainfo['general'][0]['movie_name']):
         reply += self.reporter.print_report("correct", "Movie name format `Name (Year)`: `" + self.mediainfo['general'][0]['movie_name'] + "`\n")
       else:
         reply += self.reporter.print_report("error", "Movie name does not match format `Name (Year)`: `" + self.mediainfo['general'][0]['movie_name'] + "`\n")
