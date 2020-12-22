@@ -12,8 +12,9 @@ from url_parser import URLParser
 from paste_parser import PasteParser
 from media_info_parser import MediaInfoParser
 from codecs_parser import CodecsParser
-from checker import Checker
 from source_detector import SourceDetector
+from reporter import Reporter
+from checker import Checker
 
 # load environment variables
 load_dotenv()
@@ -119,14 +120,15 @@ async def on_message(message):
       mediainfo_parser = MediaInfoParser()
       mediainfo = mediainfo_parser.parse(mediainfo)
       codecs = CodecsParser()
-      source_detect = SourceDetector(bdinfo, mediainfo)
-      checker = Checker(bdinfo, mediainfo, eac3to, codecs, source_detect, message.channel.name)
+      source_detector = SourceDetector(bdinfo, mediainfo)
+      reporter = Reporter()
+      checker = Checker(bdinfo, mediainfo, eac3to, codecs, source_detector, reporter, message.channel.name)
       
       # run all checks
       reply += checker.run_checks()
       
       # report
-      reply += checker.display_report()
+      reply += reporter.display_report()
     except:
       traceback.print_exc()
       reply += "\n[ERROR] vdator failed to parse\n"

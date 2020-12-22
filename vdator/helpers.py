@@ -34,3 +34,10 @@ def has_many(obj, base, keys):
     if not has(obj, lookup):
       return False
   return True
+
+def is_number(s):
+  try:
+    float(s)
+    return True
+  except ValueError:
+    return False
