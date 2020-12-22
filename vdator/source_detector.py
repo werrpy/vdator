@@ -10,7 +10,7 @@ class SourceDetector():
   Define ways to detect source
   """
   
-  def __init__(self, bdinfo, mediainfo):
+  def setup(self, bdinfo, mediainfo):
     """    
     Parameters
     ----------

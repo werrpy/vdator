@@ -1,9 +1,7 @@
 from dotenv import load_dotenv
-import os
 from enum import Enum
 from urllib.parse import urlparse
-import requests
-import re
+import os, re, requests
 
 # load environment variables
 load_dotenv()

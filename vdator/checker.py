@@ -13,8 +13,7 @@ import hunspell
 # parsers
 from helpers import has_many, is_number
 from paste_parser import BDInfoType
-import nltk
-import nltk_people
+import nltk, nltk_people
 from nltk_people import extract_names, ie_preprocess
 from nltk.tokenize.api import StringTokenizer
 
@@ -44,15 +43,18 @@ MOVIE_YEAR_OFFSET = int(os.environ.get("MOVIE_YEAR_OFFSET", "1").strip())
 
 class Checker():
 
-  def __init__(self, bdinfo, mediainfo, eac3to, codecs, source_detector, reporter, channel_name):
+  def __init__(self, codecs_parser, source_detector, reporter):
+    self.codecs = codecs_parser
+    self.source_detector = source_detector
+    self.reporter = reporter
+    self.hobj = hunspell.HunSpell(HUNSPELL_LANG[0], HUNSPELL_LANG[1])
+
+  def setup(self, bdinfo, mediainfo, eac3to, channel_name):
     self.bdinfo = bdinfo
     self.mediainfo = mediainfo
     self.eac3to = eac3to
-    self.codecs = codecs
-    self.source_detector = source_detector
-    self.reporter = reporter
     self.channel_name = channel_name
-    self.hobj = hunspell.HunSpell(HUNSPELL_LANG[0], HUNSPELL_LANG[1])
+    self.source_detector.setup(bdinfo, mediainfo)
     
   def run_checks(self):
     reply = ""

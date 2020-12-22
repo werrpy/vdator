@@ -1,9 +1,8 @@
 from dotenv import load_dotenv
-import json, os, re, traceback
+import json, os, traceback
 
 # APIs
 import discord
-from discord import Emoji
 from discord.utils import get
 
 # parsers
@@ -13,13 +12,20 @@ from paste_parser import PasteParser
 from media_info_parser import MediaInfoParser
 from codecs_parser import CodecsParser
 from source_detector import SourceDetector
-from reporter import Reporter
+from reporter import Reporter, add_status_reactions
 from checker import Checker
 
-# initiate url parser
+# initialize parsers
 with open('urls.json') as f:
   urls = json.load(f)['urls']
   url_parser = URLParser(urls)
+
+paste_parser = PasteParser()
+mediainfo_parser = MediaInfoParser()
+codecs_parser = CodecsParser()
+source_detector = SourceDetector()
+reporter = Reporter()
+checker = Checker(codecs_parser, source_detector, reporter)
 
 # load environment variables
 load_dotenv()
@@ -64,25 +70,6 @@ def print_help():
     "Chapter languages\n" \
     "Chapter padding```"
 
-async def add_status_reactions(client, message, content):
-  # add status reactions to message based on content
-  report_re = re.search(r'(\d+)\scorrect,\s(\d+)\swarnings?,\s(\d+)\serrors?,\sand\s(\d+)\sinfo', content)
-  if report_re:
-    report = {
-      "correct": int(report_re.group(1)),
-      "warning": int(report_re.group(2)),
-      "error": int(report_re.group(3)),
-      "info": int(report_re.group(4))
-    }
-    
-    if report['warning'] == 0 and report['error'] == 0:
-      await message.add_reaction('✅')
-    else:
-      if report['warning'] != 0:
-        await message.add_reaction('⚠')
-      if report['error'] != 0:
-        await message.add_reaction('❌')
-      
 client = discord.Client()
 
 @client.event
@@ -112,7 +99,6 @@ async def on_message(message):
   supported_urls = url_parser.extract_supported_urls(message.content)
   
   for url in supported_urls:
-    paste_parser = PasteParser()
     paste = url_parser.get_paste(url)
     bdinfo, mediainfo, eac3to = paste_parser.parse(paste)
     
@@ -120,13 +106,13 @@ async def on_message(message):
 
     try:
       # parse mediainfo
-      mediainfo_parser = MediaInfoParser()
       mediainfo = mediainfo_parser.parse(mediainfo)
-      codecs = CodecsParser()
-      source_detector = SourceDetector(bdinfo, mediainfo)
-      reporter = Reporter()
-      checker = Checker(bdinfo, mediainfo, eac3to, codecs, source_detector, reporter, message.channel.name)
-      
+
+      # setup/reset reporter
+      reporter.setup()
+      # setup checker
+      checker.setup(bdinfo, mediainfo, eac3to, message.channel.name)
+
       # run all checks
       reply += checker.run_checks()
       

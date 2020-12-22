@@ -1,0 +1,39 @@
+{
+    "urls": {
+        "dpaste.com": {
+            "slug_regex": "https://dpaste.com/(.*)",
+            "raw_url": "https://dpaste.com/{}.txt"
+        },
+        "ghostbin.co": {
+            "slug_regex": "https://ghostbin.co/paste/(.*)",
+            "raw_url": "https://ghostbin.co/paste/{}/raw"
+        },
+        "hastebin.com": {
+            "slug_regex": "https://hastebin.com/(.*)",
+            "raw_url": "https://hastebin.com/raw/{}"
+        },
+        "www.heypasteit.com": {
+            "slug_regex": "https://www.heypasteit.com/clip/(.*)",
+            "raw_url": "https://www.heypasteit.com/download/{}"
+        },
+        "paste.centos.org": {
+            "slug_regex": "https://paste.centos.org/view/(.*)",
+            "raw_url": "https://paste.centos.org/view/raw/{}"
+        },
+        "paste.ee": {
+            "slug_regex": "https://paste.ee/p/(.*)",
+            "raw_url": "https://paste.ee/d/{}"
+        },
+        "paste.opensuse.org": {
+            "slug_regex": "https://paste.opensuse.org/(.*)",
+            "raw_url": "https://paste.opensuse.org/view/raw/{}"
+        },
+        "pastebin.com": {
+            "slug_regex": "https://pastebin.com/(.*)",
+            "raw_url": "https://pastebin.com/raw/{}"
+        },
+        "termbin.com": {
+            "raw_url": "https://termbin.com/{}"
+        }
+    }
+}

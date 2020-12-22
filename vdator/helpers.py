@@ -41,3 +41,22 @@ def is_number(s):
     return True
   except ValueError:
     return False
+
+def num_to_emoji(n):
+  num_emoji_map = {
+    '1' : ':one:',
+    '2' : ':two:',
+    '3' : ':three:',
+    '4' : ':four:',
+    '5' : ':five:',
+    '6' : ':six:',
+    '7' : ':seven:',
+    '8' : ':eight:',
+    '9' : ':nine:',
+    '10' : ':ten:'
+  }
+
+  n = str(n)
+  if n in num_emoji_map:
+    return num_emoji_map[n]
+  return False
