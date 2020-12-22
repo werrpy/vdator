@@ -2,58 +2,21 @@ from urllib.parse import urlparse
 import re, requests
 
 class URLParser():
-  def __init__(self):
+  def __init__(self, urls):
     # regex used to extract urls from message
     self.urls_regex = "(?P<url>https?://[^\s]+)"
     
     '''
+    # hostname
     'example.com': {
         # regex to get paste's unique identifier
         'slug_regex': 'https://example.com/(.*)',
         
-        # link to raw text using the unique identifier
+        # link to raw text using the unique identifier in place of {}
         'raw_url': 'https://example.com/raw/{}'
     }
     '''
-    self.urls = {
-        'dpaste.com': {
-            'slug_regex': 'https://dpaste.com/(.*)',
-            'raw_url': 'https://dpaste.com/{}.txt'
-        },
-        'ghostbin.co': {
-            'slug_regex': 'https://ghostbin.co/paste/(.*)',
-            'raw_url': 'https://ghostbin.co/paste/{}/raw'
-        },
-        'hastebin.com': {
-            'slug_regex': 'https://hastebin.com/(.*)',
-            'raw_url': 'https://hastebin.com/raw/{}'
-        },
-        'www.heypasteit.com': {
-            'slug_regex': 'https://www.heypasteit.com/clip/(.*)',
-            'raw_url': 'https://www.heypasteit.com/download/{}'
-        },
-        'paste.centos.org': {
-            'slug_regex': 'https://paste.centos.org/view/(.*)',
-            'raw_url': 'https://paste.centos.org/view/raw/{}'
-        },
-        'paste.ee': {
-            'slug_regex': 'https://paste.ee/p/(.*)',
-            'raw_url': 'https://paste.ee/d/{}'
-        },
-        'paste.opensuse.org': {
-            'slug_regex': 'https://paste.opensuse.org/(.*)',
-            'raw_url': 'https://paste.opensuse.org/view/raw/{}'
-        },
-        'pastebin.com': {
-            # regex to get paste's unique identifier
-            'slug_regex': 'https://pastebin.com/(.*)',
-            # link to raw text using the unique identifier
-            'raw_url': 'https://pastebin.com/raw/{}'
-        },
-        'termbin.com': {
-            'raw_url': 'https://termbin.com/{}'
-        },
-    }
+    self.urls = urls
 
   def extract_supported_urls(self, text):
     # list of urls

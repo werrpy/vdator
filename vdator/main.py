@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import os, re, traceback
+import json, os, re, traceback
 
 # APIs
 import discord
@@ -15,6 +15,11 @@ from codecs_parser import CodecsParser
 from source_detector import SourceDetector
 from reporter import Reporter
 from checker import Checker
+
+# initiate url parser
+with open('urls.json') as f:
+  urls = json.load(f)['urls']
+  url_parser = URLParser(urls)
 
 # load environment variables
 load_dotenv()
@@ -88,8 +93,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-  url_parser = URLParser()
-  
   # only listens in bot and review channels
   if not (message.channel.name in BOT_CHANNELS or message.channel.name in REVIEW_CHANNELS):
     return

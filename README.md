@@ -93,3 +93,18 @@ Run `systemctl enable vdator` to start on boot. Use systemctl to start/stop vdat
 ### Using
 
 Type `!help` in one of the bot channels for more information.
+
+### Adding a pastebin site
+
+Edit `urls.json` and add your pastebin site.
+
+```
+# hostname
+'example.com': {
+    # regex to get paste's unique identifier
+    'slug_regex': 'https://example.com/(.*)',
+    
+    # link to raw text using the unique identifier in place of {}
+    'raw_url': 'https://example.com/raw/{}'
+}
+```
