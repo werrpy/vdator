@@ -466,6 +466,10 @@ class Checker():
     version_name_regex_mediainfo = '\'(.*)\''
     version_num_regex = '(\d+\.\d+\.\d+)'
     
+    if not has(self.mediainfo, 'general.0.writing_application'):
+      reply += self.reporter.print_report("info", "Not using mkvtoolnix\n")
+      return reply
+
     mediainfo_version_num = re.search(version_num_regex, self.mediainfo['general'][0]['writing_application'])
     if mediainfo_version_num:
       mediainfo_version_num = mediainfo_version_num.group(1)
@@ -476,7 +480,9 @@ class Checker():
     
     if not mediainfo_version_num or not mediainfo_version_name:
       reply += self.reporter.print_report("info", "Not using mkvtoolnix\n")
-    else:
+      return reply
+
+    try:
       r = requests.get(os.environ.get("MKVTOOLNIX_NEWS"))
       if r.status_code == 200:
         ## Version 32.0.0 "Astral Progressions" 2019-03-12
@@ -496,6 +502,10 @@ class Checker():
         else:
           reply += self.reporter.print_report("warning", "Not using latest mkvtoolnix: `" + mediainfo_version_num + " \"" + mediainfo_version_name +
             "\"` latest is: `" + mkvtoolnix_version_num + " \"" + mkvtoolnix_version_name + "\"`\n")
+    except:
+      reply += self.reporter.print_report("info", "Could not fetch latest mkvtoolnix version\n")
+      return reply
+
     return reply
     
   def print_audio_track_names(self):
