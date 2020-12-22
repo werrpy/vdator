@@ -12,7 +12,7 @@ class URLParser():
         # regex to get paste's unique identifier
         'slug_regex': 'https://example.com/(.*)',
         
-        # link to raw text using the unique identifier in place of {}
+        # link to raw text using {} in place of the unique identifier
         'raw_url': 'https://example.com/raw/{}'
     }
     '''

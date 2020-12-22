@@ -23,6 +23,15 @@ Chapter languages
 Chapter padding
 ```
 
+### Table of Contents
+- [Supported pastebin sites](#supported-pastebin-sites)
+- [Setup](#setup)
+- [Installing dependencies](#installing-dependencies)
+- [Updating dependencies](#updating-dependencies)
+- [Running with systemd](#running-with-systemd)
+- [Using](#using)
+- [Adding a pastebin site](#adding-a-pastebin-site)
+
 ### Supported pastebin sites
 
 - [Pastebin](https://pastebin.com/)
@@ -46,7 +55,7 @@ Request a [TMDB API Key](https://developers.themoviedb.org/3/getting-started/int
 
 Don't forget to create channels on the server and set them in `vdator\.env` for `REVIEW_CHANNELS`, `REVIEW_REPLY_CHANNELS`, and `BOT_CHANNELS`.
 
-### Install dependencies
+### Installing dependencies
 
 Install [pyhunspell](https://github.com/blatinier/pyhunspell#installation)
 
@@ -56,7 +65,7 @@ Install dependencies
 pip3 install -r requirements.txt
 ```
 
-### Update dependencies
+### Updating dependencies
 
 ```
 pip3 install -r requirements.txt --upgrade
@@ -104,7 +113,7 @@ Edit `urls.json` and add your pastebin site.
     # regex to get paste's unique identifier
     'slug_regex': 'https://example.com/(.*)',
     
-    # link to raw text using the unique identifier in place of {}
+    # link to raw text using {} in place of the unique identifier
     'raw_url': 'https://example.com/raw/{}'
 }
 ```
