@@ -49,11 +49,11 @@ Chapter padding
 Use [pip and virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) to run vdator.
 
 Create a [Discord bot](https://discordapp.com/developers/docs/intro) and add it to a server.
-Edit `vdator\.env` and set `DISCORD_BOT_SECRET` to your bot's token.
+Edit `vdator/.env` and set `DISCORD_BOT_SECRET` to your bot's token.
 
 Request a [TMDB API Key](https://developers.themoviedb.org/3/getting-started/introduction) and set `TMDB_API_KEY`.
 
-Don't forget to create channels on the server and set them in `vdator\.env` for `REVIEW_CHANNELS`, `REVIEW_REPLY_CHANNELS`, and `BOT_CHANNELS`.
+Don't forget to create channels on the server and set them in `vdator/.env` for `REVIEW_CHANNELS`, `REVIEW_REPLY_CHANNELS`, and `BOT_CHANNELS`.
 
 ### Installing dependencies
 
@@ -105,7 +105,7 @@ Type `!help` in one of the bot channels for more information.
 
 ### Adding a pastebin site
 
-Edit `urls.json` and add your pastebin site.
+Edit `vdator/urls.json` and add your pastebin site.
 
 ```
 # hostname
