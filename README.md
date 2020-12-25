@@ -105,7 +105,7 @@ Type `!help` in one of the bot channels for more information.
 
 ### Adding a pastebin site
 
-Edit `vdator/urls.json` and add your pastebin site.
+Edit `vdator/data/urls.json` and add your pastebin site.
 
 ```
 # hostname

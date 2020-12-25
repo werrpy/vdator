@@ -16,13 +16,17 @@ from reporter import Reporter, add_status_reactions
 from checker import Checker
 
 # initialize parsers
-with open('urls.json') as f:
+with open('data/urls.json') as f:
   urls = json.load(f)['urls']
   url_parser = URLParser(urls)
 
 paste_parser = PasteParser()
 mediainfo_parser = MediaInfoParser()
-codecs_parser = CodecsParser()
+
+with open('data/codecs.json') as f:
+  codecs = json.load(f)
+  codecs_parser = CodecsParser(codecs)
+
 source_detector = SourceDetector()
 reporter = Reporter()
 checker = Checker(codecs_parser, source_detector, reporter)

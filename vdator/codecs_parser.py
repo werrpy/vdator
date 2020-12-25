@@ -4,67 +4,33 @@ class CodecsParser():
   Define codecs
   """
   
-  def __init__(self):
+  def __init__(self, codecs):
     # map codec names to extension
-    self.video_codecs = {
-      'h264/AVC' : '.h264',
-      'h265/HEVC' : '.h265',
-      'MPEG1' : '.m1v',
-      'MPEG2' : '.m2v',
-      'VC-1' : '.vc1',
-    }
 
-    self.audio_codecs = {
-      'AC3' : '.ac3',
-      'AC3 EX' : '.ac3',
-      'AC3 Surround' : '.ac3',
-      'DTS-HD High-Res Audio': '.dtshr',
-      'DTS Master Audio' : '.dtsma',
-      'DTS' : '.dts',
-      'E-AC3' : 'eac3',
-      'FLAC Audio' : '.flac',
-      'RAW/PCM' : '.pcm',
-      'TrueHD/AC3' : '.thd+ac3',
-      'TrueHD/AC3 (Atmos)' : '.thd+ac3',
+    '''
+    {
+      "codecs": {
+        "video": {...},
+        "audio": {...},
+        "subtitles": {...},
+        "chapters": {...}
+      },
+      "track_titles": {
+        "video": {...},
+        "audio": {...}
+      },
+      "scan_types": {...}
     }
-
-    self.sub_codecs = {
-      'Subtitle (PGS)' : '.sup',
-      'Subtitle (DVD)' : '.sup',
-    }
-
-    self.chapter_codecs = {
-      'Chapters' : '.txt',
-    }
-    
-    # map codec names used in track title to names used in file title
-    self.video_codec_title_names = {
-      'MPEG-2 Video' : 'MPEG-2',
-      'MPEG-4 AVC Video' : 'AVC',
-      'MPEG-H HEVC Video' : 'HEVC',
-      'VC-1 Video' : 'VC-1',
-    }
-    
-    self.audio_codec_title_names = {
-      'DTS Audio' : 'DTS',
-      'DTS-HD High-Res Audio' : 'DTS-HD.HR',
-      'DTS-HD Master Audio' : 'DTS-HD.MA',
-      'DTS:X Master Audio' : 'DTS-X',
-      'Dolby Digital Audio' : 'DD',
-      'Dolby Digital EX Audio' : 'DD-EX',
-      'Dolby TrueHD Audio' : 'TrueHD',
-      'Dolby TrueHD/Atmos Audio' : 'TrueHD.Atmos',
-      'FLAC Audio' : 'FLAC',
-    }
-    
-    self.scan_type_title_names = {
-      'interlaced' : 'i',
-      'mbaff' : 'i',
-      'progressive' : 'p',
-    }
+    '''
+    self.codecs = codecs
 
     # map of all codec names to extensions
-    self.codec_ext = {**self.video_codecs, **self.audio_codecs, **self.sub_codecs, **self.chapter_codecs}
+    self.codec_ext = {
+      **self.codecs['codecs']['video'],
+      **self.codecs['codecs']['audio'],
+      **self.codecs['codecs']['subtitles'],
+      **self.codecs['codecs']['chapters']
+    }
 
   def is_video(self, codec):
     """
@@ -79,7 +45,7 @@ class CodecsParser():
     -------
     True if codec is a video codec, False otherwise.
     """
-    if codec in self.video_codecs:
+    if codec in self.codecs['codecs']['video']:
       return True
     return False
     
@@ -96,7 +62,7 @@ class CodecsParser():
     -------
     True if codec is a video title codec, False otherwise.
     """
-    if codec in self.video_codec_title_names:
+    if codec in self.codecs['track_titles']['video']:
       return True
     return False
     
@@ -113,7 +79,7 @@ class CodecsParser():
     -------
     True if codec is an audio codec, False otherwise.
     """
-    if codec in self.audio_codecs:
+    if codec in self.codecs['codecs']['audio']:
       return True
     return False
     
@@ -130,7 +96,7 @@ class CodecsParser():
     -------
     True if codec is an audio title codec, False otherwise.
     """
-    if codec in self.audio_codec_title_names:
+    if codec in self.codecs['track_titles']['audio']:
       return True
     return False
     
@@ -147,7 +113,7 @@ class CodecsParser():
     -------
     True if codec is a subtitle codec, False otherwise.
     """
-    if codec in self.sub_codecs:
+    if codec in self.codecs['codecs']['subtitles']:
       return True
     return False
 
@@ -164,7 +130,7 @@ class CodecsParser():
     -------
     True if codec is a chapter codec, False otherwise.
     """
-    if codec in self.chapter_codecs:
+    if codec in self.codecs['codecs']['chapters']:
       return True
     return False
     
@@ -213,9 +179,9 @@ class CodecsParser():
     -------
     str codec title name
     """
-    if codec not in self.video_codec_title_names:
+    if codec not in self.codecs['track_titles']['video']:
       return ''
-    return self.video_codec_title_names[codec]
+    return self.codecs['track_titles']['video'][codec]
     
   def get_audio_codec_title_name(self, codec):
     """
@@ -230,9 +196,9 @@ class CodecsParser():
     -------
     str codec title name
     """
-    if codec not in self.audio_codec_title_names:
+    if codec not in self.codecs['track_titles']['audio']:
       return ''
-    return self.audio_codec_title_names[codec]
+    return self.codecs['track_titles']['audio'][codec]
     
   def get_scan_type_title_name(self, scan_type, video_fps):
     """
@@ -262,7 +228,6 @@ class CodecsParser():
       #scan_type = 'progressive'
       actually_progressive = True
       
-    if scan_type not in self.scan_type_title_names:
+    if scan_type not in self.codecs['scan_types']:
       return ''
-    return self.scan_type_title_names[scan_type], actually_progressive
-    
+    return self.codecs['scan_types'][scan_type], actually_progressive
