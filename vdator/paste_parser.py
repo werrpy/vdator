@@ -36,10 +36,11 @@ class PasteParser():
     PLAYLIST_INNER_AUDIO = 2
 
   def parse(self, text):
-    bdinfo = dict()
-    bdinfo['video'] = list()
-    bdinfo['audio'] = list()
-    bdinfo['subtitle'] = list()
+    bdinfo = {
+      'video': list(),
+      'audio': list(),
+      'subtitle': list()
+    }
     mediainfo = list()
     eac3to = list()
     eac3to_index = -1
