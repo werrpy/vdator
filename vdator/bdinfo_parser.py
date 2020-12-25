@@ -23,3 +23,28 @@ class BDInfoParser():
     name = "/".join(name2)
 
     return name
+
+  def playlist_report_format_video_track_name(self, name):
+    try:
+      parts = name.split()
+      kbps_i = parts.index("kbps")
+      before = " ".join(parts[:kbps_i - 1]).strip()
+      after = " ".join(parts[kbps_i + 1:]).strip()
+      track_name = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
+      track_name = self.format_video_track_name(track_name)
+      return track_name
+    except ValueError:
+      return False
+
+  def playlist_report_format_audio_track_name(self, name):
+    try:
+      if "(" in name:
+        name = name.split("(")[0]
+      name = name.strip()
+      name_parts = name.split(" / ")
+      name_parts0 = name_parts[0].strip().split()
+      name = " ".join(name_parts0[:-4]) + " / " + name_parts0[-1] + " / " + " / ".join(name_parts[1:]).strip()
+      name = self.format_track_name(name)
+      return name
+    except ValueError:
+      return False

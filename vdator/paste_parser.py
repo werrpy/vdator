@@ -134,21 +134,15 @@ class PasteParser():
             
           if sect2 == self.Section2.PLAYLIST_VIDEO and sect3 == self.Section3.PLAYLIST_INNER_VIDEO:
             # format video track name with slashes
-            try:
-              parts = l.split()
-              kbps_i = parts.index("kbps")
-              before = " ".join(parts[:kbps_i - 1]).strip()
-              after = " ".join(parts[kbps_i + 1:]).strip()
-              track_name = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
-              track_name = self.bdinfo_parser.format_video_track_name(track_name)
+            track_name = self.bdinfo_parser.playlist_report_format_video_track_name(l)
+            if track_name:
               bdinfo['video'].append(track_name)
-            except ValueError:
-              continue
               
           elif sect2 == self.Section2.PLAYLIST_AUDIO and sect3 == self.Section3.PLAYLIST_INNER_AUDIO:              
-            name = self._name_from_parts(l)
-            bdinfo['audio'].append(self.bdinfo_parser.format_track_name(name))
-            
+            track_name = self.bdinfo_parser.playlist_report_format_audio_track_name(l)
+            if track_name:
+              bdinfo['audio'].append(track_name)
+
             if "ac3 embedded" in l.lower():
               audio_parts = re.split(r'\(ac3 embedded:', l, flags=re.IGNORECASE)
               compat_track = "Compatibility Track / Dolby Digital Audio / " + "/".join(audio_parts[1].split("/")[:-1]).strip().rstrip(")")
@@ -164,17 +158,6 @@ class PasteParser():
           eac3to[eac3to_index].append(l)
     
     return bdinfo, mediainfo, eac3to
-    
-  def _name_from_parts(self, l):
-    l2 = l
-    if "(" in l:
-      l2 = l.split("(")[0]
-    l2 = l2.strip()
-    l_parts = l2.split(" / ")
-    l_parts0 = l_parts[0].strip().split()
-    l_parts1 = " / ".join(l_parts[1:]).strip()
-    name = " ".join(l_parts0[:-4]) + " / " + l_parts0[-1] + " / " + l_parts1
-    return name
     
   def _isIgnoreAfterLine(self, l):
     if IGNORE_AFTER_LINE_METHOD == "equals":
