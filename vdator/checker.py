@@ -253,13 +253,12 @@ class Checker():
     test_year = int(test_year)
     return test_year in range(year - offset, (year + offset) + 1)
     
-  def _construct_release_name(self, cut=None, hybird=False):
+  def _construct_release_name(self, reply, cut=None, hybird=False):
     release_name = ""
 
     # scan type must come from bdinfo
     bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
     scan_type = bdinfo_video_parts[2].strip()[-1].lower()
-    video_fps = float(''.join(re.findall(r'\d*\.\d+|\d+', bdinfo_video_parts[3].strip().lower())))
 
     if has_many(self.mediainfo, 'video.0', ['height', 'title']) and \
       has(self.mediainfo, 'audio.0.title'):
@@ -327,7 +326,7 @@ class Checker():
         audio_channel_index = 2 if (len(main_audio_title) > 5 ) else 1
         main_audio_title[audio_channel_index] = main_audio_title[audio_channel_index].strip()
         # extract float
-        main_audio_title[audio_channel_index] = re.search("\d+(?:\.\d+)?", main_audio_title[audio_channel_index]).group(0)
+        main_audio_title[audio_channel_index] = re.search(r'\d+(?:\.\d+)?', main_audio_title[audio_channel_index]).group(0)
         # codec
         release_name += '.' + main_audio_title[codec_title_index]
         # channel
@@ -356,7 +355,7 @@ class Checker():
         complete_name = complete_name.split('/')[-1]
       
       # possible release names
-      possible_release_names = [self._construct_release_name(cut, hybird=('hybrid' in complete_name.lower())) for cut in CUTS]
+      possible_release_names = [self._construct_release_name(reply, cut, hybird=('hybrid' in complete_name.lower())) for cut in CUTS]
 
       if self.channel_name in INTERNAL_CHANNELS and complete_name in possible_release_names:
         reply += self.reporter.print_report("correct", "Filename: `" + complete_name + "`\n")
@@ -438,9 +437,9 @@ class Checker():
   def check_mkvmerge(self):
     reply = ""
     
-    version_name_regex_mkvtoolnix = '"(.*)"'
-    version_name_regex_mediainfo = '\'(.*)\''
-    version_num_regex = '(\d+\.\d+\.\d+)'
+    version_name_regex_mkvtoolnix = r'"(.*)"'
+    version_name_regex_mediainfo = r'\'(.*)\''
+    version_num_regex = r'(\d+\.\d+\.\d+)'
     
     if not has(self.mediainfo, 'general.0.writing_application'):
       reply += self.reporter.print_report("info", "Not using mkvtoolnix\n")
@@ -653,7 +652,7 @@ class Checker():
           search = tmdb.Search()
           for n in names:
             # TMDB API
-            resp = search.person(query=n)
+            search.person(query=n)
             for s in search.results:
               if n == s['name']:
                 matched_names.append(n)
@@ -857,7 +856,7 @@ class Checker():
     if 'menu' in self.mediainfo and len(self.mediainfo['menu']) > 0:
       if len(self.mediainfo['menu']) == 1:
         num_chapters = len(self.mediainfo['menu'][0])
-        for i, ch in enumerate(self.mediainfo['menu'][0]):
+        for ch in enumerate(self.mediainfo['menu'][0]):
           if re.search(r'^chapter\s\d+', ch['title'], re.IGNORECASE):
             # numbered chapter
             ch_num = ''.join(re.findall(r'[\d]+', ch['title']))

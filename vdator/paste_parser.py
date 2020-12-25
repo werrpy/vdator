@@ -47,7 +47,7 @@ class PasteParser():
 
     # parse bdinfo
     lines = text.splitlines()
-    ignore_next_lines, did_first_mediainfo, did_first_bdinfo = False, False, False
+    ignore_next_lines, did_first_mediainfo = False, False
     for l in lines:
       # break after ignore line
       if self._isIgnoreAfterLine(l):
@@ -98,7 +98,7 @@ class PasteParser():
         elif l2.startswith("audio:"):
           audio_name = l.split(':', 1)[1].strip()
           if "ac3 embedded" in audio_name.lower():
-            audio_parts = re.split("\(ac3 embedded:", audio_name, flags=re.IGNORECASE)
+            audio_parts = re.split(r'\(ac3 embedded:', audio_name, flags=re.IGNORECASE)
             bdinfo['audio'].append(self._format_track_name(audio_parts[0]))
             compat_track = "Compatibility Track / Dolby Digital Audio / " + audio_parts[1].strip().rstrip(")")
             bdinfo['audio'].append(self._format_track_name(compat_track))
@@ -147,7 +147,7 @@ class PasteParser():
             bdinfo['audio'].append(self._format_track_name(name))
             
             if "ac3 embedded" in l.lower():
-              audio_parts = re.split("\(ac3 embedded:", l, flags=re.IGNORECASE)
+              audio_parts = re.split(r'\(ac3 embedded:', l, flags=re.IGNORECASE)
               compat_track = "Compatibility Track / Dolby Digital Audio / " + "/".join(audio_parts[1].split("/")[:-1]).strip().rstrip(")")
               bdinfo['audio'].append(self._format_track_name(compat_track))
               

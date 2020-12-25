@@ -58,7 +58,7 @@ class SourceDetector():
     """
     is_ntsc = False
     
-    if is_dvd():
+    if self.is_dvd():
       if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 \
         and 'standard' in self.mediainfo['video'][0]:
             if self.mediainfo['video'][0]['standard'].upper() == 'NTSC':
@@ -76,7 +76,7 @@ class SourceDetector():
     """
     is_pal = False
     
-    if is_dvd():
+    if self.is_dvd():
       if 'video' in self.mediainfo and len(self.mediainfo['video']) >= 1 \
         and 'standard' in self.mediainfo['video'][0]:
             if self.mediainfo['video'][0]['standard'].upper() == 'PAL':

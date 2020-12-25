@@ -4,7 +4,7 @@ import re, requests
 class URLParser():
   def __init__(self, urls):
     # regex used to extract urls from message
-    self.urls_regex = "(?P<url>https?://[^\s]+)"
+    self.urls_regex = r'(?P<url>https?://[^\s]+)'
     
     '''
     # hostname
