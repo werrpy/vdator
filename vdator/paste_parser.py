@@ -17,6 +17,9 @@ class BDInfoType(Enum):
 
 class PasteParser():
 
+  def __init__(self, bdinfo_parser):
+    self.bdinfo_parser = bdinfo_parser
+
   class Section(Enum):
     QUICK_SUMMARY = 1
     MEDIAINFO = 2
@@ -93,22 +96,22 @@ class PasteParser():
       if sect == self.Section.QUICK_SUMMARY:
         if l2.startswith("video:"):
           track_name = l.split(':', 1)[1]
-          track_name = self._format_video_track_name(track_name)
+          track_name = self.bdinfo_parser.format_video_track_name(track_name)
           bdinfo['video'].append(track_name)
         elif l2.startswith("audio:"):
           audio_name = l.split(':', 1)[1].strip()
           if "ac3 embedded" in audio_name.lower():
             audio_parts = re.split(r'\(ac3 embedded:', audio_name, flags=re.IGNORECASE)
-            bdinfo['audio'].append(self._format_track_name(audio_parts[0]))
+            bdinfo['audio'].append(self.bdinfo_parser.format_track_name(audio_parts[0]))
             compat_track = "Compatibility Track / Dolby Digital Audio / " + audio_parts[1].strip().rstrip(")")
-            bdinfo['audio'].append(self._format_track_name(compat_track))
+            bdinfo['audio'].append(self.bdinfo_parser.format_track_name(compat_track))
           else:
             if "(" in l:
               l = l.split("(")[0]
             l = l.strip()
-            bdinfo['audio'].append(self._format_track_name(l.split(':', 1)[1]))
+            bdinfo['audio'].append(self.bdinfo_parser.format_track_name(l.split(':', 1)[1]))
         elif l2.startswith("subtitle:"):
-          bdinfo['subtitle'].append(self._format_track_name(l.split(':', 1)[1]))
+          bdinfo['subtitle'].append(self.bdinfo_parser.format_track_name(l.split(':', 1)[1]))
           
       elif sect == self.Section.PLAYLIST_REPORT:
       
@@ -137,19 +140,19 @@ class PasteParser():
               before = " ".join(parts[:kbps_i - 1]).strip()
               after = " ".join(parts[kbps_i + 1:]).strip()
               track_name = before + " / " + parts[kbps_i - 1] + " " + parts[kbps_i] + " / " + after
-              track_name = self._format_video_track_name(track_name)
+              track_name = self.bdinfo_parser.format_video_track_name(track_name)
               bdinfo['video'].append(track_name)
             except ValueError:
               continue
               
           elif sect2 == self.Section2.PLAYLIST_AUDIO and sect3 == self.Section3.PLAYLIST_INNER_AUDIO:              
             name = self._name_from_parts(l)
-            bdinfo['audio'].append(self._format_track_name(name))
+            bdinfo['audio'].append(self.bdinfo_parser.format_track_name(name))
             
             if "ac3 embedded" in l.lower():
               audio_parts = re.split(r'\(ac3 embedded:', l, flags=re.IGNORECASE)
               compat_track = "Compatibility Track / Dolby Digital Audio / " + "/".join(audio_parts[1].split("/")[:-1]).strip().rstrip(")")
-              bdinfo['audio'].append(self._format_track_name(compat_track))
+              bdinfo['audio'].append(self.bdinfo_parser.format_track_name(compat_track))
               
       elif sect == self.Section.MEDIAINFO:
         mediainfo.append(l)
@@ -172,36 +175,6 @@ class PasteParser():
     l_parts1 = " / ".join(l_parts[1:]).strip()
     name = " ".join(l_parts0[:-4]) + " / " + l_parts0[-1] + " / " + l_parts1
     return name
-    
-  def _format_video_track_name(self, name):
-    track_name = self._remove_3d(name)
-    track_name = self._format_track_name(track_name)
-    track_name = self._video_fps_force_decimal(track_name)
-    return track_name
-    
-  def _format_track_name(self, name):
-    # remove multiple and trailing spaces
-    track_name = ' '.join(name.split()).strip()
-    # remove dialog normalization text
-    track_name = self._remove_dialog_normalization(track_name)
-    return track_name
-    
-  def _remove_dialog_normalization(self, name):
-    if 'DN' in name.upper():
-      return name.rpartition(' / ')[0]
-    return name
-    
-  def _remove_3d(self, name):
-    name = name.replace(" / Left Eye", "")
-    name = name.replace(" / Right Eye", "")
-    return name
-    
-  def _video_fps_force_decimal(self, name):
-    # bdinfo force decimal instead of comma in fps
-    new_name = name.split('/')
-    new_name[3] = new_name[3].replace(',', '.')
-    new_name = "/".join(new_name)
-    return new_name
     
   def _isIgnoreAfterLine(self, l):
     if IGNORE_AFTER_LINE_METHOD == "equals":

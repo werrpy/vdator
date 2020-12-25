@@ -8,6 +8,7 @@ from discord.utils import get
 # parsers
 from helpers import balanced_blockquotes, split_string
 from url_parser import URLParser
+from bdinfo_parser import BDInfoParser
 from paste_parser import PasteParser
 from media_info_parser import MediaInfoParser
 from codecs_parser import CodecsParser
@@ -20,7 +21,8 @@ with open('data/urls.json') as f:
   urls = json.load(f)['urls']
   url_parser = URLParser(urls)
 
-paste_parser = PasteParser()
+bdinfo_parser = BDInfoParser()
+paste_parser = PasteParser(bdinfo_parser)
 mediainfo_parser = MediaInfoParser()
 
 with open('data/codecs.json') as f:
