@@ -214,6 +214,8 @@ class Checker():
         imdb_movie = ia.get_movie(imdb_id)
       except imdb._exceptions.IMDbParserError:
         reply += self.reporter.print_report("error", "Invalid IMDB id: `" + self.mediainfo['general'][0]['imdb'] + "`\n")
+      except:
+        reply += self.reporter.print_report("info", "Failed to get IMDB movie data\n")
       else:
         if name == imdb_movie['title'] and self._year_range(imdb_movie['year'], year):
           reply += self.reporter.print_report("correct", "Matched IMDB name and year\n")
@@ -224,7 +226,7 @@ class Checker():
       tmdb_movie = tmdb.Movies(tmdb_id)
       try:
         tmdb_movie_info = tmdb_movie.info()
-      except requests.exceptions.HTTPError:
+      except:
         reply += self.reporter.print_report("error", "Invalid TMDB id: `" + self.mediainfo['general'][0]['tmdb'] + "`\n")
       else:
         datetime_obj = datetime.datetime.strptime(tmdb_movie_info['release_date'], '%Y-%m-%d')
@@ -657,9 +659,12 @@ class Checker():
               if n == s['name']:
                 matched_names.append(n)
             # IMDb API
-            for person in ia.search_person(n):
-              if n == person['name']:
-                matched_names.append(n)
+            try:
+              for person in ia.search_person(n):
+                if n == person['name']:
+                  matched_names.append(n)
+            except:
+              reply += self.reporter.print_report("info", "Failed to get IMDB people data\n")
           matched_names = set(matched_names)
           if len(matched_names) > 0:
             reply += self.reporter.print_report("correct", "Audio " + self._section_id("audio", i) + " People Matched: `" + ", ".join(matched_names) + "`\n")
@@ -856,7 +861,7 @@ class Checker():
     if 'menu' in self.mediainfo and len(self.mediainfo['menu']) > 0:
       if len(self.mediainfo['menu']) == 1:
         num_chapters = len(self.mediainfo['menu'][0])
-        for ch in enumerate(self.mediainfo['menu'][0]):
+        for ch in self.mediainfo['menu'][0]:
           if re.search(r'^chapter\s\d+', ch['title'], re.IGNORECASE):
             # numbered chapter
             ch_num = ''.join(re.findall(r'[\d]+', ch['title']))
