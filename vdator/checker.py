@@ -394,20 +394,16 @@ class Checker():
     
   def check_tracks_have_language(self):
     reply, is_valid = "", True
-    
-    n_reply, n_is_valid = self._check_tracks_have_language_section('video')
-    reply += n_reply
-    is_valid &= n_is_valid
-    n_reply, n_is_valid = self._check_tracks_have_language_section('audio')
-    reply += n_reply
-    is_valid &= n_is_valid
-    n_reply, n_is_valid = self._check_tracks_have_language_section('text')
-    reply += n_reply
-    is_valid &= n_is_valid
+
+    for section in ['video', 'audio', 'text']:
+      for i, _ in enumerate(self.mediainfo[section]):
+        if 'language' not in self.mediainfo[section][i]:
+          reply += self.reporter.print_report("error", section.capitalize() + " " + self._section_id(section, i) + ": Does not have a language chosen\n")
+          is_valid = False
     
     if is_valid:
       reply += self.reporter.print_report("correct", "All tracks have a language chosen\n")
-    
+
     return reply
     
   def check_video_language_matches_first_audio_language(self):
@@ -425,42 +421,19 @@ class Checker():
       reply += self.reporter.print_report("error", "Video language does not match first audio language: `" + self.mediainfo['video'][0]['language'] + "` vs `" + self.mediainfo['audio'][0]['language'] + "`\n")
     return reply
     
-  def _check_tracks_have_language_section(self, section):
-    reply, is_valid = "", True
-    for i, _ in enumerate(self.mediainfo[section]):
-      if 'language' not in self.mediainfo[section][i]:
-        reply += self.reporter.print_report("error", section.capitalize() + " " + self._section_id(section, i) + ": Does not have a language chosen\n")
-        is_valid = False
-    return reply, is_valid
-    
   def check_muxing_mode(self):
     reply, is_valid = "", True
-    
-    n_reply, n_is_valid = self._check_muxing_mode_section('general')
-    reply += n_reply
-    is_valid &= n_is_valid
-    n_reply, n_is_valid = self._check_muxing_mode_section('video')
-    reply += n_reply
-    is_valid &= n_is_valid
-    n_reply, n_is_valid = self._check_muxing_mode_section('audio')
-    reply += n_reply
-    is_valid &= n_is_valid
-    n_reply, n_is_valid = self._check_muxing_mode_section('text')
-    reply += n_reply
-    is_valid &= n_is_valid
+
+    for section in ['general', 'video', 'audio', 'text']:
+      for i, _ in enumerate(self.mediainfo[section]):
+        if 'muxing_mode' in self.mediainfo[section][i]:
+          reply += self.reporter.print_report("error", section.capitalize() + " #" + self.mediainfo[section][i]['id'] + " has muxing mode: `" + self.mediainfo[section][i]["muxing_mode"] + "`\n")
+          is_valid = False
     
     if is_valid:
       reply += self.reporter.print_report("correct", "All tracks do not have a muxing mode\n")
     
     return reply
-    
-  def _check_muxing_mode_section(self, section):
-    reply, is_valid = "", True
-    for i, _ in enumerate(self.mediainfo[section]):
-      if 'muxing_mode' in self.mediainfo[section][i]:
-        reply += self.reporter.print_report("error", section.capitalize() + " #" + self.mediainfo[section][i]['id'] + " has muxing mode: `" + self.mediainfo[section][i]["muxing_mode"] + "`\n")
-        is_valid = False
-    return reply, is_valid
     
   def check_mkvmerge(self):
     reply = ""
