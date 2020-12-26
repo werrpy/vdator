@@ -503,8 +503,8 @@ class Checker():
     reply = ""
     
     if self.source_detector.is_dvd():
-      # audio track conversions not supported for dvds
-      reply += self.reporter.print_report("info", "Audio track conversions check not supported for DVDs\n")
+      # no audio track conversions for dvds
+      reply += self.reporter.print_report("info", "No audio track conversions to check for DVDs\n")
       return reply
     elif len(self.bdinfo['audio']) == len(self.mediainfo['audio']):
       for i, title in enumerate(self.bdinfo['audio']):
