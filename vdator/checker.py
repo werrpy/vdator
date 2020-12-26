@@ -191,24 +191,39 @@ class Checker():
     return reply
 
   def _movie_name_extra_space(self, movie_name):
-      reply = ""
-      
-      if movie_name.startswith(" "):
-          reply += self.reporter.print_report("error", "Movie name starts with an extra space!\n")
-          
-      if movie_name.endswith(" "):
-          reply += self.reporter.print_report("error", "Movie name ends with an extra space!\n")
-          
-      return reply
+    reply = ""
+    
+    if movie_name.startswith(" "):
+      reply += self.reporter.print_report("error", "Movie name starts with an extra space!\n")
+        
+    if movie_name.endswith(" "):
+      reply += self.reporter.print_report("error", "Movie name ends with an extra space!\n")
+        
+    return reply
     
   def check_ids(self):
-    reply, name, year, imdb_movie, tmdb_movie_info, matched_imdb, matched_tmdb = "", None, None, None, None, False, False
+    reply, name, year, imdb_movie, tmdb_info, tmdb_year, matched_imdb, matched_tmdb = "", None, None, None, None, None, False, False
     
+    # is it a movie or tv show? assume movie
+    is_movie = True
     if has(self.mediainfo, 'general.0.movie_name'):
-      movie_name = re.search(r'^(.+)\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
-      if movie_name:
-        name = movie_name.group(1).strip()
-        year = movie_name.group(2).strip()
+      # tv show name in format "Name - S01E01"
+      # [^/\\\s] means movie name can't start with a forward slash (/), backslash (\), or a space
+      is_movie = not(re.search(r'^[^/\\\s].+\s-\sS\d{2}E\d{2}.*$', self.mediainfo['general'][0]['movie_name']))
+
+    # extract movie name and year or tv show name
+    if has(self.mediainfo, 'general.0.movie_name'):
+      if is_movie:
+        # movie
+        movie_name = re.search(r'^(.+)\((\d{4})\)', self.mediainfo['general'][0]['movie_name'])
+        if movie_name:
+          name = movie_name.group(1).strip()
+          year = movie_name.group(2).strip()
+      else:
+        # tv show
+        tv_show_name = re.search(r'^(.+)\s-\s.+\s-\s.+', self.mediainfo['general'][0]['movie_name'])
+        if tv_show_name:
+          name = tv_show_name.group(1).strip()
     
     if has(self.mediainfo, 'general.0.imdb'):
       imdb_id = ''.join(re.findall(r'[\d]+', self.mediainfo['general'][0]['imdb']))
@@ -225,23 +240,38 @@ class Checker():
           
     if has(self.mediainfo, 'general.0.tmdb'):
       tmdb_id = ''.join(re.findall(r'[\d]+', self.mediainfo['general'][0]['tmdb']))
-      tmdb_movie = tmdb.Movies(tmdb_id)
+      # movie or tv show
+      tmdb_data = tmdb.Movies(tmdb_id) if is_movie else tmdb.TV(tmdb_id)
+
       try:
-        tmdb_movie_info = tmdb_movie.info()
+        tmdb_info = tmdb_data.info()
       except:
         reply += self.reporter.print_report("error", "Invalid TMDB id: `" + self.mediainfo['general'][0]['tmdb'] + "`\n")
       else:
-        datetime_obj = datetime.datetime.strptime(tmdb_movie_info['release_date'], '%Y-%m-%d')
-        tmdb_year = str(datetime_obj.year)
-        if name == tmdb_movie_info['original_title'] and self._year_range(tmdb_year, year):
-          reply += self.reporter.print_report("correct", "Matched TMDB name and year\n")
-          matched_tmdb = True
+        if is_movie:
+          # movie
+          datetime_obj = datetime.datetime.strptime(tmdb_info['release_date'], '%Y-%m-%d')
+          tmdb_year = str(datetime_obj.year)
+          if name == tmdb_info['original_title'] and self._year_range(tmdb_year, year):
+            reply += self.reporter.print_report("correct", "Movie matched TMDB name and year\n")
+            matched_tmdb = True
+        else:
+          # tv show
+          if name == tmdb_info['name']:
+            reply += self.reporter.print_report("correct", "TV Show matched TMDB name\n")
+            matched_tmdb = True
           
     if not matched_imdb and not matched_tmdb:
       if imdb_movie and has_many(imdb_movie, None, ['title', 'year']):
         reply += self.reporter.print_report("error", "IMDB: Name: `" + imdb_movie['title'] + "` Year: `" + str(imdb_movie['year']) + "`\n")
-      if tmdb_movie_info and 'original_title' in tmdb_movie_info and tmdb_year:
-        reply += self.reporter.print_report("error", "TMDB: Name: `" + tmdb_movie_info['original_title'] + "` Year: `" + tmdb_year + "`\n")
+      if is_movie:
+        # movie
+        if tmdb_info and 'original_title' in tmdb_info and tmdb_year:
+          reply += self.reporter.print_report("error", "TMDB Movie: Name: `" + tmdb_info['original_title'] + "` Year: `" + tmdb_year + "`\n")
+      else:
+        # tv show
+        if tmdb_info and 'name' in tmdb_info:
+          reply += self.reporter.print_report("error", "TMDB TV Show: Name: `" + tmdb_info['name'] + "`\n")
         
     return reply
 
