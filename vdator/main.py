@@ -49,7 +49,7 @@ REVIEW_REPLY_CHANNELS = [x.strip() for x in os.environ.get("REVIEW_REPLY_CHANNEL
 # channels to listen in and post full summaries
 BOT_CHANNELS = [x.strip() for x in os.environ.get("BOT_CHANNELS").split(',')]
 
-VERSION = os.environ.get("VERSION").strip()
+VERSION = "1.3.0"
 
 def print_help():
   return "vdator " + VERSION + " help: " \
