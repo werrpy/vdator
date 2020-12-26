@@ -1,5 +1,3 @@
-from enum import Enum
-
 class MediaInfoParser():
 
   def format_key(self, key):
