@@ -1,4 +1,5 @@
 from pydash import has
+import difflib
 
 def balanced_blockquotes(str):
   num_blockquotes = str.count('```')
@@ -60,3 +61,21 @@ def num_to_emoji(n):
   if n in num_emoji_map:
     return num_emoji_map[n]
   return False
+
+def show_diff(expected, actual):
+  seqm = difflib.SequenceMatcher(None, expected, actual)
+
+  output = []
+  for opcode, a0, a1, b0, b1 in seqm.get_opcodes():
+    if opcode == 'equal':
+      output.append(seqm.a[a0:a1])
+    elif opcode == 'insert':
+      output.append("**" + seqm.b[b0:b1] + "**")
+    elif opcode == 'delete':
+      output.append("**" + seqm.a[a0:a1] + "**")
+    elif opcode == 'replace':
+      output.append("**" + seqm.a[a0:a1] + "**")
+    else:
+      # unexpected opcode
+      return False
+  return "Hint: " + ''.join(output) + "\n"

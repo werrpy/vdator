@@ -11,7 +11,7 @@ from imdb import IMDb
 import hunspell
 
 # parsers
-from helpers import has_many, is_number
+from helpers import has_many, is_number, show_diff
 from paste_parser import BDInfoType
 import nltk, nltk_people
 from nltk_people import extract_names, ie_preprocess
@@ -139,6 +139,7 @@ class Checker():
         reply += self.reporter.print_report("correct", "Video track names match: ```" + mediainfo_title + "```")
       else:
         reply += self.reporter.print_report("error", "Video track names missmatch:\n```fix\nExpected: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
+        reply += show_diff(video_title, mediainfo_title)
       
     elif has(self.bdinfo, 'video') and has(self.mediainfo, 'video'):
       if len(self.bdinfo['video']) != 1:
@@ -161,6 +162,7 @@ class Checker():
           reply += self.reporter.print_report("correct", "Video track names match: ```" + video_title + "```")
         else:
           reply += self.reporter.print_report("error", "Video track names missmatch:\n```fix\nBDInfo: " + video_title + "\nMediaInfo: " + mediainfo_title + "```")
+          reply += show_diff(video_title, mediainfo_title)
       else:
         reply += self.reporter.print_report("error", "Missing mediainfo video track\n")
         return reply
@@ -258,9 +260,10 @@ class Checker():
   def _construct_release_name(self, reply, cut=None, hybird=False):
     release_name = ""
 
-    # scan type must come from bdinfo
-    bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
-    scan_type = bdinfo_video_parts[2].strip()[-1].lower()
+    if not self.source_detector.is_dvd():
+      # scan type must come from bdinfo
+      bdinfo_video_parts = self.bdinfo['video'][0].split(' / ')
+      scan_type = bdinfo_video_parts[2].strip()[-1].lower()
 
     if has_many(self.mediainfo, 'video.0', ['height', 'title']) and \
       has(self.mediainfo, 'audio.0.title'):
@@ -375,6 +378,7 @@ class Checker():
           expected_release_name += 'GRouP.mkv'
           
         reply += self.reporter.print_report("error", "Filename missmatch:\n```fix\nFilename: " + complete_name + "\nExpected: " + expected_release_name + "```")
+        reply += show_diff(expected_release_name, complete_name)
     else:
       reply += self.reporter.print_report("error", "Cannot validate filename\n")
       
