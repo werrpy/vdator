@@ -294,9 +294,11 @@ class Checker():
         else:
           if imdb_movie and 'title' in imdb_movie:
             reply += self.reporter.print_report("error", "IMDb: Name: `" + imdb_movie['title'] + "`")
+            reply += show_diff(imdb_movie['title'], movie_data['name'])
             matched['title_replied'] = True
           if tmdb_info and 'original_title' in tmdb_info:
             reply += self.reporter.print_report("error", "TMDb: Name: `" + tmdb_info['original_title'] + "`")
+            reply += show_diff(tmdb_info['original_title'], movie_data['name'])
             matched['title_replied'] = True
           if not matched['title_replied']:
             reply += self.reporter.print_report("error", "Failed to match movie name with IMDb/TMDb")
