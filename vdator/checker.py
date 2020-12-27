@@ -76,7 +76,7 @@ class Checker():
     reply += self.print_audio_track_names()
     reply += self.check_audio_tracks()
     
-    # TMDB and IMDb People API
+    # TMDb and IMDb People API
     reply += self.check_people()
     reply += self.spell_check_track_name()
     
@@ -740,18 +740,21 @@ class Checker():
           names = extract_names(title)
           search = tmdb.Search()
           for n in names:
-            # TMDB API
-            search.person(query=n)
-            for s in search.results:
-              if n == s['name']:
-                matched_names.append(n)
+            # TMDb API
+            try:
+              search.person(query=n)
+              for s in search.results:
+                if n == s['name']:
+                  matched_names.append(n)
+            except:
+              reply += self.reporter.print_report("info", "Failed to get TMDb people data\n")
             # IMDb API
             try:
               for person in ia.search_person(n):
                 if n == person['name']:
                   matched_names.append(n)
             except:
-              reply += self.reporter.print_report("info", "Failed to get IMDB people data\n")
+              reply += self.reporter.print_report("info", "Failed to get IMDb people data\n")
           matched_names = set(matched_names)
           if len(matched_names) > 0:
             reply += self.reporter.print_report("correct", "Audio " + self._section_id("audio", i) + " People Matched: `" + ", ".join(matched_names) + "`\n")
