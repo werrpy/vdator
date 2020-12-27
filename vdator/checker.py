@@ -401,26 +401,19 @@ class Checker():
       if len(main_video_title) >= 1:
         release_name += '.' + self.codecs.get_video_codec_title_name(main_video_title[0].strip())
       main_audio_title = self.mediainfo['audio'][0]['title'].split(' / ')
-      if len(main_audio_title) >= 2:
-        # audio codec name for title (ex. DTS-HD.MA)
-        # usually 0. 1 if we have a custom title (ex. commentary, surround upmix, etc.)
-        codec_title_index = 1 if (len(main_audio_title) > 5 ) else 0
-        audio_codec = main_audio_title[codec_title_index].strip()
-        title = self.codecs.get_audio_codec_title_name(audio_codec)
-        if title:
-          main_audio_title[codec_title_index] = title
-        else:
-          reply += self.reporter.print_report("error", "No title name found for audio codec: `" + audio_codec + "`")
-        # audio channel (ex. 5.1)
-        # usually 1. 2 if we have a custom title (ex. commentary, surround upmix, etc.)
-        audio_channel_index = 2 if (len(main_audio_title) > 5 ) else 1
-        main_audio_title[audio_channel_index] = main_audio_title[audio_channel_index].strip()
-        # extract float
-        main_audio_title[audio_channel_index] = re.search(r'\d+(?:\.\d+)?', main_audio_title[audio_channel_index]).group(0)
-        # codec
-        release_name += '.' + main_audio_title[codec_title_index]
-        # channel
-        release_name += '.' + main_audio_title[audio_channel_index]
+
+      for part in main_audio_title:
+        if self.codecs.is_audio_title(part):
+          audio_codec_title = self.codecs.get_audio_codec_title_name(part)
+          if audio_codec_title:
+            # codec
+            release_name += '.' + audio_codec_title
+          else:
+            reply += self.reporter.print_report("error", "No title name found for audio codec: `" + part + "`")
+        elif is_number(part):
+          # channel
+          release_name += '.' + part
+
       # release group
       release_name += '-'
       if self.channel_name in INTERNAL_CHANNELS:
