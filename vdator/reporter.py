@@ -33,7 +33,7 @@ class Reporter():
       'info': 0
     }
 
-  def print_report(self, type, message, record=True):
+  def print_report(self, type, message, record=True, new_line=True):
     """
     Display report
 
@@ -46,11 +46,15 @@ class Reporter():
       reply message
 
     record : bool
-      should this report be kept track of in total 
+      should this report be kept track of in total
+    
+    new_line : bool
+      print a new line after message
+      default: True
     """
     if record:
       self.report[type.lower()] += 1
-    return "[" + type.upper() + "] " + message
+    return "[" + type.upper() + "] " + message + ("\n" if new_line else "")
     
   def get_report(self):
     """
