@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import datetime, os, re, requests, string, unicodedata
+import datetime, logging, os, re, requests, string, unicodedata
 from pydash import has
 
 # APIs
@@ -21,7 +21,9 @@ from nltk.tokenize.api import StringTokenizer
 load_dotenv()
 
 tmdb.API_KEY = os.environ.get("TMDB_API_KEY")
-ia = IMDb()
+ia = IMDb(reraiseExceptions=True, loggingLevel="critical")
+logger = logging.getLogger('imdbpy')
+logger.disabled = True
 
 # make language detection deterministic
 DetectorFactory.seed = 0
@@ -253,6 +255,7 @@ class Checker():
       except imdb._exceptions.IMDbParserError:
         reply += self.reporter.print_report("error", "Invalid IMDB id: `" + self.mediainfo['general'][0]['imdb'] + "`")
       except:
+        # imdb._exceptions.IMDbDataAccessError
         reply += self.reporter.print_report("info", "Failed to get IMDB movie data")
       else:
         matched['imdb_title'] = movie_data['name'] == imdb_movie['title']
