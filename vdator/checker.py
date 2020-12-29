@@ -933,7 +933,10 @@ class Checker():
                 reply += self.reporter.print_report("correct", "Chapters language matches detected language: `" + ch_lang.name + "`")
               else:
                 chapter_langs_names = ", ".join(list(set([lang.name for lang in chapter_langs])))
-                reply += self.reporter.print_report("error", "Chapters languages: `" + chapter_langs_names + "` do not match detected language: `" + ch_lang.name + "`")
+                if chapter_langs_names:
+                  reply += self.reporter.print_report("error", "Chapters languages: `" + chapter_langs_names + "` do not match detected language: `" + ch_lang.name + "`")
+                else:
+                  reply += self.reporter.print_report("error", "No chapter languages. Detected chapter language: `" + ch_lang.name + "`")
             except KeyError:
               reply += self.reporter.print_report("warning", "Could not detect chapters language")
       else:
