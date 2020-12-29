@@ -104,7 +104,9 @@ async def react_num_errors(message, num_errors):
   """
   if num_errors in range(1, 11):
     # errors between 1 and 10
-    await message.add_reaction(EMOJIS[num_to_emoji(num_errors)])
+    emoji = num_to_emoji(num_errors)
+    if emoji:
+      await message.add_reaction(EMOJIS[emoji])
   elif num_errors > 10:
     # more than 10 errors
     await message.add_reaction(EMOJIS[num_to_emoji(10)])
