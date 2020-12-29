@@ -89,15 +89,33 @@ class Reporter():
     reply += ", and " + str(self.report['info']) + " info"
     return reply
 
-async def add_status_reactions(client, message, content):
+async def react_num_errors(message, num_errors):
+  """
+  Add status reactions to discord message with number of errors
+  Adds a plus sign if more than 10 errors
+
+  Parameters
+  ----------
+  message : discord.Message
+    discord message to react to
+
+  num_errors : int
+    number of errors
+  """
+  if num_errors in range(1, 11):
+    # errors between 1 and 10
+    await message.add_reaction(EMOJIS[num_to_emoji(num_errors)])
+  elif num_errors > 10:
+    # more than 10 errors
+    await message.add_reaction(EMOJIS[num_to_emoji(10)])
+    await message.add_reaction(EMOJIS[':heavy_plus_sign:'])
+
+async def add_status_reactions(message, content):
   """
   Add status reactions to discord message
 
   Parameters
   ----------
-  client : discord.Client
-    discord client 
-    
   message : discord.Message
     discord message to react to
 
@@ -124,13 +142,8 @@ async def add_status_reactions(client, message, content):
         await message.add_reaction(EMOJIS[':x:'])
 
       num_errors = report['warning'] + report['error']
-      if num_errors in range(1, 11):
-        # errors between 1 and 10
-        await message.add_reaction(EMOJIS[num_to_emoji(num_errors)])
-      elif num_errors > 10:
-        # more than 10 errors
-        await message.add_reaction(EMOJIS[num_to_emoji(10)])
-        await message.add_reaction(EMOJIS[':heavy_plus_sign:'])
+      await react_num_errors(message, num_errors)
 
       if report['fail'] != 0:
         await message.add_reaction(EMOJIS[':interrobang:'])
+        await react_num_errors(message, report['fail'])

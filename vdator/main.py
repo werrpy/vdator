@@ -99,7 +99,7 @@ async def on_message(message):
   # self
   if message.author == client.user:
     # add status reactions to own messages
-    await add_status_reactions(client, message, message.content)
+    await add_status_reactions(message, message.content)
     return
     
   supported_urls = url_parser.extract_supported_urls(message.content)
@@ -147,7 +147,7 @@ async def on_message(message):
         await message.channel.send(reply)
     elif message.channel.name in REVIEW_CHANNELS:
       # add reactions in review channel
-      await add_status_reactions(client, message, reply)
+      await add_status_reactions(message, reply)
         
       # and send reply to
       for ch in REVIEW_REPLY_CHANNELS:
