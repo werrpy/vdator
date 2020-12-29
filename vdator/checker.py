@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import datetime, logging, os, re, requests, string, unicodedata
+import datetime, logging, os, re, requests, string, traceback, unicodedata
 from pydash import has
 
 # APIs
@@ -65,85 +65,103 @@ class Checker():
     try:
       reply += self.check_movie_name()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error parsing movie name")
     try:
       reply += self.check_ids()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error parsing IMDb/TMDb ids")
     
     try:
       reply += self.check_filename()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking filename")
     try:
       reply += self.check_tracks_have_language()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking filename")
     try:
       reply += self.check_video_language_matches_first_audio_language()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking that video language matches first audio language")
     try:
       reply += self.check_muxing_mode()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking muxing mode")
     try:
       reply += self.check_mkvmerge()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking mkvtoolnix version")
     
     # check video
     try:
       reply += self.check_video_track()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking video track name")
     
     # check audio
     try:
       reply += self.print_audio_track_names()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error printing audio track names")
     try:
       reply += self.check_audio_tracks()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking audio tracks")
 
     # TMDb and IMDb People API
     try:
       reply += self.check_people()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking IMDb/TMDb people")
     try:
       reply += self.spell_check_track_name()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error spell checking track names")
     
     # check text
     try:
       reply += self.print_text_tracks()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error printing text tracks")
     try:
       reply += self.check_text_order()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking text track order")
     try:
       reply += self.check_text_default_flag()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking text track default flag")
 
     # check chapters
     try:
       reply += self.has_chapers()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking if should have chapters")
     try:
       reply += self.chapter_language()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking chapter language")
     try:
       reply += self.chapter_padding()
     except:
+      traceback.print_exc()
       reply += self.reporter.print_report("fail", "Error checking chapter padding")
     
     return reply

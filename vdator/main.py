@@ -113,20 +113,22 @@ async def on_message(message):
     try:
       # parse mediainfo
       mediainfo = mediainfo_parser.parse(mediainfo)
-
       # setup/reset reporter
       reporter.setup()
       # setup checker
       checker.setup(bdinfo, mediainfo, eac3to, message.channel.name)
-
-      # run all checks
-      reply += checker.run_checks()
-      
-      # report
-      reply += reporter.display_report()
     except:
       traceback.print_exc()
       reply += reporter.print_report("fail", "vdator failed to parse")
+    else:
+      try:
+        reply += checker.run_checks()
+      except:
+        traceback.print_exc()
+        reply += reporter.print_report("fail", "vdator failed to parse")
+
+    # report
+    reply += reporter.display_report()
     
     # split into multiple messages based on reply length
     BLOCK_QUOTES = "```"

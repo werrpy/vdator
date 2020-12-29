@@ -135,17 +135,18 @@ async def add_status_reactions(message, content):
       "info": int(report_re.group(5))
     }
     
-    if report['warning'] == 0 and report['error'] == 0:
+    if report['warning'] == 0 and report['error'] == 0 and report['fail'] == 0:
       await message.add_reaction(EMOJIS[':white_check_mark:'])
     else:
-      if report['warning'] != 0:
+      if report['warning'] > 0:
         await message.add_reaction(EMOJIS[':warning:'])
-      if report['error'] != 0:
+      if report['error'] > 0:
         await message.add_reaction(EMOJIS[':x:'])
 
       num_errors = report['warning'] + report['error']
-      await react_num_errors(message, num_errors)
+      if num_errors > 0:
+        await react_num_errors(message, num_errors)
 
-      if report['fail'] != 0:
+      if report['fail'] > 0:
         await message.add_reaction(EMOJIS[':interrobang:'])
         await react_num_errors(message, report['fail'])
