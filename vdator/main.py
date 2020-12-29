@@ -126,7 +126,7 @@ async def on_message(message):
       reply += reporter.display_report()
     except:
       traceback.print_exc()
-      reply += "\n[ERROR] vdator failed to parse\n"
+      reply += reporter.print_report("fail", "vdator failed to parse")
     
     # split into multiple messages based on reply length
     BLOCK_QUOTES = "```"

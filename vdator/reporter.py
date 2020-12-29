@@ -30,7 +30,8 @@ class Reporter():
       'correct': 0,
       'warning': 0,
       'error': 0,
-      'info': 0
+      'info': 0,
+      'fail': 0
     }
 
   def print_report(self, type, message, record=True, new_line=True):
@@ -62,7 +63,7 @@ class Reporter():
       
     Returns
     -------
-    report dict: {'correct' : int, 'warning' : int, 'error' : int, 'info' : int}
+    report dict: {'correct' : int, 'warning' : int, 'error' : int, 'info' : int, 'fail' : int}
     """
     return self.report
     
@@ -81,6 +82,9 @@ class Reporter():
     
     reply += ", " + str(self.report['error']) + " error"
     reply += "" if self.report['error'] == 1 else "s"
+
+    reply += ", " + str(self.report['fail']) + " failure"
+    reply += "" if self.report['fail'] == 1 else "s"
     
     reply += ", and " + str(self.report['info']) + " info"
     return reply
@@ -101,13 +105,14 @@ async def add_status_reactions(client, message, content):
     content to parse to determine reactions
   """
   # add status reactions to message based on content
-  report_re = re.search(r'(\d+)\scorrect,\s(\d+)\swarnings?,\s(\d+)\serrors?,\sand\s(\d+)\sinfo', content)
+  report_re = re.search(r'(\d+)\scorrect,\s(\d+)\swarnings?,\s(\d+)\serrors?,\s(\d+)\sfailures?,\sand\s(\d+)\sinfo', content)
   if report_re:
     report = {
       "correct": int(report_re.group(1)),
       "warning": int(report_re.group(2)),
       "error": int(report_re.group(3)),
-      "info": int(report_re.group(4))
+      "fail": int(report_re.group(4)),
+      "info": int(report_re.group(5))
     }
     
     if report['warning'] == 0 and report['error'] == 0:
@@ -126,3 +131,6 @@ async def add_status_reactions(client, message, content):
         # more than 10 errors
         await message.add_reaction(EMOJIS[num_to_emoji(10)])
         await message.add_reaction(EMOJIS[':heavy_plus_sign:'])
+
+      if report['fail'] != 0:
+        await message.add_reaction(EMOJIS[':interrobang:'])

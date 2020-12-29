@@ -62,35 +62,89 @@ class Checker():
     reply = ""
     
     # check metadata
-    reply += self.check_movie_name()
-    reply += self.check_ids()
+    try:
+      reply += self.check_movie_name()
+    except:
+      reply += self.reporter.print_report("fail", "Error parsing movie name")
+    try:
+      reply += self.check_ids()
+    except:
+      reply += self.reporter.print_report("fail", "Error parsing IMDb/TMDb ids")
     
-    reply += self.check_filename()
-    reply += self.check_tracks_have_language()
-    reply += self.check_video_language_matches_first_audio_language()
-    reply += self.check_muxing_mode()
-    reply += self.check_mkvmerge()
+    try:
+      reply += self.check_filename()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking filename")
+    try:
+      reply += self.check_tracks_have_language()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking filename")
+    try:
+      reply += self.check_video_language_matches_first_audio_language()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking that video language matches first audio language")
+    try:
+      reply += self.check_muxing_mode()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking muxing mode")
+    try:
+      reply += self.check_mkvmerge()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking mkvtoolnix version")
     
     # check video
-    reply += self.check_video_track()
+    try:
+      reply += self.check_video_track()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking video track name")
     
     # check audio
-    reply += self.print_audio_track_names()
-    reply += self.check_audio_tracks()
-    
+    try:
+      reply += self.print_audio_track_names()
+    except:
+      reply += self.reporter.print_report("fail", "Error printing audio track names")
+    try:
+      reply += self.check_audio_tracks()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking audio tracks")
+
     # TMDb and IMDb People API
-    reply += self.check_people()
-    reply += self.spell_check_track_name()
+    try:
+      reply += self.check_people()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking IMDb/TMDb people")
+    try:
+      reply += self.spell_check_track_name()
+    except:
+      reply += self.reporter.print_report("fail", "Error spell checking track names")
     
     # check text
-    reply += self.print_text_tracks()
-    reply += self.check_text_order()
-    reply += self.check_text_default_flag()
-    
+    try:
+      reply += self.print_text_tracks()
+    except:
+      reply += self.reporter.print_report("fail", "Error printing text tracks")
+    try:
+      reply += self.check_text_order()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking text track order")
+    try:
+      reply += self.check_text_default_flag()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking text track default flag")
+
     # check chapters
-    reply += self.has_chapers()
-    reply += self.chapter_language()
-    reply += self.chapter_padding()
+    try:
+      reply += self.has_chapers()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking if should have chapters")
+    try:
+      reply += self.chapter_language()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking chapter language")
+    try:
+      reply += self.chapter_padding()
+    except:
+      reply += self.reporter.print_report("fail", "Error checking chapter padding")
     
     return reply
     
