@@ -698,14 +698,11 @@ class Checker():
                 reply += self.reporter.print_report("correct", "Audio " + self._section_id("audio", i) + ": Track names match")
               else:
                 is_bad_audio_format = False
-                if '/' in title and '/' in self.mediainfo['audio'][i]['title']:
-                  if self.codecs.is_codec(self.mediainfo['audio'][i]['title'][0]):
-                    mediainfo_audio_title = self.mediainfo['audio'][i]['title'].strip()
-                  else:
-                    # remove first part since its not a codec
-                    mediainfo_audio_title = ' / '.join(self.mediainfo['audio'][i]['title'].split(' / ')[1:]).strip()
-                  if title != mediainfo_audio_title:
-                    is_bad_audio_format = True
+                mediainfo_audio_title = self.mediainfo['audio'][i]['title'].strip()
+                mediainfo_audio_title = self._remove_until_first_codec(mediainfo_audio_title)
+                if title != mediainfo_audio_title:
+                  is_bad_audio_format = True
+
                 if is_bad_audio_format:
                   reply += self.reporter.print_report("error", "Audio " + self._section_id("audio", i) + ": Bad conversion:\n```fix\nBDInfo: " + title + "\nMediaInfo: " + self.mediainfo['audio'][i]['title'] + "```", new_line=False)
                 else:
@@ -720,6 +717,18 @@ class Checker():
         reply += "Did you forget to add a minus (-) sign in front of unused audio tracks in bdinfo?\n"
         
     return reply
+
+  def _remove_until_first_codec(self, title):
+    title2 = title
+    if ' / ' in title:
+      for part in title.split(' / '):
+        if self.codecs.is_audio_title(part):
+          # stop when we get first codec
+          break
+        else:
+          # remove part since its not a codec
+          title2 = ' / '.join(title2.split(' / ')[1:]).strip()
+    return title2
     
   def _check_commentary(self, i):
     reply, is_commentary = "", False
