@@ -26,9 +26,11 @@ Chapter padding
 ### Table of Contents
 - [Supported pastebin sites](#supported-pastebin-sites)
 - [Setup](#setup)
-- [Installing dependencies](#installing-dependencies)
-- [Updating dependencies](#updating-dependencies)
-- [Running with systemd](#running-with-systemd)
+  * [Create a python3 virtual environment](#create-a-python3-virtual-environment)
+  * [Installing dependencies](#installing-dependencies)
+  * [Updating dependencies](#updating-dependencies)
+  * [Running with systemd](#running-manually)
+  * [Running with systemd](#running-with-systemd)
 - [Using](#using)
 - [Adding a pastebin site](#adding-a-pastebin-site)
 
@@ -46,8 +48,6 @@ Chapter padding
 
 ### Setup
 
-Use [pip and virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) to run vdator.
-
 Create a [Discord bot](https://discordapp.com/developers/docs/intro) and add it to a server.
 Edit `vdator/.env` and set `DISCORD_BOT_SECRET` to your bot's token.
 
@@ -55,24 +55,57 @@ Request a [TMDB API Key](https://developers.themoviedb.org/3/getting-started/int
 
 Don't forget to create channels on the server and set them in `vdator/.env` for `REVIEW_CHANNELS`, `REVIEW_REPLY_CHANNELS`, and `BOT_CHANNELS`.
 
-### Installing dependencies
+#### Create a python3 virtual environment:
+
+Use [pip and virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) to run vdator.
+
+In the `vdator` directory run:
+```
+python3 -m venv .
+```
+
+If the command fails to install pip, you will see an error similar to:
+```
+Error: Command '['python3', '-Im', 'ensurepip', '--upgrade', '--default-pip']' returned non-zero exit status 1.
+```
+Start over by creating a virutal environment without pip, and then install pip manually inside it:
+```
+python3 -m venv --without-pip .
+source bin/activate
+curl https://bootstrap.pypa.io/get-pip.py | python3
+deactivate
+```
+
+#### Installing dependencies
 
 Install [pyhunspell](https://github.com/blatinier/pyhunspell#installation)
 
 Install dependencies
 
 ```
+source bin/activate
 pip3 install -r requirements.txt
+deactivate
 ```
 
-### Updating dependencies
+#### Updating dependencies
 
 ```
+source bin/activate
 pip3 install -r requirements.txt --upgrade
 pip3 freeze > requirements.txt
+deactivate
 ```
 
-### Running with systemd
+#### Running manually
+
+Run the bot manually for testing, exceptions will get printed:
+```
+source bin/activate
+python3 main.py
+```
+
+#### Running with systemd
 
 Create a systemd service to run vdator, `/etc/systemd/system/vdator.service`
 
