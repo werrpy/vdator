@@ -29,7 +29,7 @@ Chapter padding
   * [Create a python3 virtual environment](#create-a-python3-virtual-environment)
   * [Installing dependencies](#installing-dependencies)
   * [Updating dependencies](#updating-dependencies)
-  * [Running with systemd](#running-manually)
+  * [Running manually](#running-manually)
   * [Running with systemd](#running-with-systemd)
 - [Using](#using)
 - [Adding a pastebin site](#adding-a-pastebin-site)
