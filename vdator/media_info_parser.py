@@ -1,7 +1,21 @@
 class MediaInfoParser():
+  """
+  Parse MediaInfo
+  """
 
   def format_key(self, key):
-    # format keys into abc_def_ghi
+    """
+    Format keys into abc_def_ghi
+    
+    Parameters
+    ----------
+    key : str
+      mediainfo key
+      
+    Returns
+    -------
+    str formatted mediainfo key
+    """
     return key.strip()\
       .replace(" ", "_")\
       .replace("/", "_")\
@@ -12,6 +26,18 @@ class MediaInfoParser():
       .lower()
 
   def parse(self, text):
+    """
+    Parse mediainfo
+    
+    Parameters
+    ----------
+    text : str
+      mediainfo text
+      
+    Returns
+    -------
+    dict mediainfo with 'general', 'video', 'audio', 'text', and 'menu' keys
+    """
     mediainfo_sections = ['general', 'video', 'audio', 'text', 'menu']
     # dictionary of lists for mediainfo data
     mediainfo = dict((k, list()) for k in mediainfo_sections)
