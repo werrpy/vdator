@@ -5,7 +5,7 @@ class BDInfoParser():
     name = ' '.join(name.split()).strip()
 
     # remove dialog normalization
-    if 'DN' in name.upper():
+    if 'DN' in name.upper() and ' / ' in name:
       name = name.rpartition(' / ')[0]
 
     return name
@@ -19,7 +19,8 @@ class BDInfoParser():
 
     # force decimal instead of comma in fps
     name2 = name.split('/')
-    name2[3] = name2[3].replace(',', '.')
+    if len(name2) >= 4:
+      name2[3] = name2[3].replace(',', '.')
     name = "/".join(name2)
 
     return name
