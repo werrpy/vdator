@@ -1,11 +1,17 @@
-# define codecs
 class CodecsParser():
   """
   Define codecs
   """
   
   def __init__(self, codecs):
-    # map codec names to extension
+    """
+    Define codecs
+
+    Parameters
+    ----------
+    codecs : dict
+      codec definitions
+    """
 
     '''
     {
