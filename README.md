@@ -31,6 +31,7 @@ Chapter padding
   * [Updating dependencies](#updating-dependencies)
   * [Running manually](#running-manually)
   * [Running with systemd](#running-with-systemd)
+- [Lint](#lint)
 - [Using](#using)
 - [Adding a pastebin site](#adding-a-pastebin-site)
 
@@ -131,6 +132,11 @@ Set `User` to the user to run vdator as, and `Group` to the user's group (list w
 Replace `/home/USER/vdator/venv/` with the full path to your venv.
 
 Run `systemctl enable vdator` to start on boot. Use systemctl to start/stop vdator, `systemctl start vdator`, `systemctl stop vdator`, `systemctl restart vdator`
+
+### Lint
+```
+black .
+```
 
 ### Using
 
