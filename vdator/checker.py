@@ -1099,7 +1099,8 @@ class Checker:
                             "Audio "
                             + self._section_id("audio", i)
                             + ": Commentary AC-3 bitrate should be `224 kbps` instead of `"
-                            + self.mediainfo["audio"][i]["bit_rate"] + "`",
+                            + self.mediainfo["audio"][i]["bit_rate"]
+                            + "`",
                         )
                 else:
                     reply += self.reporter.print_report(

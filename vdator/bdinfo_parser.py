@@ -74,6 +74,35 @@ class BDInfoParser:
 
         return name
 
+    def format_audio_compatibility_track(self, audio_track):
+        """
+        Format audio compatibility track
+
+        Parameters
+        ----------
+        audio_track : dict
+            audio track
+            dict{'name':'...', 'language':'...'}
+
+        Returns
+        -------
+        audio track, compatibility track
+        [dict{'name':'...', 'language':'...'}, dict{'name':'...', 'language':'...'}]
+        """
+        audio_parts = re.split(
+            r"\(ac3 embedded:", audio_track["name"], flags=re.IGNORECASE
+        )
+        audio_track["name"] = audio_parts[0]
+
+        compat_track = {
+            "name": self.format_track_name(
+                "Compatibility Track / Dolby Digital Audio / "
+                + audio_parts[1].strip().rstrip(")")
+            ),
+            "language": audio_track["language"],
+        }
+        return audio_track, compat_track
+
     def format_audio_track(self, name):
         """
         Split audio track with name and language
@@ -91,8 +120,8 @@ class BDInfoParser:
         name = name.strip()
         if " / " in name:
             name_parts = name.split(" / ", 1)
-            track["language"] = name_parts[0]
             track["name"] = self.format_audio_track_name(name_parts[1])
+            track["language"] = name_parts[0]
         return track
 
     def format_subtitle_track(self, name):
@@ -108,7 +137,7 @@ class BDInfoParser:
         -------
         dict{'language':'...', 'bitrate':'...'}
         """
-        track = {"name": None, "bitrate": None}
+        track = {"language": None, "bitrate": None}
         name = name.strip()
         if " / " in name:
             name_parts = name.split(" / ", 1)

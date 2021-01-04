@@ -117,19 +117,13 @@ class PasteParser:
                     audio_name = l.split(":", 1)[1].strip()
                     audio_track = self.bdinfo_parser.format_audio_track(audio_name)
                     if "ac3 embedded" in audio_track["name"].lower():
-                        audio_parts = re.split(
-                            r"\(ac3 embedded:", audio_track["name"], flags=re.IGNORECASE
+                        (
+                            audio_track,
+                            compat_track,
+                        ) = self.bdinfo_parser.format_audio_compatibility_track(
+                            audio_track
                         )
-                        bdinfo["audio"].append(
-                            self.bdinfo_parser.format_audio_track(audio_parts[0])
-                        )
-                        compat_track = {
-                            "name": self.bdinfo_parser.format_track_name(
-                                "Compatibility Track / Dolby Digital Audio / "
-                                + audio_parts[1].strip().rstrip(")")
-                            ),
-                            "language": audio_track["language"],
-                        }
+                        bdinfo["audio"].append(audio_track)
                         bdinfo["audio"].append(compat_track)
                     else:
                         bdinfo["audio"].append(audio_track)
@@ -177,23 +171,17 @@ class PasteParser:
                         audio_track = (
                             self.bdinfo_parser.playlist_report_format_audio_track(l)
                         )
-                        if audio_track:
-                            bdinfo["audio"].append(audio_track)
-
                         if "ac3 embedded" in l.lower():
-                            audio_parts = re.split(
-                                r"\(ac3 embedded:", l, flags=re.IGNORECASE
+                            (
+                                audio_track,
+                                compat_track,
+                            ) = self.bdinfo_parser.format_audio_compatibility_track(
+                                audio_track
                             )
-                            compat_track = {
-                                "name": self.bdinfo_parser.format_track_name(
-                                    "Compatibility Track / Dolby Digital Audio / "
-                                    + "/".join(audio_parts[1].split("/")[:-1])
-                                    .strip()
-                                    .rstrip(")")
-                                ),
-                                "language": audio_track["language"],
-                            }
+                            bdinfo["audio"].append(audio_track)
                             bdinfo["audio"].append(compat_track)
+                        else:
+                            bdinfo["audio"].append(audio_track)
 
             elif sect == self.Section.MEDIAINFO:
                 mediainfo.append(l)
