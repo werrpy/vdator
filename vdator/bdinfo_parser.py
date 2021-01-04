@@ -1,5 +1,24 @@
+import re
+
+
 class BDInfoParser:
+    """
+    Parse BDInfo
+    """
+
     def format_track_name(self, name):
+        """
+        Format track name
+
+        Parameters
+        ----------
+        name : str
+            track name
+
+        Returns
+        -------
+        str formatted track name
+        """
         # remove multiple and trailing spaces
         name = " ".join(name.split()).strip()
 
@@ -7,9 +26,24 @@ class BDInfoParser:
         if "DN" in name.upper() and " / " in name:
             name = name.rpartition(" / ")[0]
 
+        # remove (DTS Core:...)
+        name = re.sub(r"\(DTS Core:.*\)", "", name).strip()
+
         return name
 
     def format_video_track_name(self, name):
+        """
+        Format video track name
+
+        Parameters
+        ----------
+        name : str
+            track name
+
+        Returns
+        -------
+        str formatted video track name
+        """
         # remove 3d
         name = name.replace(" / Left Eye", "")
         name = name.replace(" / Right Eye", "")
@@ -25,6 +59,18 @@ class BDInfoParser:
         return name
 
     def playlist_report_format_video_track_name(self, name):
+        """
+        Format playlist report video track name
+
+        Parameters
+        ----------
+        name : str
+            track name
+
+        Returns
+        -------
+        str formatted track name
+        """
         try:
             parts = name.split()
             kbps_i = parts.index("kbps")
@@ -39,9 +85,19 @@ class BDInfoParser:
             return False
 
     def playlist_report_format_audio_track_name(self, name):
+        """
+        Format playlist report audio track name
+
+        Parameters
+        ----------
+        name : str
+            track name
+
+        Returns
+        -------
+        str formatted track name
+        """
         try:
-            if "(" in name:
-                name = name.split("(")[0]
             name = name.strip()
             name_parts = name.split(" / ")
             name_parts0 = name_parts[0].strip().split()
