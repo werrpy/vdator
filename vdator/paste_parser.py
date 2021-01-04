@@ -109,14 +109,21 @@ class PasteParser:
                     did_first_mediainfo = True
 
             if sect == self.Section.QUICK_SUMMARY:
+                if (
+                    l2.startswith("video:")
+                    or l2.startswith("audio:")
+                    or l2.startswith("subtitle:")
+                ):
+                    track_name = l.split(":", 1)[1].strip()
                 if l2.startswith("video:"):
-                    track_name = l.split(":", 1)[1]
                     track_name = self.bdinfo_parser.format_video_track_name(track_name)
                     bdinfo["video"].append(track_name)
                 elif l2.startswith("audio:"):
-                    audio_name = l.split(":", 1)[1].strip()
-                    audio_track = self.bdinfo_parser.format_audio_track(audio_name)
-                    if "ac3 embedded" in audio_track["name"].lower():
+                    audio_track = self.bdinfo_parser.format_audio_track(track_name)
+                    if (
+                        "-ac3 embedded" not in audio_track["name"].lower()
+                        and "ac3 embedded" in audio_track["name"].lower()
+                    ):
                         (
                             audio_track,
                             compat_track,
@@ -129,7 +136,7 @@ class PasteParser:
                         bdinfo["audio"].append(audio_track)
                 elif l2.startswith("subtitle:"):
                     bdinfo["subtitle"].append(
-                        self.bdinfo_parser.format_subtitle_track(l.split(":", 1)[1])
+                        self.bdinfo_parser.format_subtitle_track(track_name)
                     )
 
             elif sect == self.Section.PLAYLIST_REPORT:
@@ -171,7 +178,10 @@ class PasteParser:
                         audio_track = (
                             self.bdinfo_parser.playlist_report_format_audio_track(l)
                         )
-                        if "ac3 embedded" in l.lower():
+                        if (
+                            "-ac3 embedded" not in l.lower()
+                            and "ac3 embedded" in l.lower()
+                        ):
                             (
                                 audio_track,
                                 compat_track,

@@ -36,11 +36,11 @@ class BDInfoParser:
         -------
         str formatted video track name
         """
+        name = self.format_track_name(name)
+
         # remove 3d
         name = name.replace(" / Left Eye", "")
         name = name.replace(" / Right Eye", "")
-
-        name = self.format_track_name(name)
 
         # force decimal instead of comma in fps
         name2 = name.split("/")
@@ -92,7 +92,7 @@ class BDInfoParser:
         audio_parts = re.split(
             r"\(ac3 embedded:", audio_track["name"], flags=re.IGNORECASE
         )
-        audio_track["name"] = audio_parts[0]
+        audio_track["name"] = self.format_track_name(audio_parts[0])
 
         compat_track = {
             "name": self.format_track_name(
@@ -196,7 +196,7 @@ class BDInfoParser:
                 + " / "
                 + " / ".join(name_parts[1:]).strip()
             )
-            track["name"] = self.format_track_name(name)
+            track["name"] = self.format_audio_track_name(name)
             track["language"] = name_parts0[3]
             return track
         except ValueError:

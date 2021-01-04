@@ -271,12 +271,12 @@ class Checker:
                 reply += show_diff(video_title, mediainfo_title)
 
         elif has(self.bdinfo, "video") and has(self.mediainfo, "video"):
-            if len(self.bdinfo["video"]) != 1:
+            if len(self.bdinfo["video"]) < 1:
                 reply += self.reporter.print_report(
                     "error", "Missing bdinfo video track"
                 )
                 return reply
-            elif len(self.mediainfo["video"]) != 1:
+            elif len(self.mediainfo["video"]) < 1:
                 reply += self.reporter.print_report(
                     "error", "Missing mediainfo video track"
                 )
