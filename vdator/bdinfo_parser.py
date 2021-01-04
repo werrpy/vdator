@@ -21,14 +21,6 @@ class BDInfoParser:
         """
         # remove multiple and trailing spaces
         name = " ".join(name.split()).strip()
-
-        # remove dialog normalization
-        if "DN" in name.upper() and " / " in name:
-            name = name.rpartition(" / ")[0]
-
-        # remove (DTS Core:...)
-        name = re.sub(r"\(DTS Core:.*\)", "", name).strip()
-
         return name
 
     def format_video_track_name(self, name):
@@ -60,7 +52,31 @@ class BDInfoParser:
 
     def format_audio_track_name(self, name):
         """
-        Format audio track name
+        Format track name
+
+        Parameters
+        ----------
+        name : str
+            track name
+
+        Returns
+        -------
+        str formatted audio track name
+        """
+        # remove dialog normalization
+        if "DN" in name.upper() and " / " in name:
+            name = name.rpartition(" / ")[0]
+
+        # remove (DTS Core:...)
+        name = re.sub(r"\(DTS Core:.*\)", "", name).strip()
+
+        name = self.format_track_name(name)
+
+        return name
+
+    def format_audio_track(self, name):
+        """
+        Split audio track with name and language
 
         Parameters
         ----------
@@ -76,7 +92,28 @@ class BDInfoParser:
         if " / " in name:
             name_parts = name.split(" / ", 1)
             track["language"] = name_parts[0]
-            track["name"] = self.format_track_name(name_parts[1])
+            track["name"] = self.format_audio_track_name(name_parts[1])
+        return track
+
+    def format_subtitle_track(self, name):
+        """
+        Format subtitle track with language and bitrate
+
+        Parameters
+        ----------
+        name : str
+            track name
+
+        Returns
+        -------
+        dict{'language':'...', 'bitrate':'...'}
+        """
+        track = {"name": None, "bitrate": None}
+        name = name.strip()
+        if " / " in name:
+            name_parts = name.split(" / ", 1)
+            track["language"] = name_parts[0].strip()
+            track["bitrate"] = name_parts[1].strip()
         return track
 
     def playlist_report_format_video_track_name(self, name):

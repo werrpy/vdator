@@ -115,13 +115,13 @@ class PasteParser:
                     bdinfo["video"].append(track_name)
                 elif l2.startswith("audio:"):
                     audio_name = l.split(":", 1)[1].strip()
-                    audio_track = self.bdinfo_parser.format_audio_track_name(audio_name)
+                    audio_track = self.bdinfo_parser.format_audio_track(audio_name)
                     if "ac3 embedded" in audio_track["name"].lower():
                         audio_parts = re.split(
                             r"\(ac3 embedded:", audio_track["name"], flags=re.IGNORECASE
                         )
                         bdinfo["audio"].append(
-                            self.bdinfo_parser.format_audio_track_name(audio_parts[0])
+                            self.bdinfo_parser.format_audio_track(audio_parts[0])
                         )
                         compat_track = {
                             "name": self.bdinfo_parser.format_track_name(
@@ -135,7 +135,7 @@ class PasteParser:
                         bdinfo["audio"].append(audio_track)
                 elif l2.startswith("subtitle:"):
                     bdinfo["subtitle"].append(
-                        self.bdinfo_parser.format_track_name(l.split(":", 1)[1])
+                        self.bdinfo_parser.format_subtitle_track(l.split(":", 1)[1])
                     )
 
             elif sect == self.Section.PLAYLIST_REPORT:

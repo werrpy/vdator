@@ -934,35 +934,25 @@ class Checker:
                 title = audio["name"]
                 bdinfo_audio_parts = re.sub(r"\s+", " ", title).split(" / ")
 
-                # determine where to split based on bdinfo type
-                audio_split_index = (
-                    1 if self.bdinfo["type"] == BDInfoType.QUICK_SUMMARY else 0
-                )
-
-                if self.bdinfo["type"] == BDInfoType.QUICK_SUMMARY:
-                    # quick summary strip language
-                    if "/" in title:
-                        title = title.split("/", 1)[1].strip()
-
                 # check audio commentary
                 is_commentary, commentary_reply = self._check_commentary(i)
 
                 if is_commentary:
                     reply += commentary_reply
-                elif len(bdinfo_audio_parts) >= audio_split_index + 1:
+                elif len(bdinfo_audio_parts) >= 1:
                     if (
-                        bdinfo_audio_parts[audio_split_index] == "DTS-HD Master Audio"
-                        and is_number(bdinfo_audio_parts[audio_split_index + 1])
-                        and float(bdinfo_audio_parts[audio_split_index + 1]) < 3
+                        bdinfo_audio_parts[0] == "DTS-HD Master Audio"
+                        and is_number(bdinfo_audio_parts[1])
+                        and float(bdinfo_audio_parts[1]) < 3
                     ):
                         # DTS-HD MA 1.0 or 2.0 to FLAC
                         reply += self._check_audio_conversion(
                             i, "DTS-HD Master Audio", "FLAC Audio"
                         )
-                    elif bdinfo_audio_parts[audio_split_index] == "LPCM Audio":
+                    elif bdinfo_audio_parts[0] == "LPCM Audio":
                         if (
-                            is_number(bdinfo_audio_parts[audio_split_index + 1])
-                            and float(bdinfo_audio_parts[audio_split_index + 1]) < 3
+                            is_number(bdinfo_audio_parts[1])
+                            and float(bdinfo_audio_parts[1]) < 3
                         ):
                             # LPCM 1.0 or 2.0 to FLAC
                             reply += self._check_audio_conversion(
@@ -1053,7 +1043,7 @@ class Checker:
             # audio = dict{'name':'...', 'language':'...'}
             if self.bdinfo["audio"][i]["name"].count("/") >= 1:
                 bdinfo_audio_format = (
-                    self.bdinfo["audio"][i]["name"].split("/")[1].strip()
+                    self.bdinfo["audio"][i]["name"].split("/")[0].strip()
                 )
 
                 if bdinfo_audio_format == "Dolby Digital Audio":
@@ -1101,15 +1091,15 @@ class Checker:
                             "correct",
                             "Audio "
                             + self._section_id("audio", i)
-                            + ": Commentary converted to AC-3 @ 224 kbps",
+                            + ": Commentary converted to `AC-3 @ 224 kbps`",
                         )
                     else:
                         reply += self.reporter.print_report(
                             "error",
                             "Audio "
                             + self._section_id("audio", i)
-                            + ": Commentary AC-3 bitrate should be 224 kbps instead of "
-                            + self.mediainfo["audio"][i]["bit_rate"],
+                            + ": Commentary AC-3 bitrate should be `224 kbps` instead of `"
+                            + self.mediainfo["audio"][i]["bit_rate"] + "`",
                         )
                 else:
                     reply += self.reporter.print_report(
