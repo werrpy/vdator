@@ -58,6 +58,27 @@ class BDInfoParser:
 
         return name
 
+    def format_audio_track_name(self, name):
+        """
+        Format audio track name
+
+        Parameters
+        ----------
+        name : str
+            track name
+
+        Returns
+        -------
+        dict{'name':'...', 'language':'...'}
+        """
+        track = {"name": None, "language": None}
+        name = name.strip()
+        if " / " in name:
+            name_parts = name.split(" / ", 1)
+            track["language"] = name_parts[0]
+            track["name"] = self.format_track_name(name_parts[1])
+        return track
+
     def playlist_report_format_video_track_name(self, name):
         """
         Format playlist report video track name
@@ -84,9 +105,9 @@ class BDInfoParser:
         except ValueError:
             return False
 
-    def playlist_report_format_audio_track_name(self, name):
+    def playlist_report_format_audio_track(self, name):
         """
-        Format playlist report audio track name
+        Format playlist report audio track
 
         Parameters
         ----------
@@ -95,8 +116,9 @@ class BDInfoParser:
 
         Returns
         -------
-        str formatted track name
+        dict{'name':'...', 'language':'...'}
         """
+        track = {"name": None, "language": None}
         try:
             name = name.strip()
             name_parts = name.split(" / ")
@@ -108,7 +130,8 @@ class BDInfoParser:
                 + " / "
                 + " / ".join(name_parts[1:]).strip()
             )
-            name = self.format_track_name(name)
-            return name
+            track["name"] = self.format_track_name(name)
+            track["language"] = name_parts0[3]
+            return track
         except ValueError:
             return False

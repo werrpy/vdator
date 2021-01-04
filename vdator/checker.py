@@ -929,7 +929,9 @@ class Checker:
             )
             return reply
         elif len(self.bdinfo["audio"]) == len(self.mediainfo["audio"]):
-            for i, title in enumerate(self.bdinfo["audio"]):
+            for i, audio in enumerate(self.bdinfo["audio"]):
+                # audio = dict{'name':'...', 'language':'...'}
+                title = audio["name"]
                 bdinfo_audio_parts = re.sub(r"\s+", " ", title).split(" / ")
 
                 # determine where to split based on bdinfo type
@@ -947,7 +949,7 @@ class Checker:
 
                 if is_commentary:
                     reply += commentary_reply
-                elif len(bdinfo_audio_parts) >= 3:
+                elif len(bdinfo_audio_parts) >= audio_split_index + 1:
                     if (
                         bdinfo_audio_parts[audio_split_index] == "DTS-HD Master Audio"
                         and is_number(bdinfo_audio_parts[audio_split_index + 1])
@@ -1048,11 +1050,10 @@ class Checker:
 
         if self._is_commentary_track(self.mediainfo["audio"][i]["title"].lower()):
             is_commentary = True
-            # determine slashes and where to split based on bdinfo type
-            slash_count = 2 if self.bdinfo["type"] == BDInfoType.QUICK_SUMMARY else 1
-            if self.bdinfo["audio"][i].count("/") >= slash_count:
+            # audio = dict{'name':'...', 'language':'...'}
+            if self.bdinfo["audio"][i]["name"].count("/") >= 1:
                 bdinfo_audio_format = (
-                    self.bdinfo["audio"][i].split("/")[slash_count - 1].strip()
+                    self.bdinfo["audio"][i]["name"].split("/")[1].strip()
                 )
 
                 if bdinfo_audio_format == "Dolby Digital Audio":
@@ -1132,7 +1133,7 @@ class Checker:
 
         # verify audio track titles
         if (
-            " / " not in self.bdinfo["audio"][i]
+            " / " not in self.bdinfo["audio"][i]["name"]
             or "title" not in self.mediainfo["audio"][i]
             or " / " not in self.mediainfo["audio"][i]["title"]
         ):
@@ -1141,13 +1142,15 @@ class Checker:
             )
             return reply
 
-        bdinfo_audio_parts = re.sub(r"\s+", " ", self.bdinfo["audio"][i]).split(" / ")
-        if len(bdinfo_audio_parts) <= 5:
+        # [codec, channel, sampling rate, bit rate, bit depth]
+        bdinfo_audio_parts = self.bdinfo["audio"][i]["name"].split(" / ")
+        if len(bdinfo_audio_parts) <= 4:
             reply += self.reporter.print_report(
                 "warning", "Could not verify audio " + self._section_id("audio", i)
             )
             return reply
 
+        # [codec, channel, sampling rate, bit rate, bit depth]
         mediainfo_parts = self.mediainfo["audio"][i]["title"].split(" / ")
         if len(mediainfo_parts) <= 4:
             reply += self.reporter.print_report(
@@ -1160,7 +1163,7 @@ class Checker:
         mediainfo_offset = 1 if (len(mediainfo_parts) > 5) else 0
 
         if mediainfo_parts[0 + mediainfo_offset] == audio_to:
-            if mediainfo_parts[1 + mediainfo_offset] != bdinfo_audio_parts[2]:
+            if mediainfo_parts[1 + mediainfo_offset] != bdinfo_audio_parts[1]:
                 reply += self.reporter.print_report(
                     "error",
                     "Audio "
@@ -1171,7 +1174,8 @@ class Checker:
                     + mediainfo_parts[1 + mediainfo_offset]
                     + " and "
                     + audio_to
-                    + bdinfo_audio_parts[2],
+                    + " "
+                    + bdinfo_audio_parts[1],
                 )
 
             bdbitrate = bdinfo_audio_parts[4].strip()
@@ -1185,7 +1189,7 @@ class Checker:
                     + ": "
                     + audio_from
                     + " "
-                    + bdinfo_audio_parts[2]
+                    + bdinfo_audio_parts[1]
                     + " to "
                     + audio_to
                     + " "
@@ -1201,7 +1205,7 @@ class Checker:
                     + ": "
                     + audio_from
                     + " "
-                    + bdinfo_audio_parts[2]
+                    + bdinfo_audio_parts[1]
                     + " to "
                     + audio_to
                     + " "
