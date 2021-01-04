@@ -3,12 +3,43 @@ import difflib
 
 
 def balanced_blockquotes(str):
+    """
+    Check if blockquotes are balanced
+
+    Parameters
+    ----------
+    str : str
+        text
+
+    Returns
+    -------
+    True if blockquotes are balanced, False otherwise
+    """
     num_blockquotes = str.count("```")
     # balanced if even number of blockquotes
     return (num_blockquotes % 2) == 0
 
 
 def split_string(str, limit, sep="\n"):
+    """
+    Split string
+
+    Parameters
+    ----------
+    str : str
+        string to split
+
+    limit : int
+        string length limit
+
+    sep : str
+        separator
+        default: "\n"
+
+    Returns
+    -------
+    True if blockquotes are balanced, False otherwise
+    """
     limit = int(limit)
     words = str.split(sep)
 
@@ -30,6 +61,24 @@ def split_string(str, limit, sep="\n"):
 
 
 def has_many(obj, base, keys):
+    """
+    Check if object has many keys
+
+    Parameters
+    ----------
+    obj : object
+        object to test
+
+    base : str
+        base key path
+
+    keys : list
+        keys to test
+
+    Returns
+    -------
+    True if all keys exist, False otherwise
+    """
     for key in keys:
         lookup = ""
         if base:
@@ -41,6 +90,18 @@ def has_many(obj, base, keys):
 
 
 def is_number(s):
+    """
+    Check if string is a number
+
+    Parameters
+    ----------
+    s : str
+        string to test
+
+    Returns
+    -------
+    True if numeric, False otherwise
+    """
     try:
         float(s)
         return True
@@ -49,6 +110,18 @@ def is_number(s):
 
 
 def num_to_emoji(n):
+    """
+    Convert number to discord emoji
+
+    Parameters
+    ----------
+    n : str
+        string number
+
+    Returns
+    -------
+    str discord emoji if valid, False otherwise
+    """
     num_emoji_map = {
         "1": ":one:",
         "2": ":two:",
@@ -69,6 +142,22 @@ def num_to_emoji(n):
 
 
 def show_diff(expected, actual):
+    """
+    Show difference between expected and actual result
+    using discord bold format
+
+    Parameters
+    ----------
+    expected : str
+        expected result
+
+    actual : str
+        actual result
+
+    Returns
+    -------
+    str with differences in bold
+    """
     seqm = difflib.SequenceMatcher(None, expected, actual)
 
     output = []

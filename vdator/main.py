@@ -93,6 +93,9 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
+    """
+    Discord client is ready
+    """
     print("I'm in")
     print(client.user)
     await client.change_presence(activity=discord.Game(name=IN_GAME))
@@ -100,6 +103,14 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    """
+    Discord message event
+
+    Parameters
+    ----------
+    message : discord.Message class
+        discord message
+    """
     # only listens in bot and review channels
     if not (
         message.channel.name in BOT_CHANNELS or message.channel.name in REVIEW_CHANNELS

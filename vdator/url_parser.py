@@ -8,15 +8,15 @@ class URLParser:
         self.urls_regex = r"(?P<url>https?://[^\s]+)"
 
         """
-    # hostname
-    'example.com': {
-        # regex to get paste's unique identifier
-        'slug_regex': 'https://example.com/(.*)',
-        
-        # link to raw text using {} in place of the unique identifier
-        'raw_url': 'https://example.com/raw/{}'
-    }
-    """
+        # hostname
+        'example.com': {
+            # regex to get paste's unique identifier
+            'slug_regex': 'https://example.com/(.*)',
+            
+            # link to raw text using {} in place of the unique identifier
+            'raw_url': 'https://example.com/raw/{}'
+        }
+        """
         self.urls = urls
 
     def extract_supported_urls(self, text):

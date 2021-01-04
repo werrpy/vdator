@@ -10,22 +10,22 @@ class CodecsParser:
         Parameters
         ----------
         codecs : dict
-          codec definitions
+            codec definitions
         """
 
         """
         {
-          "codecs": {
-            "video": {...},
-            "audio": {...},
-            "subtitles": {...},
-            "chapters": {...}
-          },
-          "track_titles": {
-            "video": {...},
-            "audio": {...}
-          },
-          "scan_types": {...}
+            "codecs": {
+                "video": {...},
+                "audio": {...},
+                "subtitles": {...},
+                "chapters": {...}
+            },
+            "track_titles": {
+                "video": {...},
+                "audio": {...}
+            },
+            "scan_types": {...}
         }
         """
         self.codecs = codecs
@@ -45,7 +45,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -62,7 +62,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -79,7 +79,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -96,7 +96,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -113,7 +113,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -130,7 +130,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -147,7 +147,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -162,7 +162,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -179,7 +179,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -196,7 +196,7 @@ class CodecsParser:
         Parameters
         ----------
         codec : str
-          codec
+            codec
 
         Returns
         -------
@@ -213,10 +213,10 @@ class CodecsParser:
         Parameters
         ----------
         scan_type : str
-          scan type
+            scan type
 
         video_fps : str
-          frame rate
+            frame rate
 
         Returns
         -------

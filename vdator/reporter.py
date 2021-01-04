@@ -37,17 +37,17 @@ class Reporter:
         Parameters
         ----------
         type : ReportType
-          type of report: 'correct', 'warning', 'error', or 'info'
+            type of report: 'correct', 'warning', 'error', or 'info'
 
         message : str
-          reply message
+            reply message
 
         record : bool
-          should this report be kept track of in total
+            should this report be kept track of in total
 
         new_line : bool
-          print a new line after message
-          default: True
+            print a new line after message
+            default: True
         """
         if record:
             self.report[type.lower()] += 1
@@ -94,10 +94,10 @@ async def react_num_errors(message, num_errors):
     Parameters
     ----------
     message : discord.Message
-      discord message to react to
+        discord message to react to
 
     num_errors : int
-      number of errors
+        number of errors
     """
     if num_errors in range(1, 11):
         # errors between 1 and 10
@@ -117,10 +117,10 @@ async def add_status_reactions(message, content):
     Parameters
     ----------
     message : discord.Message
-      discord message to react to
+        discord message to react to
 
     content : str
-      content to parse to determine reactions
+        content to parse to determine reactions
     """
     # add status reactions to message based on content
     report_re = re.search(

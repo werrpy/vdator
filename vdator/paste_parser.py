@@ -39,6 +39,18 @@ class PasteParser:
         PLAYLIST_INNER_AUDIO = 2
 
     def parse(self, text):
+        """
+        Parse text to extract bdinfo, mediainfo and eac3to log
+
+        Parameters
+        ----------
+        text : str
+            text to parse
+
+        Returns
+        -------
+        bdinfo, mediainfo, and eac3to lists
+        """
         bdinfo = {"video": list(), "audio": list(), "subtitle": list()}
         mediainfo = list()
         eac3to = list()
@@ -199,6 +211,18 @@ class PasteParser:
         return bdinfo, mediainfo, eac3to
 
     def _isIgnoreAfterLine(self, l):
+        """
+        Check if we should ignore all input after the current line
+
+        Parameters
+        ----------
+        l : str
+            current line
+
+        Returns
+        -------
+        True if should ignore further input, False otherwise
+        """
         if IGNORE_AFTER_LINE_METHOD == "equals":
             if IGNORE_AFTER_LINE == l:
                 return True

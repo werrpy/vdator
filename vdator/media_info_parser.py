@@ -10,7 +10,7 @@ class MediaInfoParser:
         Parameters
         ----------
         key : str
-          mediainfo key
+            mediainfo key
 
         Returns
         -------
@@ -34,7 +34,7 @@ class MediaInfoParser:
         Parameters
         ----------
         text : str
-          mediainfo text
+            mediainfo text
 
         Returns
         -------

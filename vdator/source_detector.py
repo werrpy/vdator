@@ -15,10 +15,10 @@ class SourceDetector:
         Parameters
         ----------
         bdinfo : dict
-          bdinfo
+            bdinfo
 
         mediainfo : dict
-          mediainfo
+            mediainfo
         """
         self.bdinfo = bdinfo
         self.mediainfo = mediainfo
