@@ -3,30 +3,6 @@ class MediaInfoParser:
     Parse MediaInfo
     """
 
-    def format_key(self, key):
-        """
-        Format keys into abc_def_ghi
-
-        Parameters
-        ----------
-        key : str
-            mediainfo key
-
-        Returns
-        -------
-        str formatted mediainfo key
-        """
-        return (
-            key.strip()
-            .replace(" ", "_")
-            .replace("/", "_")
-            .replace("(", "")
-            .replace(")", "")
-            .replace("*", "_")
-            .replace(",", "")
-            .lower()
-        )
-
     def parse(self, text):
         """
         Parse mediainfo
@@ -74,20 +50,92 @@ class MediaInfoParser:
                     self.format_key(curr[0])
                 ] = curr[1]
             elif curr_sect == "menu":
-                # parse chapters
-                chapter = dict()
-                if len(curr) >= 1:
-                    curr[0] = curr[0].strip()
-                    chapter["time"] = curr[0]
-                if len(curr) >= 2:
-                    if ":" in curr[1]:
-                        # chapter has a language
-                        curr2 = curr[1].split(":", 1)
-                        chapter["language"] = curr2[0].strip()
-                        chapter["title"] = curr2[1]
-                    else:
-                        # no language, just store title
-                        chapter["title"] = curr[1]
-                mediainfo["menu"][section_index[curr_sect]].append(chapter)
+                mediainfo["menu"][section_index[curr_sect]].append(
+                    self.parse_chapter(curr)
+                )
 
         return mediainfo
+
+    def format_key(self, key):
+        """
+        Format keys into abc_def_ghi
+
+        Parameters
+        ----------
+        key : str
+            mediainfo key
+
+        Returns
+        -------
+        str formatted mediainfo key
+        """
+        return (
+            key.strip()
+            .replace(" ", "_")
+            .replace("/", "_")
+            .replace("(", "")
+            .replace(")", "")
+            .replace("*", "_")
+            .replace(",", "")
+            .lower()
+        )
+
+    def parse_chapter(self, curr):
+        """
+        Parse a single chapter
+
+        Parameters
+        ----------
+        curr : list
+            current line
+
+        Returns
+        -------
+        dict chapter
+        {"time": "...", "titles": [...], "languages": [...]}
+        languages list has unique elements
+        """
+        chapter = {"time": None, "titles": list(), "languages": set()}
+        if len(curr) >= 1:
+            chapter["time"] = curr[0].strip()
+        if len(curr) >= 2:
+            chapter_title = {
+                "language": None,
+                "title": None,
+            }
+            if " - " in curr[1]:
+                langs = curr[1].split(" - ")
+                for lang in langs:
+                    if ":" in lang:
+                        # chapter has a language
+                        ch = self.format_chapter(lang)
+                        chapter["titles"].append(ch)
+                        chapter["languages"].add(ch["language"])
+            elif ":" in curr[1]:
+                # chapter has a language
+                ch = self.format_chapter(curr[1])
+                chapter["titles"].append(ch)
+                chapter["languages"].add(ch["language"])
+            else:
+                # no language, just store title
+                chapter_title["title"] = curr[1]
+                chapter["titles"].append(chapter_title)
+        chapter["languages"] = list(chapter["languages"])
+        return chapter
+
+    def format_chapter(self, text):
+        """
+        Format chapter language and title
+
+        Parameters
+        ----------
+        text : str
+            chapter text
+
+        Returns
+        -------
+        dict chapter with 'language', 'title' keys
+        """
+        l = text.split(":", 1)
+        chapter = {"language": l[0].strip(), "title": l[1]}
+        return chapter

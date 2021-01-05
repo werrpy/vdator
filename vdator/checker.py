@@ -166,6 +166,11 @@ class Checker:
 
         # check chapters
         try:
+            reply += self.print_chapters()
+        except:
+            traceback.print_exc()
+            reply += self.reporter.print_report("fail", "Error printing chapters")
+        try:
             reply += self.has_chapers()
         except:
             traceback.print_exc()
@@ -1433,75 +1438,105 @@ class Checker:
 
     def print_chapters(self):
         reply = ""
-        if len(self.mediainfo["menu"]) > 0:
+        if len(self.mediainfo["menu"]) > 0 and len(self.mediainfo["menu"][0]) > 0:
+            reply += "Chapters:\n"
             reply += "```"
-            if len(self.mediainfo["menu"][0]) > 0:
-                for ch in self.mediainfo["menu"][0]:
-                    if "time" in ch:
-                        reply += ch["time"]
-                    if "language" in ch:
-                        reply += " " + ch["language"]
-                    if "title" in ch:
-                        reply += " " + ch["title"]
-                    reply += "\n"
-            reply += "```\n"
+            for ch in self.mediainfo["menu"][0]:
+                if ch["time"]:
+                    reply += ch["time"] + " :"
+                for title in ch["titles"]:
+                    if title["language"]:
+                        reply += " lang: " + title["language"]
+                    if title["title"]:
+                        reply += " title: " + title["title"]
+                reply += "\n"
+            reply += "```"
+            reply += (
+                "Chapter languages: `"
+                + ", ".join(self.mediainfo["menu"][0][0]["languages"])
+                + "`\n"
+            )
         return reply
 
     def chapter_language(self):
         reply = ""
 
         if "menu" in self.mediainfo and len(self.mediainfo["menu"]) > 0:
-            if len(self.mediainfo["menu"]) == 1:
-                for i, _ in enumerate(self.mediainfo["menu"]):
-                    invalid_lang_list = list()
-                    # concatenate all chapter titles
-                    chapter_phrase = ""
-                    chapter_langs = list()
-                    if len(self.mediainfo["menu"][i]) > 0:
-                        for j, item in enumerate(self.mediainfo["menu"][i]):
-                            if "language" in self.mediainfo["menu"][i][j]:
-                                try:
-                                    ch_lang = iso639_languages.get(
-                                        alpha2=self.mediainfo["menu"][i][j]["language"]
-                                    )
-                                    chapter_langs.append(ch_lang)
-                                except KeyError:
-                                    invalid_lang_list.append(str(j + 1))
-                            else:
-                                invalid_lang_list.append(str(j + 1))
-                            if "title" in item:
-                                chapter_phrase += item["title"] + "\n"
-                    if len(invalid_lang_list) > 0:
-                        if len(invalid_lang_list) == len(self.mediainfo["menu"][i]):
-                            reply += self.reporter.print_report(
-                                "error", "All chapters do not have a language set"
-                            )
+            if len(self.mediainfo["menu"]) == 1 and len(self.mediainfo["menu"][0]) >= 1:
+                # chapter numbers that have an invalid language
+                invalid_ch_lang_nums = list()
+                # list of chapters
+                # [{'time': '...', 'titles': [{'language': '...', 'title': '...'}, ...], 'languages': ['...', '...']}]
+                chapters = self.mediainfo["menu"][0]
+                # {'time': '...', 'titles': [{'language': '...', 'title': '...'}, ...], 'languages': ['...', '...']}
+                ch_0 = chapters[0]
+                # concatenate all chapter titles into phrases
+                # ch_0["languages"] = ['...', '...']
+                # chapter_phrases = {'de': '...', 'en': '...'}
+                chapter_phrases = {k: "" for k in ch_0["languages"]}
+                # list of detected languages with chapter languages as keys
+                # chapter_langs = {'de': [...], 'en': [...]}
+                chapter_langs = {k: list() for k in ch_0["languages"]}
+
+                for ch in chapters:
+                    for j, lang in enumerate(ch["languages"]):
+                        if lang:
+                            try:
+                                ch_lang = iso639_languages.get(alpha2=lang)
+                                # store chapter language
+                                chapter_langs[lang].append(ch_lang)
+                            except KeyError:
+                                # store invalid chapter number
+                                invalid_ch_lang_nums.append(str(j + 1))
                         else:
-                            reply += self.reporter.print_report(
-                                "error",
-                                "The following chapters do not have a language set: `"
-                                + ", ".join(invalid_lang_list)
-                                + "`",
-                            )
+                            # store invalid chapter number
+                            invalid_ch_lang_nums.append(str(j + 1))
+
+                    for title in ch["titles"]:
+                        chapter_phrases[title["language"]] += title["title"] + "\n"
+
+                if len(invalid_ch_lang_nums) > 0:
+                    if len(invalid_ch_lang_nums) == len(chapters):
+                        reply += self.reporter.print_report(
+                            "error", "All chapters do not have a language set"
+                        )
                     else:
                         reply += self.reporter.print_report(
-                            "correct", "All chapters have a language set"
+                            "error",
+                            "The following chapters do not have a language set: `"
+                            + ", ".join(invalid_ch_lang_nums)
+                            + "`",
                         )
+                else:
+                    reply += self.reporter.print_report(
+                        "correct", "All chapters have a language set"
+                    )
+
+                for k, chapter_phrase in chapter_phrases.items():
                     if chapter_phrase:
-                        chapter_langs = list(set(chapter_langs))
+                        chapter_langs[k] = list(set(chapter_langs[k]))
                         try:
-                            lang = langdetect_detect(chapter_phrase)
-                            ch_lang = iso639_languages.get(alpha2=lang)
-                            if ch_lang in chapter_langs:
+                            detected_lang = langdetect_detect(chapter_phrase)
+                            ch_detected_lang = iso639_languages.get(
+                                alpha2=detected_lang
+                            )
+                            if ch_detected_lang in chapter_langs[k]:
                                 reply += self.reporter.print_report(
                                     "correct",
                                     "Chapters language matches detected language: `"
-                                    + ch_lang.name
+                                    + ch_detected_lang.name
                                     + "`",
                                 )
                             else:
                                 chapter_langs_names = ", ".join(
-                                    list(set([lang.name for lang in chapter_langs]))
+                                    list(
+                                        set(
+                                            [
+                                                detected_lang.name
+                                                for detected_lang in chapter_langs[k]
+                                            ]
+                                        )
+                                    )
                                 )
                                 if chapter_langs_names:
                                     reply += self.reporter.print_report(
@@ -1509,14 +1544,14 @@ class Checker:
                                         "Chapters languages: `"
                                         + chapter_langs_names
                                         + "` do not match detected language: `"
-                                        + ch_lang.name
+                                        + ch_detected_lang.name
                                         + "`",
                                     )
                                 else:
                                     reply += self.reporter.print_report(
                                         "error",
                                         "No chapter languages. Detected chapter language: `"
-                                        + ch_lang.name
+                                        + ch_detected_lang.name
                                         + "`",
                                     )
                         except KeyError:
@@ -1539,12 +1574,13 @@ class Checker:
             if len(self.mediainfo["menu"]) == 1:
                 num_chapters = len(self.mediainfo["menu"][0])
                 for ch in self.mediainfo["menu"][0]:
-                    if re.search(r"^chapter\s\d+", ch["title"], re.IGNORECASE):
-                        # numbered chapter
-                        ch_num = "".join(re.findall(r"[\d]+", ch["title"]))
-                        if ch_num != ch_num.zfill(len(str(num_chapters))):
-                            padded_correctly = False
-                            break
+                    for title in ch["titles"]:
+                        if re.search(r"^chapter\s\d+", title["title"], re.IGNORECASE):
+                            # numbered chapter
+                            ch_num = "".join(re.findall(r"[\d]+", title["title"]))
+                            if ch_num != ch_num.zfill(len(str(num_chapters))):
+                                padded_correctly = False
+                                break
         if padded_correctly:
             reply += self.reporter.print_report("correct", "Chapters properly padded")
         else:
