@@ -63,7 +63,7 @@ class Checker:
 
         # check metadata
         try:
-            reply += self.check_movie_name()
+            reply += self.check_movie_name_format()
         except:
             traceback.print_exc()
             reply += self.reporter.print_report("fail", "Error parsing movie name")
@@ -333,7 +333,7 @@ class Checker:
 
         return reply
 
-    def check_movie_name(self):
+    def check_movie_name_format(self):
         reply = ""
 
         if has(self.mediainfo, "general.0.movie_name"):
@@ -483,9 +483,11 @@ class Checker:
                             tmdb_info["release_date"], "%Y-%m-%d"
                         )
                         tmdb_year = str(datetime_obj.year)
+                    # tmdb_info["original_title"] is original title
+                    # tmdb_info["title"] is the translated title in whatever language you're requesting
                     matched["tmdb_title"] = (
-                        "original_title" in tmdb_info
-                        and movie_data["name"] == tmdb_info["original_title"]
+                        "title" in tmdb_info
+                        and movie_data["name"] == tmdb_info["title"]
                     )
                     matched["tmdb_year"] = tmdb_year and self._year_range(
                         tmdb_year, movie_data["year"]
@@ -500,77 +502,80 @@ class Checker:
         matched["title"] = matched["imdb_title"] or matched["tmdb_title"]
         matched["year"] = matched["imdb_year"] or matched["tmdb_year"]
 
-        if is_movie:
-            # movie
-            if matched["title"] and matched["year"]:
-                reply += self.reporter.print_report(
-                    "correct", "Matched movie name and year with IMDb/TMDb"
-                )
+        if has(self.mediainfo, "general.0.imdb") or has(
+            self.mediainfo, "general.0.tmdb"
+        ):
+            if is_movie:
+                # movie
+                if matched["title"] and matched["year"]:
+                    reply += self.reporter.print_report(
+                        "correct", "Matched movie name and year with IMDb/TMDb"
+                    )
+                else:
+                    if matched["title"]:
+                        reply += self.reporter.print_report(
+                            "correct", "Matched movie name with IMDb/TMDb"
+                        )
+                    else:
+                        if imdb_movie and "title" in imdb_movie:
+                            reply += self.reporter.print_report(
+                                "error", "IMDb: Name: `" + imdb_movie["title"] + "`"
+                            )
+                            reply += show_diff(imdb_movie["title"], movie_data["name"])
+                            matched["title_replied"] = True
+                        # tmdb_info["original_title"] is original title
+                        # tmdb_info["title"] is the translated title in whatever language you're requesting
+                        if tmdb_info and "title" in tmdb_info:
+                            reply += self.reporter.print_report(
+                                "error", "TMDb: Name: `" + tmdb_info["title"] + "`"
+                            )
+                            reply += show_diff(tmdb_info["title"], movie_data["name"])
+                            matched["title_replied"] = True
+                        if not matched["title_replied"]:
+                            reply += self.reporter.print_report(
+                                "error", "Failed to match movie name with IMDb/TMDb"
+                            )
+
+                    if matched["year"]:
+                        reply += self.reporter.print_report(
+                            "correct", "Matched movie year with IMDb/TMDb"
+                        )
+                    else:
+                        if imdb_movie and "year" in imdb_movie:
+                            reply += self.reporter.print_report(
+                                "error", "IMDb: Year: `" + str(imdb_movie["year"]) + "`"
+                            )
+                            matched["year_replied"] = True
+                        if tmdb_year:
+                            reply += self.reporter.print_report(
+                                "error", "TMDb: Year: `" + str(tmdb_year) + "`"
+                            )
+                            matched["year_replied"] = True
+                        if not matched["year_replied"]:
+                            reply += self.reporter.print_report(
+                                "error", "Failed to match movie year with IMDb/TMDb"
+                            )
             else:
+                # tv show
                 if matched["title"]:
                     reply += self.reporter.print_report(
-                        "correct", "Matched movie name with IMDb/TMDb"
+                        "correct", "Matched tv show name with IMDb/TMDb"
                     )
                 else:
                     if imdb_movie and "title" in imdb_movie:
                         reply += self.reporter.print_report(
                             "error", "IMDb: Name: `" + imdb_movie["title"] + "`"
                         )
-                        reply += show_diff(imdb_movie["title"], movie_data["name"])
                         matched["title_replied"] = True
-                    if tmdb_info and "original_title" in tmdb_info:
+                    if tmdb_info and "name" in tmdb_info:
                         reply += self.reporter.print_report(
-                            "error", "TMDb: Name: `" + tmdb_info["original_title"] + "`"
-                        )
-                        reply += show_diff(
-                            tmdb_info["original_title"], movie_data["name"]
+                            "error", "TMDb: Name: `" + tmdb_info["name"] + "`"
                         )
                         matched["title_replied"] = True
                     if not matched["title_replied"]:
                         reply += self.reporter.print_report(
-                            "error", "Failed to match movie name with IMDb/TMDb"
+                            "error", "Failed to match tv show name with IMDb/TMDb"
                         )
-
-                if matched["year"]:
-                    reply += self.reporter.print_report(
-                        "correct", "Matched movie year with IMDb/TMDb"
-                    )
-                else:
-                    if imdb_movie and "year" in imdb_movie:
-                        reply += self.reporter.print_report(
-                            "error", "IMDb: Year: `" + imdb_movie["year"] + "`"
-                        )
-                        matched["year_replied"] = True
-                    if tmdb_year:
-                        reply += self.reporter.print_report(
-                            "error", "TMDb: Year: `" + tmdb_year + "`"
-                        )
-                        matched["year_replied"] = True
-                    if not matched["year_replied"]:
-                        reply += self.reporter.print_report(
-                            "error", "Failed to match movie year with IMDb/TMDb"
-                        )
-        else:
-            # tv show
-            if matched["title"]:
-                reply += self.reporter.print_report(
-                    "correct", "Matched tv show name with IMDb/TMDb"
-                )
-            else:
-                if imdb_movie and "title" in imdb_movie:
-                    reply += self.reporter.print_report(
-                        "error", "IMDb: Name: `" + imdb_movie["title"] + "`"
-                    )
-                    matched["title_replied"] = True
-                if tmdb_info and "name" in tmdb_info:
-                    reply += self.reporter.print_report(
-                        "error", "TMDb: Name: `" + tmdb_info["name"] + "`"
-                    )
-                    matched["title_replied"] = True
-                if not matched["title_replied"]:
-                    reply += self.reporter.print_report(
-                        "error", "Failed to match tv show name with IMDb/TMDb"
-                    )
 
         return reply
 
