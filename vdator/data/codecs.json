@@ -30,6 +30,7 @@
     },
     "track_titles": {
         "video": {
+            "MPEG-1 Video": "MPEG-1",
             "MPEG-2 Video": "MPEG-2",
             "MPEG-4 AVC Video": "AVC",
             "MPEG-H HEVC Video": "HEVC",
