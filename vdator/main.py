@@ -18,8 +18,11 @@ from source_detector import SourceDetector
 from reporter import Reporter, add_status_reactions
 from checker import Checker
 
+# script location
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
 # initialize parsers
-with open("data/urls.json") as f:
+with open(os.path.join(__location__, "data/urls.json")) as f:
     urls = json.load(f)["urls"]
     url_parser = URLParser(urls)
 
@@ -27,7 +30,7 @@ bdinfo_parser = BDInfoParser()
 paste_parser = PasteParser(bdinfo_parser)
 mediainfo_parser = MediaInfoParser()
 
-with open("data/codecs.json") as f:
+with open(os.path.join(__location__, "data/codecs.json")) as f:
     codecs = json.load(f)
     codecs_parser = CodecsParser(codecs)
 
