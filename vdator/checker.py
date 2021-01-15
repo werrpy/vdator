@@ -237,7 +237,7 @@ class Checker:
             )
 
             # scan type
-            scan_type, _ = self.codecs.get_scan_type_title_name(
+            (scan_type, _) = self.codecs.get_scan_type_title_name(
                 self.mediainfo["video"][0]["scan_type"].lower(), 0
             )
             video_title += scan_type
@@ -298,7 +298,7 @@ class Checker:
                         )
                     )
                 )
-                _, actually_progressive = self.codecs.get_scan_type_title_name(
+                (_, actually_progressive) = self.codecs.get_scan_type_title_name(
                     scan_type, video_fps
                 )
                 if actually_progressive:

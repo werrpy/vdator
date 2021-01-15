@@ -138,7 +138,7 @@ async def on_message(message):
 
     for url in supported_urls:
         paste = url_parser.get_paste(url)
-        bdinfo, mediainfo, eac3to = paste_parser.parse(paste)
+        (bdinfo, mediainfo, eac3to) = paste_parser.parse(paste)
 
         reply = "<" + url + ">" + "\n"
 

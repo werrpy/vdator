@@ -223,10 +223,10 @@ class CodecsParser:
         str scan type title name, boolean if actually progressive
         """
         actually_progressive = False
-        scan_type = scan_type.strip()
+        scan_type = scan_type.strip().lower()
 
-        if len(scan_type) == 1:
-            scan_type = "progressive" if scan_type == "p" else "interlaced"
+        if len(scan_type) >= 1:
+            scan_type = "progressive" if scan_type[0] == "p" else "interlaced"
 
         # interlaced @ 25fps is actually progressive
         # but it's still called interlaced
