@@ -944,7 +944,7 @@ class Checker:
                 bdinfo_audio_parts = re.sub(r"\s+", " ", title).split(" / ")
 
                 # check audio commentary
-                is_commentary, commentary_reply = self._check_commentary(i)
+                (is_commentary, commentary_reply) = self._check_commentary(i)
 
                 if is_commentary:
                     reply += commentary_reply
