@@ -1486,7 +1486,7 @@ class Checker:
                     for j, lang in enumerate(ch["languages"]):
                         if lang:
                             try:
-                                ch_lang = iso639_languages.get(alpha2=lang)
+                                ch_lang = iso639_languages.get(part1=lang)
                                 # store chapter language
                                 chapter_langs[lang].append(ch_lang)
                             except KeyError:
@@ -1522,7 +1522,7 @@ class Checker:
                         try:
                             detected_lang = langdetect_detect(chapter_phrase)
                             ch_detected_lang = iso639_languages.get(
-                                alpha2=detected_lang
+                                part1=detected_lang
                             )
                             if ch_detected_lang in chapter_langs[k]:
                                 reply += self.reporter.print_report(
