@@ -17,8 +17,8 @@
             "E-AC3": "eac3",
             "FLAC Audio": ".flac",
             "RAW/PCM": ".pcm",
-            "TrueHD/AC3": ".thd+ac3",
-            "TrueHD/AC3 (Atmos)": ".thd+ac3"
+            "TrueHD/AC3": ".thd",
+            "TrueHD/AC3 (Atmos)": ".thd"
         },
         "subtitles": {
             "Subtitle (PGS)": ".sup",
