@@ -617,6 +617,10 @@ class Checker:
                 title = self._format_filename_title(movie_name_search.group(1))
                 year = movie_name_search.group(2).strip()
                 release_name += title + "." + year
+            else:
+                release_name += self._format_filename_title(
+                    self.mediainfo["general"][0]["movie_name"]
+                )
 
             # with or without hybrid
             if hybird:
@@ -1521,9 +1525,7 @@ class Checker:
                         chapter_langs[k] = list(set(chapter_langs[k]))
                         try:
                             detected_lang = langdetect_detect(chapter_phrase)
-                            ch_detected_lang = iso639_languages.get(
-                                part1=detected_lang
-                            )
+                            ch_detected_lang = iso639_languages.get(part1=detected_lang)
                             if ch_detected_lang in chapter_langs[k]:
                                 reply += self.reporter.print_report(
                                     "correct",
