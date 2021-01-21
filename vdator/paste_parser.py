@@ -109,6 +109,8 @@ class PasteParser:
                     did_first_mediainfo = True
 
             if sect == self.Section.QUICK_SUMMARY:
+                # parse hidden tracks
+                l2 = l2.lstrip("* ")
                 if (
                     l2.startswith("video:")
                     or l2.startswith("audio:")
@@ -157,6 +159,8 @@ class PasteParser:
                     # skip tracks that start with minus sign
                     if l.startswith("-"):
                         continue
+                    # parse hidden tracks
+                    l = l.lstrip("* ")
 
                     if (
                         sect2 == self.Section2.PLAYLIST_VIDEO
