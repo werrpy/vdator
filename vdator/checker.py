@@ -516,19 +516,21 @@ class Checker:
                             "correct", "Matched movie name with IMDb/TMDb"
                         )
                     else:
-                        if imdb_movie and "title" in imdb_movie:
+                        if imdb_movie and "title" in imdb_movie and imdb_movie["title"]:
                             reply += self.reporter.print_report(
                                 "error", "IMDb: Name: `" + imdb_movie["title"] + "`"
                             )
-                            reply += show_diff(imdb_movie["title"], movie_data["name"])
+                            if movie_data["name"]:
+                                reply += show_diff(imdb_movie["title"], movie_data["name"])
                             matched["title_replied"] = True
                         # tmdb_info["original_title"] is original title
                         # tmdb_info["title"] is the translated title in whatever language you're requesting
-                        if tmdb_info and "title" in tmdb_info:
+                        if tmdb_info and "title" in tmdb_info and tmdb_info["title"]:
                             reply += self.reporter.print_report(
                                 "error", "TMDb: Name: `" + tmdb_info["title"] + "`"
                             )
-                            reply += show_diff(tmdb_info["title"], movie_data["name"])
+                            if movie_data["name"]:
+                                reply += show_diff(tmdb_info["title"], movie_data["name"])
                             matched["title_replied"] = True
                         if not matched["title_replied"]:
                             reply += self.reporter.print_report(
