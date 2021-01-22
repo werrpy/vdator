@@ -87,6 +87,7 @@ class PasteParser:
                         ignore_next_lines = True
                         break
 
+            l = l.strip()
             l2 = l.strip().lower()
 
             # determine current section
@@ -109,38 +110,8 @@ class PasteParser:
                     did_first_mediainfo = True
 
             if sect == self.Section.QUICK_SUMMARY:
-                # parse hidden tracks
-                l2 = l2.lstrip("* ")
-                if (
-                    l2.startswith("video:")
-                    or l2.startswith("audio:")
-                    or l2.startswith("subtitle:")
-                ):
-                    track_name = l.split(":", 1)[1].strip()
-                if l2.startswith("video:"):
-                    track_name = self.bdinfo_parser.format_video_track_name(track_name)
-                    bdinfo["video"].append(track_name)
-                elif l2.startswith("audio:"):
-                    audio_track = self.bdinfo_parser.format_audio_track(track_name)
-                    if (
-                        "-ac3 embedded" not in audio_track["name"].lower()
-                        and "ac3 embedded" in audio_track["name"].lower()
-                    ):
-                        (
-                            audio_track,
-                            compat_track,
-                        ) = self.bdinfo_parser.format_audio_compatibility_track(
-                            audio_track
-                        )
-                        bdinfo["audio"].append(audio_track)
-                        bdinfo["audio"].append(compat_track)
-                    else:
-                        bdinfo["audio"].append(audio_track)
-                elif l2.startswith("subtitle:"):
-                    bdinfo["subtitle"].append(
-                        self.bdinfo_parser.format_subtitle_track(track_name)
-                    )
-
+                # parse quick summary into bdinfo dict
+                self.bdinfo_parser.parse_quick_summary_line(bdinfo, l)
             elif sect == self.Section.PLAYLIST_REPORT:
 
                 if l2.startswith("video:"):

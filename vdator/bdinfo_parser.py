@@ -201,3 +201,52 @@ class BDInfoParser:
             return track
         except ValueError:
             return False
+
+    def parse_quick_summary_line(self, bdinfo, l):
+        """
+        Parse quick summary line
+
+        Parameters
+        ----------
+        bdinfo : dict
+            bdinfo dict
+        l : str
+            quick summary line
+
+        Returns
+        -------
+        bdinfo dict
+        """
+        l2 = l.strip().lower()
+        # parse hidden tracks
+        l2 = l2.lstrip("* ")
+        if (
+            l2.startswith("video:")
+            or l2.startswith("audio:")
+            or l2.startswith("subtitle:")
+        ):
+            track_name = l.split(":", 1)[1].strip()
+        if l2.startswith("video:"):
+            track_name = self.format_video_track_name(track_name)
+            bdinfo["video"].append(track_name)
+        elif l2.startswith("audio:"):
+            audio_track = self.format_audio_track(track_name)
+            if ("-ac3 embedded" not in audio_track["name"].lower()) and (
+                "ac3 embedded" in audio_track["name"].lower()
+            ):
+                (
+                    audio_track,
+                    compat_track,
+                ) = self.format_audio_compatibility_track(audio_track)
+                bdinfo["audio"].append(audio_track)
+                bdinfo["audio"].append(compat_track)
+            else:
+                bdinfo["audio"].append(audio_track)
+        elif l2.startswith("subtitle:"):
+            bdinfo["subtitle"].append(self.format_subtitle_track(track_name))
+        else:
+            # get all other bdinfo entries
+            l = l.split(":", 1)
+            if len(l) >= 2:
+                bdinfo[l[0].strip().lower()] = l[1].strip()
+        return bdinfo
