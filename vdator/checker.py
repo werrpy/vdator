@@ -1105,7 +1105,10 @@ class Checker:
                 and self.mediainfo["audio"][i]["format"] == "AC-3"
             ):
                 if "bit_rate" in self.mediainfo["audio"][i]:
-                    if "224" in self.mediainfo["audio"][i]["bit_rate"]:
+                    bit_rate = "".join(
+                        re.findall(r"[\d]+", self.mediainfo["audio"][i]["bit_rate"])
+                    )
+                    if bit_rate == "224":
                         reply += self.reporter.print_report(
                             "correct",
                             "Audio "
