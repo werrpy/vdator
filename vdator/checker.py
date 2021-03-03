@@ -126,6 +126,14 @@ class Checker:
         except:
             traceback.print_exc()
             reply += self.reporter.print_report("fail", "Error checking audio tracks")
+        # check FLAC audio using mediainfo
+        try:
+            reply += self.check_flac_audio_tracks()
+        except:
+            traceback.print_exc()
+            reply += self.reporter.print_report(
+                "fail", "Error checking FLAC audio tracks"
+            )
 
         # TMDb and IMDb People API
         try:
@@ -1039,6 +1047,74 @@ class Checker:
             )
             if len(self.bdinfo["audio"]) > len(self.mediainfo["audio"]):
                 reply += "Did you forget to add a minus (-) sign in front of unused audio tracks in bdinfo?\n"
+
+        return reply
+
+    def check_flac_audio_tracks(self):
+        reply = ""
+
+        if len(self.mediainfo["audio"]) > 0:
+            for i, audio_track in enumerate(self.mediainfo["audio"]):
+                if "format" in audio_track and audio_track["format"] == "FLAC":
+                    channels = float(
+                        "".join(
+                            re.findall(
+                                r"\d*\.\d+|\d+", audio_track["channels"].strip().lower()
+                            )
+                        )
+                    )
+                    sampling_rate = int(
+                        float(
+                            "".join(
+                                re.findall(
+                                    r"\d*\.\d+|\d+",
+                                    audio_track["sampling_rate"].strip().lower(),
+                                )
+                            )
+                        )
+                    )
+                    bit_rate = int(
+                        "".join(
+                            re.findall(r"\d+", audio_track["bit_rate"].strip().lower())
+                        )
+                    )
+                    bit_depth = (
+                        audio_track["bit_depth"]
+                        .strip()
+                        .lower()
+                        .replace(" bits", "-bit")
+                    )
+                    test_title = (
+                        "FLAC Audio / "
+                        + "{:.1f}".format(channels)
+                        + " / "
+                        + str(sampling_rate)
+                        + " kHz / "
+                        + str(bit_rate)
+                        + " kbps / "
+                        + bit_depth
+                    )
+
+                    audio_title = self._remove_until_first_codec(audio_track["title"])
+                    if test_title == audio_title:
+                        reply += self.reporter.print_report(
+                            "correct",
+                            "Audio "
+                            + self._section_id("audio", i)
+                            + ": Good track name",
+                        )
+                    else:
+                        reply += self.reporter.print_report(
+                            "error",
+                            "Audio "
+                            + self._section_id("audio", i)
+                            + ": Bad track name:\n```fix\nActual: "
+                            + audio_title
+                            + "\nExpected: "
+                            + test_title
+                            + "```",
+                            new_line=False,
+                        )
 
         return reply
 
