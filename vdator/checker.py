@@ -1191,7 +1191,7 @@ class Checker:
                     + bdinfo_audio_parts[1],
                 )
 
-            bdbitrate = bdinfo_audio_parts[4].strip()
+            bdbitrate = bdinfo_audio_parts[3].strip()
             mbitrate = mediainfo_parts[3 + mediainfo_offset].strip()
 
             if bdbitrate == mbitrate:
