@@ -141,24 +141,24 @@ def num_to_emoji(n):
     return False
 
 
-def show_diff(expected, actual):
+def show_diff(actual, expected):
     """
     Show difference between expected and actual result
     using discord bold format
 
     Parameters
     ----------
-    expected : str
-        expected result
-
     actual : str
         actual result
+
+    expected : str
+        expected result
 
     Returns
     -------
     str with differences in bold
     """
-    seqm = difflib.SequenceMatcher(None, expected, actual)
+    seqm = difflib.SequenceMatcher(None, actual, expected)
 
     output = []
     for opcode, a0, a1, b0, b1 in seqm.get_opcodes():
@@ -167,10 +167,10 @@ def show_diff(expected, actual):
         elif opcode == "insert":
             output.append("**" + seqm.b[b0:b1] + "**")
         elif opcode == "delete":
-            output.append("**" + seqm.a[a0:a1] + "**")
+            output.append("~~" + seqm.a[a0:a1] + "~~")
         elif opcode == "replace":
-            output.append("**" + seqm.a[a0:a1] + "**")
+            output.append("~~" + seqm.a[a0:a1] + "~~**" + seqm.b[b0:b1] + "**")
         else:
             # unexpected opcode
-            return False
+            continue
     return "Hint: " + "".join(output) + "\n"

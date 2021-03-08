@@ -281,7 +281,7 @@ class Checker:
                     + "```",
                     new_line=False,
                 )
-                reply += show_diff(video_title, mediainfo_title)
+                reply += show_diff(mediainfo_title, video_title)
 
         elif has(self.bdinfo, "video") and has(self.mediainfo, "video"):
             if len(self.bdinfo["video"]) < 1:
@@ -330,7 +330,7 @@ class Checker:
                         + "```",
                         new_line=False,
                     )
-                    reply += show_diff(video_title, mediainfo_title)
+                    reply += show_diff(mediainfo_title, video_title)
             else:
                 reply += self.reporter.print_report(
                     "error", "Missing mediainfo video track"
@@ -530,7 +530,7 @@ class Checker:
                             )
                             if movie_data["name"]:
                                 reply += show_diff(
-                                    imdb_movie["title"], movie_data["name"]
+                                    movie_data["name"], imdb_movie["title"]
                                 )
                             matched["title_replied"] = True
                         # tmdb_info["original_title"] is original title
@@ -541,7 +541,7 @@ class Checker:
                             )
                             if movie_data["name"]:
                                 reply += show_diff(
-                                    tmdb_info["title"], movie_data["name"]
+                                    movie_data["name"], tmdb_info["title"]
                                 )
                             matched["title_replied"] = True
                         if not matched["title_replied"]:
@@ -754,7 +754,7 @@ class Checker:
                     + "```",
                     new_line=False,
                 )
-                reply += show_diff(expected_release_name, complete_name)
+                reply += show_diff(complete_name, expected_release_name)
         else:
             reply += self.reporter.print_report("error", "Cannot validate filename")
 
