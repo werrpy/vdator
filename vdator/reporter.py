@@ -11,16 +11,6 @@ class Reporter:
     Keep track of types of responses
     """
 
-    class ReportType(Enum):
-        """
-        Types of responses
-        """
-
-        CORRECT = "correct"
-        WARNING = "warning"
-        ERROR = "error"
-        INFO = "info"
-
     def __init__(self):
         self.setup()
 
@@ -51,7 +41,21 @@ class Reporter:
         """
         if record:
             self.report[type.lower()] += 1
-        return "[" + type.upper() + "] " + message + ("\n" if new_line else "")
+
+        msg_type = {
+            "correct": EMOJIS[":ballot_box_with_check:"],
+            "warning": EMOJIS[":warning:"],
+            "error": EMOJIS[":x:"],
+            "info": EMOJIS[":information_source:"],
+            "fail": EMOJIS[":interrobang:"],
+        }
+
+        if type.lower() in msg_type:
+            type = msg_type[type.lower()]
+        else:
+            type = "[" + type.upper() + "] "
+
+        return type + message + ("\n" if new_line else "")
 
     def get_report(self):
         """
@@ -137,7 +141,7 @@ async def add_status_reactions(message, content):
         }
 
         if report["warning"] == 0 and report["error"] == 0 and report["fail"] == 0:
-            await message.add_reaction(EMOJIS[":white_check_mark:"])
+            await message.add_reaction(EMOJIS[":ballot_box_with_check:"])
         else:
             if report["warning"] > 0:
                 await message.add_reaction(EMOJIS[":warning:"])
