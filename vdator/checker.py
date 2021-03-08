@@ -1257,54 +1257,40 @@ class Checker:
                     "error",
                     "Audio "
                     + self._section_id("audio", i)
-                    + ": Channel Mismatch, "
-                    + audio_from
-                    + " "
+                    + ": Channels should be `"
+                    + bdinfo_audio_parts[1]
+                    + "` instead of `"
                     + mediainfo_parts[1 + mediainfo_offset]
-                    + " and "
-                    + audio_to
-                    + " "
-                    + bdinfo_audio_parts[1],
+                    + "`",
                 )
 
-            bdbitrate = bdinfo_audio_parts[3].strip()
-            mbitrate = mediainfo_parts[3 + mediainfo_offset].strip()
+            # mediainfo bitrate should be less than bdinfo bitrate
+            try:
+                m_bit_rate = int(
+                    "".join(
+                        re.findall(
+                            r"\d+", mediainfo_parts[3 + mediainfo_offset].strip()
+                        )
+                    )
+                )
 
-            if bdbitrate == mbitrate:
-                reply += self.reporter.print_report(
-                    "error",
-                    "Audio "
-                    + self._section_id("audio", i)
-                    + ": "
-                    + audio_from
-                    + " "
-                    + bdinfo_audio_parts[1]
-                    + " to "
-                    + audio_to
-                    + " "
-                    + mediainfo_parts[1 + mediainfo_offset]
-                    + " same bitrate: "
-                    + str(bdbitrate),
+                bd_bit_rate = int(
+                    "".join(re.findall(r"\d+", bdinfo_audio_parts[3].strip()))
                 )
-            else:
-                reply += self.reporter.print_report(
-                    "correct",
-                    "Audio "
-                    + self._section_id("audio", i)
-                    + ": "
-                    + audio_from
-                    + " "
-                    + bdinfo_audio_parts[1]
-                    + " to "
-                    + audio_to
-                    + " "
-                    + mediainfo_parts[1 + mediainfo_offset]
-                    + " ("
-                    + str(bdbitrate)
-                    + " to "
-                    + str(mbitrate)
-                    + ")",
-                )
+
+                if m_bit_rate > bd_bit_rate:
+                    reply += self.reporter.print_report(
+                        "error",
+                        "Audio "
+                        + self._section_id("audio", i)
+                        + ": MediaInfo bitrate is greater than BDInfo bitrate: `"
+                        + str(m_bit_rate)
+                        + " kbps > "
+                        + str(bd_bit_rate)
+                        + " kbps`",
+                    )
+            except ValueError:
+                pass
         else:
             reply += self.reporter.print_report(
                 "error",
