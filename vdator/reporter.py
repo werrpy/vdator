@@ -51,7 +51,7 @@ class Reporter:
         }
 
         if type.lower() in msg_type:
-            type = msg_type[type.lower()]
+            type = msg_type[type.lower()] + " "
         else:
             type = "[" + type.upper() + "] "
 

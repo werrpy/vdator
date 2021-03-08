@@ -1401,9 +1401,8 @@ class Checker:
         return reply
 
     def print_text_tracks(self):
-        reply = ""
+        reply = "> **Text Tracks**\n"
         if len(self.mediainfo["text"]) > 0:
-            reply += "> **Text Tracks**\n"
             reply += "```"
             for i, _ in enumerate(self.mediainfo["text"]):
                 reply += self._section_id("text", i) + ":"
@@ -1418,7 +1417,7 @@ class Checker:
                 reply += "\n"
             reply += "```"
         else:
-            reply = self.reporter.print_report("info", "No text tracks")
+            reply += self.reporter.print_report("info", "No text tracks")
         return reply
 
     def check_text_order(self):
@@ -1518,9 +1517,8 @@ class Checker:
         return reply
 
     def print_chapters(self):
-        reply = ""
+        reply = "> **Chapters**\n"
         if len(self.mediainfo["menu"]) > 0 and len(self.mediainfo["menu"][0]) > 0:
-            reply += "> **Chapters**\n"
             reply += "```"
             for ch in self.mediainfo["menu"][0]:
                 if ch["time"]:
@@ -1537,6 +1535,8 @@ class Checker:
                 + ", ".join(self.mediainfo["menu"][0][0]["languages"])
                 + "`\n"
             )
+        else:
+            reply += self.reporter.print_report("info", "No chapters")
         return reply
 
     def chapter_language(self):
@@ -1641,8 +1641,6 @@ class Checker:
                 reply += self.reporter.print_report(
                     "error", "Must have at most 1 chapter menu"
                 )
-        else:
-            reply += self.reporter.print_report("info", "No chapters")
 
         return reply
 
