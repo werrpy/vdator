@@ -160,6 +160,7 @@ async def on_message(message):
                 reply += reporter.print_report("fail", "vdator failed to parse")
 
         # report
+        reply += "> **Report**\n"
         reply += reporter.display_report()
 
         # split into multiple messages based on reply length

@@ -62,6 +62,7 @@ class Checker:
         reply = ""
 
         # check metadata
+        reply += "> **Metadata**\n"
         try:
             reply += self.check_movie_name_format()
         except:
@@ -105,6 +106,7 @@ class Checker:
             )
 
         # check video
+        reply += "> **Video & Audio Tracks**\n"
         try:
             reply += self.check_video_track()
         except:
@@ -1401,7 +1403,7 @@ class Checker:
     def print_text_tracks(self):
         reply = ""
         if len(self.mediainfo["text"]) > 0:
-            reply += "Text Tracks:\n"
+            reply += "> **Text Tracks**\n"
             reply += "```"
             for i, _ in enumerate(self.mediainfo["text"]):
                 reply += self._section_id("text", i) + ":"
@@ -1518,7 +1520,7 @@ class Checker:
     def print_chapters(self):
         reply = ""
         if len(self.mediainfo["menu"]) > 0 and len(self.mediainfo["menu"][0]) > 0:
-            reply += "Chapters:\n"
+            reply += "> **Chapters**\n"
             reply += "```"
             for ch in self.mediainfo["menu"][0]:
                 if ch["time"]:
