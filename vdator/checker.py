@@ -1057,6 +1057,10 @@ class Checker:
 
         if len(self.mediainfo["audio"]) > 0:
             for i, audio_track in enumerate(self.mediainfo["audio"]):
+                # skip commentary tracks
+                if self._is_commentary_track(audio_track["title"]):
+                    continue
+
                 if "format" in audio_track and audio_track["format"] == "FLAC":
                     channels = float(
                         "".join(
@@ -1135,7 +1139,7 @@ class Checker:
     def _check_commentary(self, i):
         reply, is_commentary = "", False
 
-        if self._is_commentary_track(self.mediainfo["audio"][i]["title"].lower()):
+        if self._is_commentary_track(self.mediainfo["audio"][i]["title"]):
             is_commentary = True
             # audio = dict{'name':'...', 'language':'...'}
             if self.bdinfo["audio"][i]["name"].count("/") >= 1:
