@@ -1006,7 +1006,7 @@ class Checker:
                                 mediainfo_audio_title = self.mediainfo["audio"][i][
                                     "title"
                                 ].strip()
-                                mediainfo_audio_title = self._remove_until_first_codec(
+                                mediainfo_audio_title, _ = self._remove_until_first_codec(
                                     mediainfo_audio_title
                                 )
                                 if title != mediainfo_audio_title:
@@ -1057,8 +1057,13 @@ class Checker:
 
         if len(self.mediainfo["audio"]) > 0:
             for i, audio_track in enumerate(self.mediainfo["audio"]):
-                # skip commentary tracks
-                if self._is_commentary_track(audio_track["title"]):
+                # skip if no title
+                if "title" not in audio_track:
+                    continue
+
+                # skip if no codec info
+                audio_title, found_codec = self._remove_until_first_codec(audio_track["title"])
+                if not found_codec:
                     continue
 
                 if "format" in audio_track and audio_track["format"] == "FLAC":
@@ -1101,7 +1106,6 @@ class Checker:
                         + bit_depth
                     )
 
-                    audio_title = self._remove_until_first_codec(audio_track["title"])
                     if test_title == audio_title:
                         reply += self.reporter.print_report(
                             "correct",
@@ -1125,16 +1129,17 @@ class Checker:
         return reply
 
     def _remove_until_first_codec(self, title):
-        title2 = title
+        title2, found = title, False
         if " / " in title:
             for part in title.split(" / "):
                 if self.codecs.is_audio_title(part):
                     # stop when we get first codec
+                    found = True
                     break
                 else:
                     # remove part since its not a codec
                     title2 = " / ".join(title2.split(" / ")[1:]).strip()
-        return title2
+        return title2, found
 
     def _check_commentary(self, i):
         reply, is_commentary = "", False
