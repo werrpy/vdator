@@ -679,6 +679,7 @@ class Checker:
                 )
             main_audio_title = self.mediainfo["audio"][0]["title"].split(" / ")
 
+            was_atmos = False
             for part in main_audio_title:
                 if self.codecs.is_audio_title(part):
                     audio_codec_title = self.codecs.get_audio_codec_title_name(part)
@@ -690,7 +691,8 @@ class Checker:
                             "error",
                             "No title name found for audio codec: `" + part + "`",
                         )
-                elif is_number(part):
+                    was_atmos = part == "Dolby TrueHD/Atmos Audio"
+                elif is_number(part) and not was_atmos:
                     # channel
                     release_name += "." + part
 
