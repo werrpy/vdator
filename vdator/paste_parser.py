@@ -153,10 +153,7 @@ class PasteParser:
                         audio_track = (
                             self.bdinfo_parser.playlist_report_format_audio_track(l)
                         )
-                        if (
-                            "-ac3 embedded" not in l.lower()
-                            and "ac3 embedded" in l.lower()
-                        ):
+                        if self.bdinfo_parser.has_compat_track(l):
                             (
                                 audio_track,
                                 compat_track,
