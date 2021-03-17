@@ -1006,7 +1006,10 @@ class Checker:
                                 mediainfo_audio_title = self.mediainfo["audio"][i][
                                     "title"
                                 ].strip()
-                                mediainfo_audio_title, _ = self._remove_until_first_codec(
+                                (
+                                    mediainfo_audio_title,
+                                    _,
+                                ) = self._remove_until_first_codec(
                                     mediainfo_audio_title
                                 )
                                 if title != mediainfo_audio_title:
@@ -1062,7 +1065,9 @@ class Checker:
                     continue
 
                 # skip if no codec info
-                audio_title, found_codec = self._remove_until_first_codec(audio_track["title"])
+                audio_title, found_codec = self._remove_until_first_codec(
+                    audio_track["title"]
+                )
                 if not found_codec:
                     continue
 

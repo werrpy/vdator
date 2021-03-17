@@ -6,6 +6,17 @@ class BDInfoParser:
     Parse BDInfo
     """
 
+    def __init__(self):
+        self.embedded_track_types = ["ac3 core", "ac3 embedded"]
+        # ['-ac3 core', '-ac3 embedded']
+        self.embedded_track_types_excluded = [
+            "-" + t for t in self.embedded_track_types
+        ]
+        # ['\\(ac3 core:', '\\(ac3 embedded:']
+        self.embedded_track_types_regex = [
+            r"\(" + a + ":" for a in self.embedded_track_types
+        ]
+
     def format_track_name(self, name):
         """
         Format track name
@@ -74,6 +85,16 @@ class BDInfoParser:
 
         return name
 
+    def has_compat_track(self, audio_track_name):
+        audio_track_name = audio_track_name.lower()
+        for i in range(0, len(self.embedded_track_types)):
+            if (
+                self.embedded_track_types_excluded[i] not in audio_track_name
+                and self.embedded_track_types[i] in audio_track_name
+            ):
+                return True
+        return False
+
     def format_audio_compatibility_track(self, audio_track):
         """
         Format audio compatibility track
@@ -89,8 +110,16 @@ class BDInfoParser:
         audio track, compatibility track
         [dict{'name':'...', 'language':'...'}, dict{'name':'...', 'language':'...'}]
         """
+        audio_track_name_lower = audio_track["name"].lower()
+        for i, track_type in enumerate(self.embedded_track_types):
+            if track_type in audio_track_name_lower:
+                embedded_track_type_index = i
+                break
+
         audio_parts = re.split(
-            r"\(ac3 embedded:", audio_track["name"], flags=re.IGNORECASE
+            self.embedded_track_types_regex[embedded_track_type_index],
+            audio_track["name"],
+            flags=re.IGNORECASE,
         )
         audio_track["name"] = self.format_track_name(audio_parts[0])
 
@@ -231,9 +260,7 @@ class BDInfoParser:
             bdinfo["video"].append(track_name)
         elif l2.startswith("audio:"):
             audio_track = self.format_audio_track(track_name)
-            if ("-ac3 embedded" not in audio_track["name"].lower()) and (
-                "ac3 embedded" in audio_track["name"].lower()
-            ):
+            if self.has_compat_track(audio_track["name"]):
                 (
                     audio_track,
                     compat_track,
