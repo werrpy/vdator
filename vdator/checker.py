@@ -606,7 +606,7 @@ class Checker:
         test_year = int(test_year)
         return test_year in range(year - offset, (year + offset) + 1)
 
-    def _construct_release_name(self, reply, cut=None, hybird=False):
+    def _construct_release_name(self, reply, cut=None, hybird=False, repack=False):
         release_name = ""
 
         if not self.source_detector.is_dvd():
@@ -641,6 +641,10 @@ class Checker:
             # with or without hybrid
             if hybird:
                 release_name += ".Hybrid"
+
+            # with or without repack
+            if repack:
+                release_name += ".REPACK"
 
             # check cuts here
             if cut is not None:
@@ -720,9 +724,13 @@ class Checker:
                 complete_name = complete_name.split("/")[-1]
 
             # possible release names
+            complete_name_lc = complete_name.lower()
             possible_release_names = [
                 self._construct_release_name(
-                    reply, cut, hybird=("hybrid" in complete_name.lower())
+                    reply,
+                    cut,
+                    hybird=("hybrid" in complete_name_lc),
+                    repack=("repack" in complete_name_lc),
                 )
                 for cut in CUTS
             ]
