@@ -138,7 +138,7 @@ async def on_message(message):
 
     for url in supported_urls:
         reply = "<" + url + ">" + "\n"
-        
+
         try:
             # get paste
             paste = url_parser.get_paste(url)
@@ -166,13 +166,17 @@ async def on_message(message):
                         checker.setup(bdinfo, mediainfo, eac3to, message.channel.name)
                     except:
                         traceback.print_exc()
-                        reply += reporter.print_report("fail", "vdator failed to setup checker")
+                        reply += reporter.print_report(
+                            "fail", "vdator failed to setup checker"
+                        )
                     else:
                         try:
                             reply += checker.run_checks()
                         except:
                             traceback.print_exc()
-                            reply += reporter.print_report("fail", "vdator failed to parse")
+                            reply += reporter.print_report(
+                                "fail", "vdator failed to parse"
+                            )
 
         # report
         reply += "> **Report**\n"
