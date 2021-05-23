@@ -137,27 +137,42 @@ async def on_message(message):
     supported_urls = url_parser.extract_supported_urls(message.content)
 
     for url in supported_urls:
-        paste = url_parser.get_paste(url)
-        (bdinfo, mediainfo, eac3to) = paste_parser.parse(paste)
-
         reply = "<" + url + ">" + "\n"
-
+        
         try:
-            # parse mediainfo
-            mediainfo = mediainfo_parser.parse(mediainfo)
-            # setup/reset reporter
-            reporter.setup()
-            # setup checker
-            checker.setup(bdinfo, mediainfo, eac3to, message.channel.name)
+            # get paste
+            paste = url_parser.get_paste(url)
         except:
             traceback.print_exc()
-            reply += reporter.print_report("fail", "vdator failed to parse")
+            reply += reporter.print_report("fail", "Failed to get paste")
         else:
             try:
-                reply += checker.run_checks()
+                (bdinfo, mediainfo, eac3to) = paste_parser.parse(paste)
             except:
                 traceback.print_exc()
-                reply += reporter.print_report("fail", "vdator failed to parse")
+                reply += reporter.print_report("fail", "Paste parser failed")
+            else:
+                try:
+                    # parse mediainfo
+                    mediainfo = mediainfo_parser.parse(mediainfo)
+                except:
+                    traceback.print_exc()
+                    reply += reporter.print_report("fail", "Mediainfo parser failed")
+                else:
+                    # setup/reset reporter
+                    reporter.setup()
+                    try:
+                        # setup checker
+                        checker.setup(bdinfo, mediainfo, eac3to, message.channel.name)
+                    except:
+                        traceback.print_exc()
+                        reply += reporter.print_report("fail", "vdator failed to setup checker")
+                    else:
+                        try:
+                            reply += checker.run_checks()
+                        except:
+                            traceback.print_exc()
+                            reply += reporter.print_report("fail", "vdator failed to parse")
 
         # report
         reply += "> **Report**\n"

@@ -1554,11 +1554,12 @@ class Checker:
                         reply += " title: " + title["title"]
                 reply += "\n"
             reply += "```"
-            reply += (
-                "Chapter languages: `"
-                + ", ".join(self.mediainfo["menu"][0][0]["languages"])
-                + "`\n"
-            )
+            if len(self.mediainfo["menu"][0][0]["languages"]) > 0:
+                reply += (
+                    "Chapter languages: `"
+                    + ", ".join(self.mediainfo["menu"][0][0]["languages"])
+                    + "`\n"
+                )
         else:
             reply += self.reporter.print_report("info", "No chapters")
         return reply
@@ -1598,6 +1599,11 @@ class Checker:
                             invalid_ch_lang_nums.append(str(j + 1))
 
                     for title in ch["titles"]:
+                        # store as key "NA" if there is no chapter language set
+                        if title["language"] is None:
+                            title["language"] = "NA"
+                        if title["language"] not in chapter_phrases:
+                            chapter_phrases[title["language"]] = ""
                         chapter_phrases[title["language"]] += title["title"] + "\n"
 
                 if len(invalid_ch_lang_nums) > 0:
@@ -1605,19 +1611,24 @@ class Checker:
                         reply += self.reporter.print_report(
                             "error", "All chapters do not have a language set"
                         )
-                    else:
+                    elif len(invalid_ch_lang_nums) > 0:
                         reply += self.reporter.print_report(
                             "error",
                             "The following chapters do not have a language set: `"
                             + ", ".join(invalid_ch_lang_nums)
                             + "`",
                         )
-                else:
-                    reply += self.reporter.print_report(
-                        "correct", "All chapters have a language set"
-                    )
+                    else:
+                        reply += self.reporter.print_report(
+                            "correct", "All chapters have a language set"
+                        )
 
                 for k, chapter_phrase in chapter_phrases.items():
+                    if k == "NA":
+                        reply += self.reporter.print_report(
+                            "error", "No chapter language set"
+                        )
+                        continue
                     if chapter_phrase:
                         chapter_langs[k] = list(set(chapter_langs[k]))
                         try:
@@ -1697,9 +1708,9 @@ class Checker:
                     should_have_chapters = True
         if should_have_chapters:
             if len(self.mediainfo["menu"]) > 0:
-                reply += self.reporter.print_report("correct", "Has chapters")
+                reply += self.reporter.print_report("correct", "Has chapters (from eac3to log)")
             else:
-                reply += self.reporter.print_report("error", "Should have chapters")
+                reply += self.reporter.print_report("error", "Should have chapters (from eac3to log)")
         return reply
 
     def _is_commentary_track(self, title):
