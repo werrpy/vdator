@@ -36,6 +36,7 @@ Chapter padding
 - [Lint](#lint)
 - [Using](#using)
 - [Adding a pastebin site](#adding-a-pastebin-site)
+- [API](#api)
 
 ### Supported pastebin sites
 
@@ -158,3 +159,26 @@ Edit `vdator/data/urls.json` and add your pastebin site.
     'raw_url': 'https://example.com/raw/{}'
 }
 ```
+
+### API
+
+Run with `python api.py`
+
+Example using Postman:
+```
+POST http://127.0.0.1:5000/text
+    Body, raw
+    [INSERT TEXT HERE]
+```
+
+Gives back json:
+```
+{
+	"discord_reply":"...",
+	"html_reply":"..."
+}
+```
+discord_reply - the text that the bot usually sends to discord
+html_reply - discord text formatted as html
+
+Insert the `html_reply` text into the `example_html_viewer.html` to see it formatted simialr to discord.

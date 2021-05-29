@@ -6,7 +6,7 @@ POST http://127.0.0.1:5000/text
     Body, raw
     [INSERT TEXT HERE]
     
-{"reply":"..."}
+{"discord_reply":"...", "html_reply":"..."}
 """
 
 import json, os, traceback
@@ -26,17 +26,17 @@ from reporter import Reporter, add_status_reactions
 from checker import Checker
 
 # initialize parsers
-with open('data/urls.json') as f:
-  urls = json.load(f)['urls']
-  url_parser = URLParser(urls)
+with open("data/urls.json") as f:
+    urls = json.load(f)["urls"]
+    url_parser = URLParser(urls)
 
 bdinfo_parser = BDInfoParser()
 paste_parser = PasteParser(bdinfo_parser)
 mediainfo_parser = MediaInfoParser()
 
-with open('data/codecs.json') as f:
-  codecs = json.load(f)
-  codecs_parser = CodecsParser(codecs)
+with open("data/codecs.json") as f:
+    codecs = json.load(f)
+    codecs_parser = CodecsParser(codecs)
 
 source_detector = SourceDetector()
 reporter = Reporter()
@@ -44,13 +44,14 @@ checker = Checker(codecs_parser, source_detector, reporter)
 
 app = Flask(__name__)
 
-@app.route('/text', methods=['POST'])
+
+@app.route("/text", methods=["POST"])
 def parse_text():
-    '''
+    """
     POST http://127.0.0.1:5000/text
     Body, raw
     [INSERT TEXT HERE]
-    '''
+    """
 
     reply = ""
 
@@ -72,33 +73,46 @@ def parse_text():
             reporter.setup()
             try:
                 # setup checker
-                checker.setup(bdinfo, mediainfo, eac3to, 'remux-bot')
+                checker.setup(bdinfo, mediainfo, eac3to, "remux-bot")
             except:
                 traceback.print_exc()
-                reply += reporter.print_report(
-                    "fail", "vdator failed to setup checker"
-                )
+                reply += reporter.print_report("fail", "vdator failed to setup checker")
             else:
                 try:
                     reply += checker.run_checks()
                 except:
                     traceback.print_exc()
-                    reply += reporter.print_report(
-                        "fail", "vdator failed to parse"
-                    )
+                    reply += reporter.print_report("fail", "vdator failed to parse")
     # report
     reply += "> **Report**\n"
     reply += reporter.display_report()
-    
+
     # prevent infinite loop with 2 multi-line code blocks
     # https://github.com/bitjockey42/discord-markdown/issues/6
-    reply_to_convert = reply.replace("```","===")
+    reply_to_convert = reply.replace("```", "===")
+    # remove quotes around sections
+    reply_to_convert = reply_to_convert.replace("> **", "**")
+
+    # convert to html
     reply_html = convert_to_html(reply_to_convert)
-    
-    data = {
-        'discord_reply': reply,
-        'html_reply': reply_html
-    }
+
+    # format html
+    reply_html = reply_html.replace("===", "<br>")
+    # emojis
+    reply_html = reply_html.replace(
+        "☑",
+        "<img src='http://discord.com//assets/86c16c39d96283551fd4ca7392e22681.svg' height='16'>",
+    )
+    reply_html = reply_html.replace(
+        "⚠",
+        "<img src='https://discord.com/assets/289673858e06dfa2e0e3a7ee610c3a30.svg' height='16'>",
+    )
+    reply_html = reply_html.replace(
+        "❌",
+        "<img src='https://discord.com/assets/8becd37ab9d13cdfe37c08c496a9def3.svg' height='16'>",
+    )
+
+    data = {"discord_reply": reply, "html_reply": reply_html}
 
     return jsonify(data)
 
