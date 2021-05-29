@@ -1448,7 +1448,7 @@ class Checker:
         if len(self.mediainfo["text"]) == 0:
             return reply
 
-        lang_num = 1 # Used to keep track of first actual sub.
+        language_number = 1 # Used to keep track of first actual sub.
         forced_checked, commentary_checked = False, False
         forced_track, commentary_track = False, False
         forced_track_eng_first = False
@@ -1463,7 +1463,7 @@ class Checker:
             if "language" in self.mediainfo["text"][i]:
                 track_language = self.mediainfo["text"][i]["language"].lower()
             else:
-                # Effor printed elsewhere.
+                # Error printed elsewhere.
                 subs_in_order = False
             if "forced" in self.mediainfo["text"][i]:
                 forced_track = self.mediainfo["text"][i]["forced"].lower() == 'yes'
@@ -1503,7 +1503,7 @@ class Checker:
                             self._section_id('Text', i-1)
                         )
                     )
-            elif lang_num > 1 and track_language < prev_track_language:
+            elif language_number > 1 and track_language < prev_track_language:
                 subs_in_order = False
                 prev_track_language = ''
                 reply += self.reporter.print_report(
@@ -1513,8 +1513,8 @@ class Checker:
                         self._section_id('text', i-1)
                     )
                 )
-            elif lang_num == 1 and track_language != 'english':
-                lang_num += 1
+            elif language_number == 1 and track_language != 'english':
+                language_number += 1
             prev_track_language = track_language
             prev_track_name = track_name
 
