@@ -1450,10 +1450,8 @@ class Checker:
 
         language_number = 1 # Used to keep track of first actual sub.
         forced_checked, commentary_checked = False, False
-        forced_track, commentary_track = False, False
         forced_track_eng_first = False
-        track_language, prev_track_language = '', ''
-        track_name, prev_track_name = '', ''
+        prev_track_language, prev_track_name = '', ''
         subs_in_order = True
 
         for i, _ in enumerate(self.mediainfo["text"]):
@@ -1497,10 +1495,10 @@ class Checker:
             elif track_language == prev_track_language:
                 if prev_track_name != '' and track_name < prev_track_name:
                     reply += self.reporter.print_report(
-                        "warning", "Text{} might need to come after Text {}, alphabetical within language"
+                        "warning", "Text {} might need to come after Text {}, alphabetical within language"
                         .format(
-                            self._section_id('Text', i),
-                            self._section_id('Text', i-1)
+                            self._section_id('Text', i-1),
+                            self._section_id('Text', i)
                         )
                     )
             elif language_number > 1 and track_language < prev_track_language:
@@ -1509,8 +1507,8 @@ class Checker:
                 reply += self.reporter.print_report(
                     "error", "Text {} should come after Text {}, language order"
                     .format(
-                        self._section_id('text', i),
-                        self._section_id('text', i-1)
+                        self._section_id('text', i-1),
+                        self._section_id('text', i)
                     )
                 )
             elif language_number == 1 and track_language != 'english':
