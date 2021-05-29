@@ -22,7 +22,7 @@ isort==5.7.0
 itsdangerous==2.0.1
 Jinja2==3.0.1
 joblib==0.16.0
-langdetect==1.0.8
+langdetect==1.0.9
 lazy-object-proxy==1.4.3
 lxml==4.6.3
 MarkupSafe==2.0.1
