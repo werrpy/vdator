@@ -34,7 +34,7 @@ numpy==1.20.3
 pathspec==0.8.1
 pydash==5.0.0
 pylint==2.6.0
-pymediainfo==5.0.3
+pymediainfo==5.1.0
 python-dotenv==0.15.0
 regex==2020.7.14
 requests==2.25.1
