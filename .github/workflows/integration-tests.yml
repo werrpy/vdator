@@ -1,4 +1,4 @@
-name: Python unit test
+name: Python integration tests
 
 on: [push, pull_request]
 
