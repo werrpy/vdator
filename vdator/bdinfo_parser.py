@@ -74,12 +74,14 @@ class BDInfoParser:
         -------
         str formatted audio track name
         """
-        # remove dialog normalization
-        if "DN" in name.upper() and " / " in name:
-            name = name.rpartition(" / ")[0]
-
         # remove (DTS Core:...)
         name = re.sub(r"\(DTS Core:.*\)", "", name).strip()
+
+        # remove dialog normalization
+        # needs to be after removing (DTS Core:...)
+        # since the dts core track can have dialog normalization which will break its regex
+        if "DN" in name.upper() and " / " in name:
+            name = name.rpartition(" / ")[0]
 
         name = self.format_track_name(name)
 
