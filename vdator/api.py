@@ -12,6 +12,7 @@ POST http://127.0.0.1:5000/text
 import json, os, traceback
 from urllib.parse import unquote
 from flask import Flask, jsonify, request
+from discord_markdown.discord_markdown import convert_to_html
 
 # parsers
 from helpers import balanced_blockquotes, split_string
@@ -88,8 +89,18 @@ def parse_text():
     # report
     reply += "> **Report**\n"
     reply += reporter.display_report()
+    
+    # prevent infinite loop with 2 multi-line code blocks
+    # https://github.com/bitjockey42/discord-markdown/issues/6
+    reply_to_convert = reply.replace("```","===")
+    reply_html = convert_to_html(reply_to_convert)
+    
+    data = {
+        'discord_reply': reply,
+        'html_reply': reply_html
+    }
 
-    return jsonify({'reply': reply})
+    return jsonify(data)
 
 
 app.run()
