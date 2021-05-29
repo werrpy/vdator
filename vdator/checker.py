@@ -1265,8 +1265,13 @@ class Checker:
             )
             return reply
 
+        mediainfo_audio_title = self.mediainfo["audio"][i]["title"]
+        (mediainfo_audio_title, _) = self._remove_until_first_codec(
+            mediainfo_audio_title
+        )
+
         # [codec, channel, sampling rate, bit rate, bit depth]
-        mediainfo_parts = self.mediainfo["audio"][i]["title"].split(" / ")
+        mediainfo_parts = mediainfo_audio_title.split(" / ")
         if len(mediainfo_parts) <= 4:
             reply += self.reporter.print_report(
                 "warning", "Could not verify audio " + self._section_id("audio", i)
@@ -1274,11 +1279,8 @@ class Checker:
             return reply
 
         # verify audio conversions
-        # mediainfo_parts size is usually 5. 6 if we have a custom title (ex. commentary, surround upmix, etc.)
-        mediainfo_offset = 1 if (len(mediainfo_parts) > 5) else 0
-
-        if mediainfo_parts[0 + mediainfo_offset] == audio_to:
-            if mediainfo_parts[1 + mediainfo_offset] != bdinfo_audio_parts[1]:
+        if mediainfo_parts[0] == audio_to:
+            if mediainfo_parts[1] != bdinfo_audio_parts[1]:
                 reply += self.reporter.print_report(
                     "error",
                     "Audio "
@@ -1286,18 +1288,14 @@ class Checker:
                     + ": Channels should be `"
                     + bdinfo_audio_parts[1]
                     + "` instead of `"
-                    + mediainfo_parts[1 + mediainfo_offset]
+                    + mediainfo_parts[1]
                     + "`",
                 )
 
             # mediainfo bitrate should be less than bdinfo bitrate
             try:
                 m_bit_rate = int(
-                    "".join(
-                        re.findall(
-                            r"\d+", mediainfo_parts[3 + mediainfo_offset].strip()
-                        )
-                    )
+                    "".join(re.findall(r"\d+", mediainfo_parts[3].strip()))
                 )
 
                 bd_bit_rate = int(
