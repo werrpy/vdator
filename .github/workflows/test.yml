@@ -2,13 +2,17 @@ name: Python test
 
 on: [push, pull_request]
 
+defaults:
+  run:
+    working-directory: ./vdator
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
 
     steps:
       - uses: actions/checkout@v2
@@ -16,11 +20,13 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install PyHunSpell
+        run: sudo apt-get install python-dev libhunspell-dev
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f vdator/requirements.txt ]; then pip install -r vdator/requirements.txt; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with black
         uses: psf/black@stable
         with:
-          args: "vdator/. --check"
+          args: ". --check"
