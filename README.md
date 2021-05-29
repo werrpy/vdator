@@ -178,7 +178,7 @@ Gives back json:
 	"html_reply":"..."
 }
 ```
-discord_reply - the text that the bot usually sends to discord
-html_reply - discord text formatted as html
+**discord_reply** - the text that the bot usually sends to discord  
+**html_reply** - discord text formatted as html
 
 Insert the `html_reply` text into the `example_html_viewer.html` to see it formatted simialr to discord.
