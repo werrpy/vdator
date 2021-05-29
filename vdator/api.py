@@ -12,31 +12,29 @@ POST http://127.0.0.1:5000/text
 PORT = 5000
 
 import json, os, traceback
-from urllib.parse import unquote
 from flask import Flask, jsonify, request
-from discord_markdown.discord_markdown import convert_to_html
+from discord_markdown.discord_markdown import (
+    convert_to_html as discord_markdown_convert_to_html,
+)
 
 # parsers
-from helpers import balanced_blockquotes, split_string
-from url_parser import URLParser
 from bdinfo_parser import BDInfoParser
 from paste_parser import PasteParser
 from media_info_parser import MediaInfoParser
 from codecs_parser import CodecsParser
 from source_detector import SourceDetector
-from reporter import Reporter, add_status_reactions
+from reporter import Reporter
 from checker import Checker
 
-# initialize parsers
-with open("data/urls.json") as f:
-    urls = json.load(f)["urls"]
-    url_parser = URLParser(urls)
+# script location
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
+# initialize parsers
 bdinfo_parser = BDInfoParser()
 paste_parser = PasteParser(bdinfo_parser)
 mediainfo_parser = MediaInfoParser()
 
-with open("data/codecs.json") as f:
+with open(os.path.join(__location__, "data/codecs.json")) as f:
     codecs = json.load(f)
     codecs_parser = CodecsParser(codecs)
 
@@ -96,7 +94,7 @@ def parse_text():
     reply_to_convert = reply_to_convert.replace("> **", "**")
 
     # convert to html
-    reply_html = convert_to_html(reply_to_convert)
+    reply_html = discord_markdown_convert_to_html(reply_to_convert)
 
     # format html
     reply_html = reply_html.replace("===", "<br>")
