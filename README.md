@@ -2,6 +2,8 @@
 > Remux validator Discord bot
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Test Dependencies](https://github.com/werrpy/vdator/actions/workflows/test-dependencies.yml/badge.svg)](https://github.com/werrpy/vdator/actions/workflows/test-dependencies.yml)
+[![Integration Tests](https://github.com/werrpy/vdator/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/werrpy/vdator/actions/workflows/integration-tests.yml)
 
 Takes a Pastebin link with BDInfo and MediaInfo dump, and validates the remux.
 
