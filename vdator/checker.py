@@ -1445,60 +1445,79 @@ class Checker:
     def check_text_order(self):
         reply = ""
 
-        if len(self.mediainfo["text"]) > 0:
-            english_first = False
-            has_english = False
+        if len(self.mediainfo["text"]) == 0:
+            return reply
 
-            # list of subtitle languages without a title
-            text_langs_without_title = list()
-            for i, _ in enumerate(self.mediainfo["text"]):
-                if (
-                    "language" in self.mediainfo["text"][i]
-                    and "title" not in self.mediainfo["text"][i]
-                ):
-                    text_langs_without_title.append(
-                        self.mediainfo["text"][i]["language"].lower()
-                    )
+        lang_num = 1 # Used to keep track of first actual sub.
+        forced_checked, commentary_checked = False, False
+        forced_track, commentary_track = False, False
+        forced_track_eng_first = False
+        track_language, prev_track_language = '', ''
+        track_name, prev_track_name = '', ''
+        subs_in_order = True
 
-            # check that English subtitles without a title are first if they exist
-            if len(text_langs_without_title) > 0:
-                if "english" in text_langs_without_title:
-                    has_english = True
-                    if text_langs_without_title[0] == "english":
-                        reply += self.reporter.print_report(
-                            "correct", "English subtitles are first"
-                        )
-                        english_first = True
-                    else:
-                        reply += self.reporter.print_report(
-                            "error", "English subtitles should be first"
-                        )
-
-            # check if all other languages are in alphabetical order
-            text_langs_without_title_and_english = [
-                x for x in text_langs_without_title if x != "english"
-            ]
-            if text_langs_without_title_and_english == sorted(
-                text_langs_without_title_and_english
-            ):
+        for i, _ in enumerate(self.mediainfo["text"]):
+            forced_track, commentary_track = False, False
+            track_language, track_name = '', ''
+            if "language" in self.mediainfo["text"][i]:
+                track_language = self.mediainfo["text"][i]["language"].lower()
+            if "forced" in self.mediainfo["text"][i]:
+                forced_track = self.mediainfo["text"][i]["forced"].lower() == 'yes'
+            if "title" in self.mediainfo["text"][i]:
+                track_name = self.mediainfo["text"][i]["title"]
+                commentary_track = self._is_commentary_track(track_name)
+            if track_language == '':
+                # Printed error elsewhere.
+                subs_in_order = False
+            if i == 0 and forced_track:
+                forced_track_eng_first = track_language == 'english'
+            elif forced_track and track_language == 'english':
                 reply += self.reporter.print_report(
-                    "correct", "Rest of the subtitles are in alphabetical order"
+                    "error", "Text {} is a forced English track, English must be first"
+                    .format(
+                        self._section_id('text', i)
+                    )
                 )
-            else:
-                if english_first:
-                    reply += self.reporter.print_report(
-                        "error", "Rest of the subtitles should be in alphabetical order"
+            elif not forced_checked:
+                forced_checked = True
+                track_name, track_language = '', ''
+            elif commentary_track:
+                commentary_checked = True
+            elif commentary_checked:
+                reply += self.reporter.print_report(
+                    "error", "Text {} came after the commentary sub(s)"
+                    .format(
+                        self._section_id('text', i)
                     )
-                elif has_english:
+                )
+            elif track_language == prev_track_language:
+                if prev_track_name != '' and track_name < prev_track_name:
                     reply += self.reporter.print_report(
-                        "error",
-                        "English subtitles should be first, rest should be in alphabetical order",
+                        "warning", "Text{} might need to come after Text {}, alphabetical within language"
+                        .format(
+                            self._section_id('Text', i),
+                            self._section_id('Text', i-1)
+                        )
                     )
-                else:
-                    reply += self.reporter.print_report(
-                        "error", "Subtitles should be in alphabetical order"
+            elif lang_num > 1 and track_language < prev_track_language:
+                prev_track_language = ''
+                reply += self.reporter.print_report(
+                    "error", "Text {} should come after Text {}, language order"
+                    .format(
+                        self._section_id('text', i),
+                        self._section_id('text', i-1)
                     )
+                )
+                subs_in_order = False
+            elif lang_num == 1 and track_language != 'english':
+                lang_num += 1
+            prev_track_language = track_language
+            prev_track_name = track_name
 
+        if subs_in_order:
+            reply += self.reporter.print_report(
+                "correct", "Rest of the subtitles are in alphabetical order"
+            )
         return reply
 
     def check_text_default_flag(self):
