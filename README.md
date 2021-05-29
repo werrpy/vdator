@@ -1,5 +1,7 @@
 # vdator
-Remux validator Discord bot
+> Remux validator Discord bot
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Takes a Pastebin link with BDInfo and MediaInfo dump, and validates the remux.
 
@@ -31,6 +33,7 @@ Chapter padding
   * [Updating dependencies](#updating-dependencies)
   * [Running manually](#running-manually)
   * [Running with systemd](#running-with-systemd)
+- [Lint](#lint)
 - [Using](#using)
 - [Adding a pastebin site](#adding-a-pastebin-site)
 
@@ -131,6 +134,11 @@ Set `User` to the user to run vdator as, and `Group` to the user's group (list w
 Replace `/home/USER/vdator/venv/` with the full path to your venv.
 
 Run `systemctl enable vdator` to start on boot. Use systemctl to start/stop vdator, `systemctl start vdator`, `systemctl stop vdator`, `systemctl restart vdator`
+
+### Lint
+```
+black .
+```
 
 ### Using
 
