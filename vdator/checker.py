@@ -1459,19 +1459,22 @@ class Checker:
         for i, _ in enumerate(self.mediainfo["text"]):
             forced_track, commentary_track = False, False
             track_language, track_name = '', ''
+
             if "language" in self.mediainfo["text"][i]:
                 track_language = self.mediainfo["text"][i]["language"].lower()
+            else:
+                # Effor printed elsewhere.
+                subs_in_order = False
             if "forced" in self.mediainfo["text"][i]:
                 forced_track = self.mediainfo["text"][i]["forced"].lower() == 'yes'
             if "title" in self.mediainfo["text"][i]:
                 track_name = self.mediainfo["text"][i]["title"]
                 commentary_track = self._is_commentary_track(track_name)
-            if track_language == '':
-                # Printed error elsewhere.
-                subs_in_order = False
+
             if i == 0 and forced_track:
                 forced_track_eng_first = track_language == 'english'
             elif forced_track and track_language == 'english':
+                subs_in_order = False
                 reply += self.reporter.print_report(
                     "error", "Text {} is a forced English track, English must be first"
                     .format(
@@ -1484,6 +1487,7 @@ class Checker:
             elif commentary_track:
                 commentary_checked = True
             elif commentary_checked:
+                subs_in_order = False
                 reply += self.reporter.print_report(
                     "error", "Text {} came after the commentary sub(s)"
                     .format(
@@ -1500,6 +1504,7 @@ class Checker:
                         )
                     )
             elif lang_num > 1 and track_language < prev_track_language:
+                subs_in_order = False
                 prev_track_language = ''
                 reply += self.reporter.print_report(
                     "error", "Text {} should come after Text {}, language order"
@@ -1508,7 +1513,6 @@ class Checker:
                         self._section_id('text', i-1)
                     )
                 )
-                subs_in_order = False
             elif lang_num == 1 and track_language != 'english':
                 lang_num += 1
             prev_track_language = track_language
