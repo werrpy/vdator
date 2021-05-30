@@ -180,6 +180,8 @@ except:
     reply += self.reporter.print_report("fail", "Error my new check failed")
 ```
 
+Define the method for your check:
+
 ```python
 def my_new_check(self):
     reply = ""
