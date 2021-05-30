@@ -865,7 +865,7 @@ class Checker:
 
         return reply
 
-    #force_version = "Version 57.0.0 \"Till The End\" 2021-05-22"
+    # force_version = "Version 57.0.0 \"Till The End\" 2021-05-22"
     def check_mkvmerge(self, force_version=None):
         reply = ""
 
