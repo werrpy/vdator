@@ -187,7 +187,7 @@ Gives back json:
 **discord_reply** - the text that the bot usually sends to discord  
 **html_reply** - discord text formatted as html
 
-Insert the `html_reply` text into the `example_html_viewer.html` to see it formatted simialr to discord.
+Insert the `html_reply` text into the `example_html_viewer.html` to see it formatted similar to discord.
 
 For testing, force a specific version of mkvmerge with
 
