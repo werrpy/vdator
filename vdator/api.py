@@ -13,9 +13,24 @@ PORT = 5000
 
 import json, os, traceback
 from flask import Flask, jsonify, request
+
 from discord_markdown.discord_markdown import (
+    Compiler,
     convert_to_html as discord_markdown_convert_to_html,
 )
+
+# Override discord_markdown.discord_markdown.Compiler.compile method to disable printing
+def compile(self, markdown=False):
+    if not self._parser.tree:
+        self._parser.parse()
+    self._code = ""
+    for node in self._parser.tree:
+        self._code = self._code + node.eval(markdown=markdown)
+    self._code = self._code.strip()
+    return self._code
+
+
+Compiler.compile = compile
 
 # parsers
 from bdinfo_parser import BDInfoParser
