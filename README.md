@@ -186,3 +186,9 @@ Gives back json:
 **html_reply** - discord text formatted as html
 
 Insert the `html_reply` text into the `example_html_viewer.html` to see it formatted simialr to discord.
+
+For testing, force a specific version of mkvmerge with
+
+````
+export MKVMERGE_VERSION="Version 54.0.0 \"Hill The End\" 2021-05-22" && python api.py
+````
