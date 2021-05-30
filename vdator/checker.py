@@ -98,7 +98,7 @@ class Checker:
             traceback.print_exc()
             reply += self.reporter.print_report("fail", "Error checking muxing mode")
         try:
-            reply += self.check_mkvmerge()
+            reply += self.check_mkvmerge(os.environ.get("MKVMERGE_VERSION"))
         except:
             traceback.print_exc()
             reply += self.reporter.print_report(
@@ -865,7 +865,8 @@ class Checker:
 
         return reply
 
-    def check_mkvmerge(self):
+    #force_version = "Version 57.0.0 \"Till The End\" 2021-05-22"
+    def check_mkvmerge(self, force_version=None):
         reply = ""
 
         version_name_regex_mkvtoolnix = r'"(.*)"'
@@ -898,6 +899,8 @@ class Checker:
             if r.status_code == 200:
                 ## Version 32.0.0 "Astral Progressions" 2019-03-12
                 mkvtoolnix_version_line = r.text.splitlines()[0]
+                if force_version:
+                    mkvtoolnix_version_line = force_version
 
                 mkvtoolnix_version_num = re.search(
                     version_num_regex, mkvtoolnix_version_line

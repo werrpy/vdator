@@ -31,3 +31,5 @@ jobs:
       - name: Test 1
         run: ./test1.sh
         working-directory: ./test
+        env:
+            MKVMERGE_VERSION: "Version 57.0.0 \"Till The End\" 2021-05-22"
