@@ -168,6 +168,8 @@ Edit `vdator/data/urls.json` and add your pastebin site.
 
 Run with `python api.py`
 
+Default is port 5000, to use a different port set the PORT enviornment variable with `export PORT=5000 && python api.py`
+
 Example using Postman:
 ```
 POST http://127.0.0.1:5000/text

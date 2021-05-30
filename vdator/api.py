@@ -9,8 +9,6 @@ POST http://127.0.0.1:5000/text
 {"discord_reply":"...", "html_reply":"..."}
 """
 
-PORT = 5000
-
 import json, os, traceback
 from flask import Flask, jsonify, request
 
@@ -133,4 +131,5 @@ def parse_text():
     return jsonify(data)
 
 
+PORT = os.environ.get('PORT', '5000')
 app.run(port=PORT)
