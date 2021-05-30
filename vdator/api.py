@@ -20,6 +20,7 @@ from discord_markdown.discord_markdown import (
 )
 
 # Override discord_markdown.discord_markdown.Compiler.compile method to disable printing
+# https://github.com/bitjockey42/discord-markdown/blob/9b8d267e3bf1b333bccaae5619a3f2af0a5a54a1/discord_markdown/compiler.py#L29-L37
 def compile(self, markdown=False):
     if not self._parser.tree:
         self._parser.parse()
