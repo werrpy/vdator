@@ -38,6 +38,7 @@ Chapter padding
 - [Lint](#lint)
 - [Using](#using)
 - [Adding a pastebin site](#adding-a-pastebin-site)
+- [Adding a new check](#adding-a-new-check)
 - [API](#api)
 
 ### Supported pastebin sites
@@ -70,7 +71,7 @@ To prevent overwriting the `vdator/.env` file when pulling changes from git, do 
 Use [pip and virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) to run vdator.
 
 In the `vdator` directory run:
-```
+```bash
 python3 -m venv .
 ```
 
@@ -78,8 +79,8 @@ If the command fails to install pip, you will see an error similar to:
 ```
 Error: Command '['python3', '-Im', 'ensurepip', '--upgrade', '--default-pip']' returned non-zero exit status 1.
 ```
-Start over by creating a virutal environment without pip, and then install pip manually inside it:
-```
+Start over by creating a virtual environment without pip, and then install pip manually inside it:
+```bash
 python3 -m venv --without-pip .
 source bin/activate
 curl https://bootstrap.pypa.io/get-pip.py | python3
@@ -92,7 +93,7 @@ Install [PyHunSpell](https://github.com/blatinier/pyhunspell#installation)
 
 Install dependencies
 
-```
+```bash
 source bin/activate
 pip3 install -r requirements.txt
 deactivate
@@ -100,7 +101,7 @@ deactivate
 
 #### Updating dependencies
 
-```
+```bash
 source bin/activate
 pip3 install -r requirements.txt --upgrade
 pip3 freeze > requirements.txt
@@ -110,7 +111,7 @@ deactivate
 #### Running manually
 
 Run the bot manually for testing, exceptions will get printed:
-```
+```bash
 source bin/activate
 python3 main.py
 ```
@@ -143,7 +144,7 @@ Replace `/home/USER/vdator/venv/` with the full path to your venv.
 Run `systemctl enable vdator` to start on boot. Use systemctl to start/stop vdator, `systemctl start vdator`, `systemctl stop vdator`, `systemctl restart vdator`
 
 ### Lint
-```
+```bash
 black .
 ```
 
@@ -166,11 +167,39 @@ Edit `vdator/data/urls.json` and add your pastebin site.
 }
 ```
 
+### Adding a new check
+
+Edit `vdator/checker.py`.
+
+In the `run_checks()` method, add 
+```python
+try:
+    reply += self.my_new_check()
+except:
+    traceback.print_exc()
+    reply += self.reporter.print_report("fail", "Error my new check failed")
+```
+
+```python
+def my_new_check(self):
+    reply = ""
+    # use self.bdinfo, self.mediainfo, self.eac3to
+    # use has() and has_many() to check if the bdinfo/mediainfo keys you need exist, for example:
+    # if has(self.bdinfo, "video"):
+        # safe to use self.bdinfo["video"] here
+    # if has_many(self.mediainfo, "video.0", ["height"]):
+        # safe to use self.mediainfo["video"][0]["height"] here
+    # use self.reporter.print_report() to print status messages
+    reply += self.reporter.print_report("info", "Some info message")
+    # lastly return the string result of the check which is appended to the bot reply in run_checks()
+    return reply
+```
+
 ### API
 
 Run with `python api.py`
 
-Default is port 5000, to use a different port set the PORT enviornment variable with `export PORT=5000 && python api.py`
+Default is port 5000, to use a different port set the PORT environment variable with `export PORT=5000 && python api.py`
 
 Example using Postman:
 ```
@@ -180,7 +209,7 @@ POST http://127.0.0.1:5000/text
 ```
 
 Gives back json:
-```
+```json
 {
 	"discord_reply":"...",
 	"html_reply":"..."
@@ -193,6 +222,6 @@ Insert the `html_reply` text into the `example_html_viewer.html` to see it forma
 
 For testing, force a specific version of mkvmerge with
 
-````
+````bash
 export MKVMERGE_VERSION="Version 54.0.0 \"Hill The End\" 2021-05-22" && python api.py
 ````
