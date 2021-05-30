@@ -63,6 +63,8 @@ Request a [TMDB API Key](https://developers.themoviedb.org/3/getting-started/int
 
 Don't forget to create channels on the server and set them in `vdator/.env` for `REVIEW_CHANNELS`, `REVIEW_REPLY_CHANNELS`, and `BOT_CHANNELS`.
 
+To prevent overwriting the `vdator/.env` file when pulling changes from git, do `git update-index --skip-worktree vdator/.env`. When you want to pull a new `.env` file, do `git update-index --no-skip-worktree vdator/.env`.
+
 #### Create a python3 virtual environment:
 
 Use [pip and virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) to run vdator.
