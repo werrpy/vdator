@@ -1,4 +1,4 @@
-name: Python dependencies test
+name: lint
 
 on: [push, pull_request]
 

@@ -1,4 +1,4 @@
-name: Python integration tests
+name: integration tests
 
 on: [push, pull_request]
 
