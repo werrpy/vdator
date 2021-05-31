@@ -70,6 +70,8 @@ def parse_text():
     reply = ""
 
     try:
+        # setup/reset reporter
+        reporter.setup()
         text = request.get_data().decode("utf-8")
         bdinfo, mediainfo, eac3to = paste_parser.parse(text)
     except:
@@ -84,8 +86,6 @@ def parse_text():
                 traceback.print_exc()
                 reply += reporter.print_report("fail", "Mediainfo parser failed")
             else:
-                # setup/reset reporter
-                reporter.setup()
                 try:
                     # setup checker
                     checker.setup(bdinfo, mediainfo, eac3to, "remux-bot")

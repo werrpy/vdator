@@ -140,6 +140,8 @@ async def on_message(message):
         reply = "<" + url + ">" + "\n"
 
         try:
+            # setup/reset reporter
+            reporter.setup()
             # get paste
             r = requests.get(url)
             r.raise_for_status()
@@ -164,8 +166,6 @@ async def on_message(message):
                             "fail", "Mediainfo parser failed"
                         )
                     else:
-                        # setup/reset reporter
-                        reporter.setup()
                         try:
                             # setup checker
                             checker.setup(
