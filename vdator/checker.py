@@ -487,12 +487,15 @@ class Checker:
             except imdb._exceptions.IMDbParserError:
                 reply += self.reporter.print_report(
                     "error",
-                    "Invalid IMDB id: `" + self.mediainfo["general"][0]["imdb"] + "`",
+                    "Invalid IMDb id: `" + self.mediainfo["general"][0]["imdb"] + "`",
                 )
             except:
                 # imdb._exceptions.IMDbDataAccessError
                 reply += self.reporter.print_report(
-                    "info", "Failed to get IMDB movie data"
+                    "info",
+                    "Failed to get IMDb movie data for id: `"
+                    + self.mediainfo["general"][0]["imdb"]
+                    + "`",
                 )
             else:
                 matched["imdb_title"] = movie_data["name"] == imdb_movie["title"]
@@ -512,8 +515,10 @@ class Checker:
                 tmdb_info = tmdb_data.info()
             except:
                 reply += self.reporter.print_report(
-                    "error",
-                    "Invalid TMDb id: `" + self.mediainfo["general"][0]["tmdb"] + "`",
+                    "info",
+                    "Failed to get TMDb data for id: `"
+                    + self.mediainfo["general"][0]["tmdb"]
+                    + "`",
                 )
             else:
                 if is_movie:
