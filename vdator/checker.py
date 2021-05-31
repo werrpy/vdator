@@ -648,7 +648,7 @@ class Checker:
         if has_many(self.mediainfo, "video.0", ["height", "title"]) and has(
             self.mediainfo, "audio.0.title"
         ):
-            # Name.S01E01
+            # Name.S01E01 or Name.S01E01E02
             tv_show_name_search = re.search(
                 r"(.+)\s-\s(S\d{2}(E\d{2})+)",
                 self.mediainfo["general"][0]["movie_name"],
