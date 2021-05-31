@@ -7,7 +7,7 @@ beautifulsoup4==4.9.3
 black==20.8b1
 certifi==2020.12.5
 chardet==4.0.0
-click==7.1.2
+click==8.0.1
 discord==1.0.1
 discord-markdown==0.4.0
 discord.py==1.7.2
