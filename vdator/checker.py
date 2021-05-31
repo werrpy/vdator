@@ -346,38 +346,53 @@ class Checker:
     def check_movie_name_format(self):
         reply = ""
 
+        # is it a movie or tv show?
+        is_movie = self._is_movie()
+
         if has(self.mediainfo, "general.0.movie_name"):
-            # tv show name in format "Name - S01E01"
-            if re.search(
-                r"^.+\s-\sS\d{2}E\d{2}.*$",
-                self.mediainfo["general"][0]["movie_name"],
-            ):
-                reply += self.reporter.print_report(
-                    "correct",
-                    "TV show name format `Name - S01E01`: `"
-                    + self.mediainfo["general"][0]["movie_name"]
-                    + "`",
-                )
-            # movie name in format "Name (Year)"
-            elif re.search(
-                r"^.+\(\d{4}\)$", self.mediainfo["general"][0]["movie_name"]
-            ):
-                reply += self.reporter.print_report(
-                    "correct",
-                    "Movie name format `Name (Year)`: `"
-                    + self.mediainfo["general"][0]["movie_name"]
-                    + "`",
-                )
+            if is_movie:
+                # movie name in format "Name (Year)"
+                if re.search(
+                    r"^.+\(\d{4}\)$", self.mediainfo["general"][0]["movie_name"]
+                ):
+                    reply += self.reporter.print_report(
+                        "correct",
+                        "Movie name format `Name (Year)`: `"
+                        + self.mediainfo["general"][0]["movie_name"]
+                        + "`",
+                    )
+                else:
+                    reply += self.reporter.print_report(
+                        "error",
+                        "Movie name does not match format `Name (Year)`: `"
+                        + self.mediainfo["general"][0]["movie_name"]
+                        + "`",
+                    )
+                    reply += self._movie_name_extra_space(
+                        self.mediainfo["general"][0]["movie_name"]
+                    )
             else:
-                reply += self.reporter.print_report(
-                    "error",
-                    "Movie name does not match format `Name (Year)`: `"
-                    + self.mediainfo["general"][0]["movie_name"]
-                    + "`",
-                )
-                reply += self._movie_name_extra_space(
-                    self.mediainfo["general"][0]["movie_name"]
-                )
+                # tv show name in format "Name - S01E01" or "Name - S01E01E02"
+                if re.search(
+                    r"^.+\s-\sS\d{2}(E\d{2})+.*$",
+                    self.mediainfo["general"][0]["movie_name"],
+                ):
+                    reply += self.reporter.print_report(
+                        "correct",
+                        "TV show name format `Name - S01E01`: `"
+                        + self.mediainfo["general"][0]["movie_name"]
+                        + "`",
+                    )
+                else:
+                    reply += self.reporter.print_report(
+                        "error",
+                        "TV show name does not match format `Name - S01E01`: `"
+                        + self.mediainfo["general"][0]["movie_name"]
+                        + "`",
+                    )
+                    reply += self._movie_name_extra_space(
+                        self.mediainfo["general"][0]["movie_name"]
+                    )
         else:
             reply += self.reporter.print_report("error", "Missing movie name")
 
@@ -398,6 +413,31 @@ class Checker:
 
         return reply
 
+    # returns True if its a movie, False if tv show
+    def _is_movie(self):
+        # is it a movie or tv show? assume movie
+        is_movie = True
+        determined_movie_or_tv = False
+
+        if has(self.mediainfo, "general.0.tmdb"):
+            if self.mediainfo["general"][0]["tmdb"].startswith("movie/"):
+                is_movie = True
+                determined_movie_or_tv = True
+            elif self.mediainfo["general"][0]["tmdb"].startswith("tv/"):
+                is_movie = False
+                determined_movie_or_tv = True
+
+        if not determined_movie_or_tv:
+            if has(self.mediainfo, "general.0.movie_name"):
+                # tv show name in format "Name - S01E01" or "Name - S01E01E02"
+                is_tv = re.search(
+                    r"^.+\s-\sS\d{2}(E\d{2})+.*$",
+                    self.mediainfo["general"][0]["movie_name"],
+                )
+                if is_tv:
+                    is_movie = not (is_tv)
+        return is_movie
+
     def check_ids(self):
         reply = ""
 
@@ -417,17 +457,8 @@ class Checker:
             "year_replied": False,
         }
 
-        # is it a movie or tv show? assume movie
-        is_movie = True
-        if has(self.mediainfo, "general.0.movie_name"):
-            # tv show name in format "Name - S01E01"
-            # [^/\\\s] means movie name can't start with a forward slash (/), backslash (\), or a space
-            is_movie = not (
-                re.search(
-                    r"^[^/\\\s].+\s-\sS\d{2}E\d{2}.*$",
-                    self.mediainfo["general"][0]["movie_name"],
-                )
-            )
+        # is it a movie or tv show?
+        is_movie = self._is_movie()
 
         # extract movie name and year or tv show name
         if has(self.mediainfo, "general.0.movie_name"):
@@ -619,7 +650,8 @@ class Checker:
         ):
             # Name.S01E01
             tv_show_name_search = re.search(
-                r"(.+)\s-\s(S\d{2}E\d{2})", self.mediainfo["general"][0]["movie_name"]
+                r"(.+)\s-\s(S\d{2}(E\d{2})+)",
+                self.mediainfo["general"][0]["movie_name"],
             )
             # Name.Year
             movie_name_search = re.search(
@@ -656,9 +688,8 @@ class Checker:
             if self.source_detector.is_dvd():
                 # source DVD
                 if "standard" in self.mediainfo["video"][0]:
-                    release_name += (
-                        "." + self.mediainfo["video"][0]["standard"] + ".DVD.REMUX"
-                    )
+                    release_name += "." + self.mediainfo["video"][0]["standard"]
+                release_name += ".DVD.REMUX"
             elif self.source_detector.is_uhd():
                 # source UHD BluRay
                 release_name += "." + height
