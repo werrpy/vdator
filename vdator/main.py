@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from dotenv import load_dotenv
-import json, os, traceback
+import json, os, requests, traceback
 
 # APIs
 import discord
@@ -141,7 +141,9 @@ async def on_message(message):
 
         try:
             # get paste
-            paste = url_parser.get_paste(url)
+            r = requests.get(url)
+            r.raise_for_status()
+            paste = r.text
         except:
             traceback.print_exc()
             reply += reporter.print_report("fail", "Failed to get paste")

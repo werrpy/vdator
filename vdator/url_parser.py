@@ -1,5 +1,5 @@
 from urllib.parse import urlparse
-import re, requests
+import re
 
 
 class URLParser:
@@ -46,10 +46,6 @@ class URLParser:
                 raw_url = self.urls[hostname]["raw_url"].format(slug.group(1))
 
         return raw_url
-
-    def get_paste(self, raw_url):
-        r = requests.get(raw_url)
-        return r.text
 
     def get_urls(self):
         return self.urls
