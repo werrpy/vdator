@@ -154,31 +154,40 @@ async def on_message(message):
                 traceback.print_exc()
                 reply += reporter.print_report("fail", "Paste parser failed")
             else:
-                try:
-                    # parse mediainfo
-                    mediainfo = mediainfo_parser.parse(mediainfo)
-                except:
-                    traceback.print_exc()
-                    reply += reporter.print_report("fail", "Mediainfo parser failed")
-                else:
-                    # setup/reset reporter
-                    reporter.setup()
+                if mediainfo:
                     try:
-                        # setup checker
-                        checker.setup(bdinfo, mediainfo, eac3to, message.channel.name)
+                        # parse mediainfo
+                        mediainfo = mediainfo_parser.parse(mediainfo)
                     except:
                         traceback.print_exc()
                         reply += reporter.print_report(
-                            "fail", "vdator failed to setup checker"
+                            "fail", "Mediainfo parser failed"
                         )
                     else:
+                        # setup/reset reporter
+                        reporter.setup()
                         try:
-                            reply += checker.run_checks()
+                            # setup checker
+                            checker.setup(
+                                bdinfo, mediainfo, eac3to, message.channel.name
+                            )
                         except:
                             traceback.print_exc()
                             reply += reporter.print_report(
-                                "fail", "vdator failed to parse"
+                                "fail", "vdator failed to setup checker"
                             )
+                        else:
+                            try:
+                                reply += checker.run_checks()
+                            except:
+                                traceback.print_exc()
+                                reply += reporter.print_report(
+                                    "fail", "vdator failed to parse"
+                                )
+                else:
+                    reply += reporter.print_report(
+                        "error", "No mediainfo. Are you missing the `General` heading?"
+                    )
 
         # report
         reply += "> **Report**\n"
