@@ -1105,7 +1105,7 @@ class Checker:
                     "warning",
                     "Checked first `{}/{}` audio tracks".format(min_len, max_len),
                 )
-                if len(self.bdinfo["audio"]) > len(self.mediainfo["audio"]):
+                if len_bdinfo > len_mediainfo:
                     reply += "Did you forget to add a minus (-) sign in front of unused audio tracks in bdinfo?\n"
 
         return reply
