@@ -1006,10 +1006,16 @@ class Checker:
                 "info", "No audio track conversions to check for DVDs"
             )
             return reply
-        elif len(self.bdinfo["audio"]) == len(self.mediainfo["audio"]):
-            for i, audio in enumerate(self.bdinfo["audio"]):
+        else:
+            len_bdinfo = len(self.bdinfo["audio"])
+            len_mediainfo = len(self.mediainfo["audio"])
+            min_len = min(len_bdinfo, len_mediainfo)
+            max_len = max(len_bdinfo, len_mediainfo)
+            diff_len = abs(max_len - min_len)
+
+            for i in range(0, min_len):
                 # audio = dict{'name':'...', 'language':'...'}
-                title = audio["name"]
+                title = self.bdinfo["audio"][i]["name"]
                 bdinfo_audio_parts = re.sub(r"\s+", " ", title).split(" / ")
 
                 # check audio commentary
@@ -1093,17 +1099,14 @@ class Checker:
                                 + self._section_id("audio", i)
                                 + ": Missing track name",
                             )
-        else:
-            reply += self.reporter.print_report(
-                "error",
-                "Cannot verify audio track conversions, "
-                + str(len(self.bdinfo["audio"]))
-                + " BDInfo Audio Track(s) vs "
-                + str(len(self.mediainfo["audio"]))
-                + " MediaInfo Audio Track(s).",
-            )
-            if len(self.bdinfo["audio"]) > len(self.mediainfo["audio"]):
-                reply += "Did you forget to add a minus (-) sign in front of unused audio tracks in bdinfo?\n"
+
+            if diff_len > 0:
+                reply += self.reporter.print_report(
+                    "warning",
+                    "Checked first `{}/{}` audio tracks".format(min_len, max_len),
+                )
+                if len(self.bdinfo["audio"]) > len(self.mediainfo["audio"]):
+                    reply += "Did you forget to add a minus (-) sign in front of unused audio tracks in bdinfo?\n"
 
         return reply
 
