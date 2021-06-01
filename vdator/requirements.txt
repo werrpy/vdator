@@ -45,7 +45,7 @@ SQLAlchemy==1.4.17
 tmdbsimple==2.8.0
 toml==0.10.2
 tqdm==4.56.0
-typed-ast==1.4.2
+typed-ast==1.4.3
 typing-extensions==3.10.0.0
 urllib3==1.25.10
 websockets==8.1
