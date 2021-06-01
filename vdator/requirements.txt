@@ -1,6 +1,6 @@
 aiohttp==3.7.4.post0
 appdirs==1.4.4
-astroid==2.5.7
+astroid==2.5.6
 async-timeout==3.0.1
 attrs==19.3.0
 beautifulsoup4==4.9.3
@@ -14,7 +14,7 @@ discord.py==1.7.2
 emoji==0.6.0
 Flask==2.0.1
 hunspell==0.5.5
-idna==3.2
+idna==2.10
 idna-ssl==1.1.0
 IMDbPY==6.8
 iso-639==0.4.5
