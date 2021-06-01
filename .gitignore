@@ -91,6 +91,7 @@ env.bak/
 venv.bak/
 
 vdator/bin/
+vdator/include
 vdator/lib64
 vdator/pyvenv.cfg
 vdator/.env
