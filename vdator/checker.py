@@ -1517,7 +1517,7 @@ class Checker:
                 subs_in_order = False
                 reply += self.reporter.print_report(
                     "error",
-                    "Text {} is a forced English track, English must be first".format(
+                    "Text {} is a forced English track, it must be first".format(
                         self._section_id("text", i)
                     ),
                 )
@@ -1557,9 +1557,7 @@ class Checker:
             prev_track_name = track_name
 
         if subs_in_order:
-            reply += self.reporter.print_report(
-                "correct", "Rest of the subtitles are in alphabetical order"
-            )
+            reply += self.reporter.print_report("correct", "Subtitles are in order")
         return reply
 
     def check_text_default_flag(self):
@@ -1577,12 +1575,19 @@ class Checker:
                 first_audio_language = self.mediainfo["audio"][0]["language"].lower()
 
             if first_audio_language != "english":
-                for i, item in enumerate(self.mediainfo["text"]):
-                    if "language" in item:
-                        if item["language"].lower() == "english":
-                            has_english_subs = True
-                            if self.mediainfo["text"][i]["default"].lower() == "yes":
-                                english_subs_default_yes = True
+                # text tracks with language and default keys
+                text_with_properties = [
+                    item
+                    for item in self.mediainfo["text"]
+                    if ("language" in item and "default" in item)
+                ]
+                for item in text_with_properties:
+                    if item["language"].lower() == "english":
+                        has_english_subs = True
+                    if item["default"].lower() == "yes":
+                        english_subs_default_yes = True
+                    if has_english_subs and english_subs_default_yes:
+                        break
 
                 if has_english_subs:
                     # foreign audio and has english subs. english subs should be default=yes
