@@ -7,7 +7,54 @@ defaults:
     working-directory: ./vdator
 
 jobs:
-  build:
+  dependencies:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install packages
+        run: sudo apt-get install -y expect python-dev libhunspell-dev
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+  api:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install packages
+        run: sudo apt-get install -y python-dev libhunspell-dev
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Run API
+        env:
+          MKVMERGE_VERSION: "Version 57.0.0 \"Till The End\" 2021-05-22"
+        run: python3 api.py &
+      - name: Test blank input to API
+        run: ./test1.sh
+        working-directory: ./test
+
+  discord-bot:
 
     runs-on: ubuntu-latest
     strategy:
@@ -27,12 +74,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Discord bot can join server
-        run: ./discord-bot-test-expect.sh
-        working-directory: ./test
-      - name: Run API
         env:
-          MKVMERGE_VERSION: "Version 57.0.0 \"Till The End\" 2021-05-22"
-        run: python3 api.py &
-      - name: Test blank input to API
-        run: ./test1.sh
+          DISCORD_BOT_SECRET: ${{ secrets.DISCORD_BOT_SECRET }}
+        run: ./discord-bot-test-expect.sh
         working-directory: ./test
