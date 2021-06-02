@@ -51,4 +51,4 @@ urllib3==1.26.5
 websockets==8.1
 Werkzeug==2.0.1
 wrapt==1.12.1
-yarl==1.5.1
+yarl==1.6.3
