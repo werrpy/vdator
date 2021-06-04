@@ -58,6 +58,11 @@ jobs:
 
   discord-bot:
 
+    on:
+      push:
+        branches:
+          - master
+
     runs-on: ubuntu-latest
 
     steps:
