@@ -5,7 +5,7 @@ async-timeout==3.0.1
 attrs==19.3.0
 beautifulsoup4==4.9.3
 black==21.5b2
-certifi==2020.12.5
+certifi==2021.5.30
 chardet==4.0.0
 click==8.0.1
 discord==1.0.1
