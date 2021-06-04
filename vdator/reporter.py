@@ -2,7 +2,7 @@ from enum import Enum
 import re
 
 # APIs
-from emoji import EMOJI_ALIAS_UNICODE as EMOJIS
+from emoji import EMOJI_ALIAS_UNICODE_ENGLISH as EMOJIS
 from helpers import num_to_emoji
 
 
