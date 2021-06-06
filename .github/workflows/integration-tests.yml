@@ -58,7 +58,11 @@ jobs:
 
   discord-bot:
 
-    if: ${{ github.ref == 'refs/heads/master' }}
+    on:
+      push:
+        branches:
+          - master
+
     runs-on: ubuntu-latest
 
     steps:
