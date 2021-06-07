@@ -36,7 +36,7 @@ pathspec==0.8.1
 pydash==5.0.0
 pylint==2.8.3
 pymediainfo==5.1.0
-python-dotenv==0.15.0
+python-dotenv==0.17.1
 regex==2021.4.4
 requests==2.25.1
 singledispatch==3.6.2
