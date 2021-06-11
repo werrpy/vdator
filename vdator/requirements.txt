@@ -42,7 +42,7 @@ requests==2.25.1
 singledispatch==3.6.2
 six==1.16.0
 soupsieve==2.2.1
-SQLAlchemy==1.4.17
+SQLAlchemy==1.4.18
 tmdbsimple==2.8.0
 toml==0.10.2
 tqdm==4.61.0
