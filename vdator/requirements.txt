@@ -10,7 +10,7 @@ chardet==4.0.0
 click==8.0.1
 discord==1.0.1
 discord-markdown==0.4.0
-discord.py==1.7.2
+discord.py==1.7.3
 emoji==1.2.0
 Flask==2.0.1
 greenlet==1.1.0
