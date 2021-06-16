@@ -298,8 +298,9 @@ class Checker:
                 return reply
 
             if has(self.mediainfo, "video.0.title") and has(self.bdinfo, "video.0"):
-                mediainfo_title = self.mediainfo["video"][0]["title"]
-                bdinfo_video_parts = self.bdinfo["video"][0].split(" / ")
+                mediainfo_video_title = self.mediainfo["video"][0]["title"]
+                bdinfo_video_title = self.bdinfo["video"][0]
+                bdinfo_video_parts = bdinfo_video_title.split(" / ")
                 scan_type = bdinfo_video_parts[2].strip()[-1].lower()
                 video_fps = float(
                     "".join(
@@ -315,24 +316,31 @@ class Checker:
                     reply += self.reporter.print_report(
                         "info", "Note: 1080i @ 25fps is actually progressive"
                     )
-                video_title = " / ".join(bdinfo_video_parts)
-                if video_title == mediainfo_title:
+                bitrate_search = re.search(r"(\d+\.\d+)\skbps", mediainfo_video_title)
+                if bitrate_search:
+                    # if mediainfo has a decimal kbps bitrate, use it in the bdinfo for comparison
+                    percise_bitrate = bitrate_search.group(1)
+                    percise_kbps = percise_bitrate + " kbps"
+                    bdinfo_video_title = re.sub(
+                        r"(\d+)\skbps", percise_kbps, bdinfo_video_title
+                    )
+                if bdinfo_video_title == mediainfo_video_title:
                     reply += self.reporter.print_report(
                         "correct",
-                        "Video track names match: ```" + video_title + "```",
+                        "Video track names match: ```" + bdinfo_video_title + "```",
                         new_line=False,
                     )
                 else:
                     reply += self.reporter.print_report(
                         "error",
                         "Video track names missmatch:\n```fix\nBDInfo: "
-                        + video_title
+                        + bdinfo_video_title
                         + "\nMediaInfo: "
-                        + mediainfo_title
+                        + mediainfo_video_title
                         + "```",
                         new_line=False,
                     )
-                    reply += show_diff(mediainfo_title, video_title)
+                    reply += show_diff(mediainfo_video_title, bdinfo_video_title)
             else:
                 reply += self.reporter.print_report(
                     "error", "Missing mediainfo video track"
