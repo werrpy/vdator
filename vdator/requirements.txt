@@ -17,7 +17,7 @@ greenlet==1.1.0
 hunspell==0.5.5
 idna==2.10
 idna-ssl==1.1.0
-IMDbPY==6.8
+IMDbPY==2021.4.18
 iso-639==0.4.5
 isort==5.8.0
 itsdangerous==2.0.1

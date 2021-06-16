@@ -21,7 +21,7 @@ from nltk.tokenize.api import StringTokenizer
 load_dotenv()
 
 tmdb.API_KEY = os.environ.get("TMDB_API_KEY")
-ia = IMDb(reraiseExceptions=True, loggingLevel="critical")
+ia = IMDb()
 logger = logging.getLogger("imdbpy")
 logger.disabled = True
 
