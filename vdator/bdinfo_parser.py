@@ -16,6 +16,10 @@ class BDInfoParser:
         self.embedded_track_types_regex = [
             r"\(" + a + ":" for a in self.embedded_track_types
         ]
+        # ['\\(-ac3 core:', '\\(-ac3 embedded:']
+        self.embedded_track_types_excluded_regex = [
+            r"\(-" + a + ":.*\)" for a in self.embedded_track_types
+        ]
 
     def format_track_name(self, name):
         """
@@ -77,6 +81,10 @@ class BDInfoParser:
         # remove (DTS Core:...)
         name = re.sub(r"\(DTS Core:.*\)", "", name).strip()
 
+        # remove excluded (-AC3 Core...) and (-AC3 Embedded...)
+        for ending in self.embedded_track_types_excluded_regex:
+            name = re.sub(ending, "", name, flags=re.IGNORECASE).strip()
+
         # remove dialog normalization
         # needs to be after removing (DTS Core:...)
         # since the dts core track can have dialog normalization which will break its regex
@@ -89,11 +97,8 @@ class BDInfoParser:
 
     def has_compat_track(self, audio_track_name):
         audio_track_name = audio_track_name.lower()
-        for i in range(0, len(self.embedded_track_types)):
-            if (
-                self.embedded_track_types_excluded[i] not in audio_track_name
-                and self.embedded_track_types[i] in audio_track_name
-            ):
+        for track_type in self.embedded_track_types:
+            if track_type in audio_track_name:
                 return True
         return False
 
