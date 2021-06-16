@@ -1618,17 +1618,27 @@ class Checker:
     def print_chapters(self):
         reply = "> **Chapters**\n"
         if len(self.mediainfo["menu"]) > 0 and len(self.mediainfo["menu"][0]) > 0:
-            reply += "```"
+
+            numbered_chapters = True
             for ch in self.mediainfo["menu"][0]:
-                if ch["time"]:
-                    reply += ch["time"] + " :"
                 for title in ch["titles"]:
-                    if title["language"]:
-                        reply += " lang: " + title["language"]
-                    if title["title"]:
-                        reply += " title: " + title["title"]
-                reply += "\n"
-            reply += "```"
+                    if not re.search(r"^chapter\s\d+", title["title"], re.IGNORECASE):
+                        numbered_chapters = False
+
+            if not numbered_chapters:
+                reply += "```"
+                for ch in self.mediainfo["menu"][0]:
+                    if ch["time"]:
+                        reply += ch["time"] + " :"
+                    for title in ch["titles"]:
+                        if title["language"]:
+                            reply += " lang: " + title["language"]
+                        if title["title"]:
+                            reply += " title: " + title["title"]
+                    reply += "\n"
+                reply += "```"
+            else:
+                reply += self.reporter.print_report("info", "Chapters are numbered")
             if len(self.mediainfo["menu"][0][0]["languages"]) > 0:
                 reply += (
                     "Chapter languages: `"
