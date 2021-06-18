@@ -89,26 +89,6 @@ def has_many(obj, base, keys):
     return True
 
 
-def is_number(s):
-    """
-    Check if string is a number
-
-    Parameters
-    ----------
-    s : str
-        string to test
-
-    Returns
-    -------
-    True if numeric, False otherwise
-    """
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
-
 def num_to_emoji(n):
     """
     Convert number to discord emoji

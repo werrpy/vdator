@@ -11,7 +11,7 @@ from imdb import IMDb
 import hunspell
 
 # parsers
-from helpers import has_many, is_number, show_diff
+from helpers import has_many, show_diff
 from paste_parser import BDInfoType
 import nltk, nltk_people
 from nltk_people import extract_names, ie_preprocess
@@ -740,7 +740,7 @@ class Checker:
                             "No title name found for audio codec: `" + part + "`",
                         )
                     was_atmos = part == "Dolby TrueHD/Atmos Audio"
-                elif is_number(part) and not was_atmos:
+                elif part.isnumeric() and not was_atmos:
                     # channel
                     release_name += "." + part
 
@@ -1034,7 +1034,7 @@ class Checker:
                 elif len(bdinfo_audio_parts) >= 1:
                     if (
                         bdinfo_audio_parts[0] == "DTS-HD Master Audio"
-                        and is_number(bdinfo_audio_parts[1])
+                        and bdinfo_audio_parts[1].isnumeric()
                         and float(bdinfo_audio_parts[1]) < 3
                     ):
                         # DTS-HD MA 1.0 or 2.0 to FLAC
@@ -1043,7 +1043,7 @@ class Checker:
                         )
                     elif bdinfo_audio_parts[0] == "LPCM Audio":
                         if (
-                            is_number(bdinfo_audio_parts[1])
+                            bdinfo_audio_parts[1].isnumeric()
                             and float(bdinfo_audio_parts[1]) < 3
                         ):
                             # LPCM 1.0 or 2.0 to FLAC
