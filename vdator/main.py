@@ -56,7 +56,7 @@ REVIEW_REPLY_CHANNELS = [
 # channels to listen in and post full summaries
 BOT_CHANNELS = [x.strip() for x in os.environ.get("BOT_CHANNELS").split(",")]
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 
 
 def print_help():
@@ -90,7 +90,12 @@ def print_help():
         "Should have chapters\n"
         "Chapter languages\n"
         "Chapter padding```"
+        "**Commands:** !help, !version"
     )
+
+
+def print_version():
+    return "vdator " + VERSION
 
 
 client = discord.Client()
@@ -125,6 +130,12 @@ async def on_message(message):
     # help command
     if message.content == "!help":
         reply = print_help()
+        await message.channel.send(reply)
+        return
+
+    # version command
+    if message.content == "!version":
+        reply = print_version()
         await message.channel.send(reply)
         return
 
