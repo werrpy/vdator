@@ -55,7 +55,7 @@ Chapter padding
 
 ### Setup
 
-Requires Python >= 3.5.4, tested with Python >= 3.7
+Requires Python >= 3.7
 
 Create a [Discord bot](https://discordapp.com/developers/docs/intro) and add it to a server.
 Edit `vdator/.env` and set `DISCORD_BOT_SECRET` to your bot's token.
