@@ -1,0 +1,14 @@
+discord.py==1.7.3
+emoji==1.2.0
+nltk==3.6.2
+iso-639==0.4.5
+tmdbsimple==2.8.0
+hunspell==0.5.5
+requests==2.25.1
+langdetect==1.0.9
+Flask==2.0.1
+pydash==5.0.0
+discord==1.0.1
+discord_markdown==0.4.0
+IMDbPY==2021.4.18
+python-dotenv==0.17.1
