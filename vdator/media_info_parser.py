@@ -9,8 +9,8 @@ class MediaInfoParser:
 
         Parameters
         ----------
-        text : str
-            mediainfo text
+        text : list
+            list of mediainfo lines
 
         Returns
         -------
