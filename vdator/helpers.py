@@ -154,3 +154,11 @@ def show_diff(actual, expected):
             # unexpected opcode
             continue
     return "Hint: " + "".join(output) + "\n"
+
+
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False

@@ -11,7 +11,7 @@ from imdb import IMDb
 import hunspell
 
 # parsers
-from helpers import has_many, show_diff
+from helpers import has_many, is_float, show_diff
 from paste_parser import BDInfoType
 import nltk, nltk_people
 from nltk_people import extract_names, ie_preprocess
@@ -740,7 +740,7 @@ class Checker:
                             "No title name found for audio codec: `" + part + "`",
                         )
                     was_atmos = part == "Dolby TrueHD/Atmos Audio"
-                elif part.isnumeric() and not was_atmos:
+                elif is_float(part) and not was_atmos:
                     # channel
                     release_name += "." + part
 
@@ -1023,8 +1023,11 @@ class Checker:
 
             for i in range(0, min_len):
                 # audio = dict{'name':'...', 'language':'...'}
-                title = self.bdinfo["audio"][i]["name"]
-                bdinfo_audio_parts = re.sub(r"\s+", " ", title).split(" / ")
+                bdinfo_audio_title = re.sub(
+                    r"\s+", " ", self.bdinfo["audio"][i]["name"]
+                )
+                bdinfo_audio_parts = bdinfo_audio_title.split(" / ")
+                bdinfo_audio_parts_converted = bdinfo_audio_parts.copy()
 
                 # check audio commentary
                 (is_commentary, commentary_reply) = self._check_commentary(i)
@@ -1032,81 +1035,98 @@ class Checker:
                 if is_commentary:
                     reply += commentary_reply
                 elif len(bdinfo_audio_parts) >= 1:
+                    # check audio conversions
                     if (
                         bdinfo_audio_parts[0] == "DTS-HD Master Audio"
-                        and bdinfo_audio_parts[1].isnumeric()
+                        and is_float(bdinfo_audio_parts[1])
                         and float(bdinfo_audio_parts[1]) < 3
                     ):
                         # DTS-HD MA 1.0 or 2.0 to FLAC
                         reply += self._check_audio_conversion(
                             i, "DTS-HD Master Audio", "FLAC Audio"
                         )
+                        bdinfo_audio_parts_converted[0] = "FLAC Audio"
                     elif bdinfo_audio_parts[0] == "LPCM Audio":
                         if (
-                            bdinfo_audio_parts[1].isnumeric()
+                            is_float(bdinfo_audio_parts[1])
                             and float(bdinfo_audio_parts[1]) < 3
                         ):
                             # LPCM 1.0 or 2.0 to FLAC
                             reply += self._check_audio_conversion(
                                 i, "LPCM Audio", "FLAC Audio"
                             )
+                            bdinfo_audio_parts_converted[0] = "FLAC Audio"
                         else:
                             # LPCM > 2.0 to DTS-HD MA
                             reply += self._check_audio_conversion(
                                 i, "LPCM Audio", "DTS-HD Master Audio"
                             )
-                    else:
-                        if "title" in self.mediainfo["audio"][i]:
-                            if title == self.mediainfo["audio"][i]["title"]:
+                            bdinfo_audio_parts_converted[0] = "DTS-HD Master Audio"
+
+                    # check track names match
+                    if "title" in self.mediainfo["audio"][i]:
+                        mediainfo_audio_title = self.mediainfo["audio"][i][
+                            "title"
+                        ].strip()
+                        (
+                            mediainfo_audio_title,
+                            _,
+                        ) = self._remove_until_first_codec(mediainfo_audio_title)
+
+                        bdinfo_audio_title = " / ".join(bdinfo_audio_parts_converted)
+                        if bdinfo_audio_title == self.mediainfo["audio"][i]["title"]:
+                            reply += self.reporter.print_report(
+                                "correct",
+                                "Audio "
+                                + self._section_id("audio", i)
+                                + ": Track names match",
+                            )
+                        else:
+                            is_bad_audio_format = False
+
+                            # use bitrate from mediainfo audio title
+                            m_bit_rate = re.search(
+                                r"(\d+)\skbps", mediainfo_audio_title
+                            ).group(1)
+                            bdinfo_audio_title = re.sub(
+                                r"(.*\s)\d+(\skbps.*)",
+                                r"\g<1>{}\g<2>".format(m_bit_rate),
+                                bdinfo_audio_title,
+                            )
+
+                            if bdinfo_audio_title != mediainfo_audio_title:
+                                is_bad_audio_format = True
+
+                            if is_bad_audio_format:
+                                reply += self.reporter.print_report(
+                                    "error",
+                                    "Audio "
+                                    + self._section_id("audio", i)
+                                    + ": Bad conversion:\n```fix\nBDInfo: "
+                                    + bdinfo_audio_title
+                                    + "\nMediaInfo: "
+                                    + self.mediainfo["audio"][i]["title"]
+                                    + "```",
+                                    new_line=False,
+                                )
+                                reply += show_diff(
+                                    self.mediainfo["audio"][i]["title"],
+                                    bdinfo_audio_title,
+                                )
+                            else:
                                 reply += self.reporter.print_report(
                                     "correct",
                                     "Audio "
                                     + self._section_id("audio", i)
                                     + ": Track names match",
                                 )
-                            else:
-                                is_bad_audio_format = False
-                                mediainfo_audio_title = self.mediainfo["audio"][i][
-                                    "title"
-                                ].strip()
-                                (
-                                    mediainfo_audio_title,
-                                    _,
-                                ) = self._remove_until_first_codec(
-                                    mediainfo_audio_title
-                                )
-                                if title != mediainfo_audio_title:
-                                    is_bad_audio_format = True
-
-                                if is_bad_audio_format:
-                                    reply += self.reporter.print_report(
-                                        "error",
-                                        "Audio "
-                                        + self._section_id("audio", i)
-                                        + ": Bad conversion:\n```fix\nBDInfo: "
-                                        + title
-                                        + "\nMediaInfo: "
-                                        + self.mediainfo["audio"][i]["title"]
-                                        + "```",
-                                        new_line=False,
-                                    )
-                                    reply += show_diff(
-                                        self.mediainfo["audio"][i]["title"], title
-                                    )
-                                else:
-                                    reply += self.reporter.print_report(
-                                        "correct",
-                                        "Audio "
-                                        + self._section_id("audio", i)
-                                        + ": Track names match",
-                                    )
-                        else:
-                            reply += self.reporter.print_report(
-                                "error",
-                                "Audio "
-                                + self._section_id("audio", i)
-                                + ": Missing track name",
-                            )
+                    else:
+                        reply += self.reporter.print_report(
+                            "error",
+                            "Audio "
+                            + self._section_id("audio", i)
+                            + ": Missing track name",
+                        )
 
             if diff_len > 0:
                 reply += self.reporter.print_report(
