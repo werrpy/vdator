@@ -1139,6 +1139,7 @@ class Checker:
         return reply
 
     def check_flac_audio_tracks(self):
+        # check FLAC Audio tracks using mediainfo
         reply = ""
 
         if len(self.mediainfo["audio"]) > 0:
@@ -1199,14 +1200,14 @@ class Checker:
                             "correct",
                             "Audio "
                             + self._section_id("audio", i)
-                            + ": Good track name",
+                            + ": FLAC Good track name (from MediaInfo)",
                         )
                     else:
                         reply += self.reporter.print_report(
                             "error",
                             "Audio "
                             + self._section_id("audio", i)
-                            + ": Bad track name:\n```fix\nActual: "
+                            + ": FLAC Bad track name (from MediaInfo):\n```fix\nActual: "
                             + audio_title
                             + "\nExpected: "
                             + test_title
