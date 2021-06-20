@@ -92,7 +92,7 @@ class PasteParser:
 
             # determine current section
             # limit to first mediainfo
-            if l2.startswith("quick summary"):
+            if l2.startswith("quick summary") or l2.startswith("disc title"):
                 sect = self.Section.QUICK_SUMMARY
                 bdinfo["type"] = BDInfoType.QUICK_SUMMARY
             elif l2.startswith("playlist report"):
