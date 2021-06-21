@@ -725,24 +725,40 @@ class Checker:
                 release_name += "." + self.codecs.get_video_codec_title_name(
                     main_video_title[0].strip()
                 )
-            main_audio_title = self.mediainfo["audio"][0]["title"].split(" / ")
 
-            was_atmos = False
-            for part in main_audio_title:
-                if self.codecs.is_audio_title(part):
-                    audio_codec_title = self.codecs.get_audio_codec_title_name(part)
-                    if audio_codec_title:
-                        # codec
-                        release_name += "." + audio_codec_title
-                    else:
-                        reply += self.reporter.print_report(
-                            "error",
-                            "No title name found for audio codec: `" + part + "`",
-                        )
-                    was_atmos = part == "Dolby TrueHD/Atmos Audio"
-                elif is_float(part) and not was_atmos:
-                    # channel
-                    release_name += "." + part
+            main_audio_title = self.mediainfo["audio"][0]["title"]
+            (
+                main_audio_title,
+                _,
+            ) = self._remove_until_first_codec(main_audio_title)
+            main_audio_title_parts = main_audio_title.split(" / ")
+
+            audio_codec_title, main_audio_channels = None, None
+
+            # get main audio codec
+            if len(main_audio_title) > 0:
+                main_audio_codec = main_audio_title_parts[0]
+                if self.codecs.is_audio_title(main_audio_codec):
+                    audio_codec_title = self.codecs.get_audio_codec_title_name(
+                        main_audio_codec
+                    )
+
+            # get main audio channels
+            if len(main_audio_title) > 1:
+                main_audio_channels = main_audio_title_parts[1]
+                search_channel_atmos = re.search(
+                    r"(\d.\d)\+\d+\sobjects", main_audio_channels
+                )
+                if search_channel_atmos:
+                    main_audio_channels = search_channel_atmos.group(1)
+
+            if audio_codec_title and is_float(main_audio_channels):
+                # have main audio codec and channels
+                if audio_codec_title == "TrueHD.Atmos":
+                    # atmos channel
+                    release_name += ".TrueHD." + main_audio_channels + ".Atmos"
+                else:
+                    release_name += "." + audio_codec_title + "." + main_audio_channels
 
             # release group
             release_name += "-"
