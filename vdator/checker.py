@@ -1840,7 +1840,7 @@ class Checker:
         return reply
 
     def _is_commentary_track(self, title):
-        return "commentary" in title.lower()
+        return "commentary" in title.lower().split()
 
     def _section_id(self, section, i):
         reply = ""
