@@ -1110,7 +1110,21 @@ class Checker:
                                 bdinfo_audio_title,
                             )
 
-                            if bdinfo_audio_title != mediainfo_audio_title:
+                            possible_bdinfo_audio_titles = [bdinfo_audio_title]
+                            if self._eac3to_log_has_mono():
+                                # could be 1.0 channels if eac3to log uses -mono
+                                possible_bdinfo_audio_titles.append(
+                                    re.sub(
+                                        r"\d+\.\d+",
+                                        "1.0",
+                                        bdinfo_audio_title,
+                                    )
+                                )
+
+                            if (
+                                mediainfo_audio_title
+                                not in possible_bdinfo_audio_titles
+                            ):
                                 is_bad_audio_format = True
 
                             if is_bad_audio_format:
@@ -1370,7 +1384,12 @@ class Checker:
 
         # verify audio conversions
         if mediainfo_parts[0] == audio_to:
-            if mediainfo_parts[1] != bdinfo_audio_parts[1]:
+            disable_channels_check = self._eac3to_log_has_mono()
+
+            if (
+                not disable_channels_check
+                and mediainfo_parts[1] != bdinfo_audio_parts[1]
+            ):
                 reply += self.reporter.print_report(
                     "error",
                     "Audio "
@@ -1841,6 +1860,22 @@ class Checker:
 
     def _is_commentary_track(self, title):
         return "commentary" in title.lower().split()
+
+    def _eac3to_log_has_mono(self):
+        # get command-lines
+
+        cmd_lines_mono = list()
+        for log in self.eac3to:
+            cmd_lines_mono.extend(
+                [
+                    l.lower()
+                    for l in log
+                    if l.lower().startswith("command line:")
+                    and "-mono" in l.lower().split()
+                ]
+            )
+
+        return len(cmd_lines_mono) > 0
 
     def _section_id(self, section, i):
         reply = ""
