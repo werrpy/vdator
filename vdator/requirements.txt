@@ -38,7 +38,7 @@ tmdbsimple==2.8.0
 toml==0.10.2
 tqdm==4.61.1
 typing-extensions==3.10.0.0
-urllib3==1.26.5
+urllib3==1.26.6
 Werkzeug==2.0.1
 yarg==0.1.9
 yarl==1.6.3
