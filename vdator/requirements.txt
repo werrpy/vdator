@@ -30,7 +30,7 @@ numpy==1.21.0
 pathspec==0.8.1
 pydash==5.0.1
 python-dotenv==0.18.0
-regex==2021.4.4
+regex==2021.7.1
 requests==2.25.1
 six==1.16.0
 SQLAlchemy==1.4.20
