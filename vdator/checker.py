@@ -752,7 +752,11 @@ class Checker:
                 if search_channel_atmos:
                     main_audio_channels = search_channel_atmos.group(1)
 
-            if audio_codec_title and is_float(main_audio_channels):
+            if (
+                audio_codec_title
+                and main_audio_channels
+                and is_float(main_audio_channels)
+            ):
                 # have main audio codec and channels
                 if audio_codec_title == "TrueHD.Atmos":
                     # atmos channel
