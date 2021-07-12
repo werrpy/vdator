@@ -511,6 +511,8 @@ class Checker:
                     + "`",
                 )
             else:
+                # force single space in movie name
+                imdb_movie["title"] = re.sub(r"\s+", " ", imdb_movie["title"])
                 matched["imdb_title"] = movie_data["name"] == imdb_movie["title"]
                 if is_movie:
                     matched["imdb_year"] = self._year_range(
@@ -526,6 +528,9 @@ class Checker:
 
             try:
                 tmdb_info = tmdb_data.info()
+                # force single space in movie name
+                if "title" in tmdb_info:
+                    tmdb_info["title"] = re.sub(r"\s+", " ", tmdb_info["title"])
             except:
                 reply += self.reporter.print_report(
                     "info",
@@ -553,7 +558,8 @@ class Checker:
                 else:
                     # tv show
                     matched["tmdb_title"] = (
-                        "name" in tmdb_info and movie_data["name"] == tmdb_info["name"]
+                        "title" in tmdb_info
+                        and movie_data["name"] == tmdb_info["title"]
                     )
 
         # matched title/year with either imdb or tmdb
@@ -851,11 +857,12 @@ class Checker:
         )
         # remove punctuation
         title = title.replace("&", "and")
-        title = "".join([i for i in title if not i in string.punctuation])
-        # force single spaces
-        title = " ".join(title.split())
+        title = "".join([i for i in title if not i in string.punctuation or i == "."])
+        title = title.replace(":", ".")
         # replace spaces with dots
         title = title.replace(" ", ".")
+        # force single dots
+        title = re.sub(r"\.+", ".", title)
         return title
 
     def check_tracks_have_language(self):
