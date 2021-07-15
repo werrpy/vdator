@@ -1036,14 +1036,14 @@ class Checker:
             if default_yes_count > 1:
                 reply += self.reporter.print_report(
                     "error",
-                    "Only 1 {} track should be default=`yes`".format(track_type),
+                    "Only 1 {} track should be `default=yes`".format(track_type),
                 )
                 default_yes_error = True
 
         if not default_yes_error:
             reply += self.reporter.print_report(
                 "correct",
-                "Only 1 track of each type is default=`yes`",
+                "Only 1 track of each type is `default=yes`",
             )
         return reply
 
