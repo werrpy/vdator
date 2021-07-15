@@ -217,6 +217,10 @@ async def on_message(message):
                 replies[i] += BLOCK_QUOTES
                 replies[i + 1] = BLOCK_QUOTES + replies[i + 1]
 
+        # fix blockquotes
+        for i, r in enumerate(replies):
+            replies[i] = replies[i].replace("``````", "```")
+
         if message.channel.name in BOT_CHANNELS:
             # reply in bot channel
             for reply in replies:
