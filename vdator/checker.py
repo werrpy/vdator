@@ -1535,39 +1535,49 @@ class Checker:
 
         # spellcheck audio track names
         for i, _ in enumerate(self.mediainfo["audio"]):
-            misspelled_words = list()
             if "title" in self.mediainfo["audio"][i]:
-                title = self.mediainfo["audio"][i]["title"].split(" / ")[0].strip()
-                # ignore codecs
-                if not self.codecs.is_audio_title(title):
+                title, title_parts, found_codec = self._remove_until_first_codec(
+                    self.mediainfo["audio"][i]["title"]
+                )
+
+                spellcheck_text = None
+                if found_codec:
+                    # spellcheck title parts before codec
+                    spellcheck_text = " ".join(title_parts)
+                else:
+                    # spellcheck entire audio title
+                    spellcheck_text = title
+                if spellcheck_text:
                     # map punctuation to space
                     translator = str.maketrans(
                         string.punctuation, " " * len(string.punctuation)
                     )
-                    title = title.translate(translator)
+                    spellcheck_text = spellcheck_text.translate(translator)
 
                     # ignore names
-                    ignore_list = extract_names(title)
+                    ignore_list = extract_names(spellcheck_text)
                     ignore_list = [a for b in ignore_list for a in b.split()]
 
                     # tokenize
-                    tokens = nltk.word_tokenize(title)
+                    tokens = nltk.word_tokenize(spellcheck_text)
                     tokens = [t for t in tokens if t not in ignore_list]
 
+                    misspelled_words = list()
                     for t in tokens:
                         if not self.hobj.spell(t):
                             # t is misspelled
                             misspelled_words.append(t)
-                misspelled_words = set(misspelled_words)
-                if len(misspelled_words) > 0:
-                    reply += self.reporter.print_report(
-                        "error",
-                        "Audio "
-                        + self._section_id("audio", i)
-                        + " Misspelled: `"
-                        + ", ".join(misspelled_words)
-                        + "`",
-                    )
+
+                    misspelled_words = set(misspelled_words)
+                    if len(misspelled_words) > 0:
+                        reply += self.reporter.print_report(
+                            "error",
+                            "Audio "
+                            + self._section_id("audio", i)
+                            + " Misspelled: `"
+                            + ", ".join(misspelled_words)
+                            + "`",
+                        )
 
         return reply
 
