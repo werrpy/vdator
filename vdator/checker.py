@@ -12,10 +12,8 @@ import hunspell
 
 # parsers
 from helpers import has_many, is_float, show_diff
-from paste_parser import BDInfoType
 import nltk, nltk_people
-from nltk_people import extract_names, ie_preprocess
-from nltk.tokenize.api import StringTokenizer
+from nltk_people import extract_names
 
 # load environment variables
 load_dotenv()

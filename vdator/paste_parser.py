@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from enum import Enum
-import os, re
+import os
 
 # load environment variables
 load_dotenv()
