@@ -741,6 +741,7 @@ class Checker:
             (
                 main_audio_title,
                 _,
+                _,
             ) = self._remove_until_first_codec(main_audio_title)
             main_audio_title_parts = main_audio_title.split(" / ")
 
@@ -1127,6 +1128,7 @@ class Checker:
                         (
                             mediainfo_audio_title,
                             _,
+                            _,
                         ) = self._remove_until_first_codec(mediainfo_audio_title)
 
                         bdinfo_audio_title = " / ".join(bdinfo_audio_parts_converted)
@@ -1219,7 +1221,7 @@ class Checker:
                     continue
 
                 # skip if no codec info
-                audio_title, found_codec = self._remove_until_first_codec(
+                audio_title, _, found_codec = self._remove_until_first_codec(
                     audio_track["title"]
                 )
                 if not found_codec:
@@ -1288,7 +1290,7 @@ class Checker:
         return reply
 
     def _remove_until_first_codec(self, title):
-        title2, found = title, False
+        title2, title_parts, found = title, list(), False
         if " / " in title:
             for part in title.split(" / "):
                 if self.codecs.is_audio_title(part):
@@ -1296,9 +1298,12 @@ class Checker:
                     found = True
                     break
                 else:
+                    title2_split = title2.split(" / ")
                     # remove part since its not a codec
-                    title2 = " / ".join(title2.split(" / ")[1:]).strip()
-        return title2, found
+                    title2 = " / ".join(title2_split[1:]).strip()
+                    # save part in list
+                    title_parts.append(title2_split[0])
+        return title2, title_parts, found
 
     def _check_commentary(self, i):
         reply, is_commentary = "", False
@@ -1410,7 +1415,7 @@ class Checker:
             return reply
 
         mediainfo_audio_title = self.mediainfo["audio"][i]["title"]
-        (mediainfo_audio_title, _) = self._remove_until_first_codec(
+        (mediainfo_audio_title, _, _) = self._remove_until_first_codec(
             mediainfo_audio_title
         )
 
@@ -1482,51 +1487,56 @@ class Checker:
         for i, _ in enumerate(self.mediainfo["audio"]):
             if "title" in self.mediainfo["audio"][i]:
                 title = self.mediainfo["audio"][i]["title"]
-                # ignore codecs
-                if not self.codecs.is_audio_title(title.split(" / ")[0].strip()):
-                    matched_names = list()
-                    names = extract_names(title)
-                    search = tmdb.Search()
-                    for n in names:
-                        # TMDb API
-                        try:
-                            search.person(query=n)
-                            for s in search.results:
-                                if n == s["name"]:
-                                    matched_names.append(n)
-                        except:
-                            reply += self.reporter.print_report(
-                                "info", "Failed to get TMDb people data"
-                            )
-                        # IMDb API
-                        try:
-                            for person in ia.search_person(n):
-                                if n == person["name"]:
-                                    matched_names.append(n)
-                        except:
-                            reply += self.reporter.print_report(
-                                "info", "Failed to get IMDb people data"
-                            )
-                    matched_names = set(matched_names)
-                    if len(matched_names) > 0:
+
+                # skip if has an audio codec
+                _, _, found_codec = self._remove_until_first_codec(title)
+                if found_codec:
+                    continue
+
+                # try to match names
+                matched_names = list()
+                names = extract_names(title)
+                search = tmdb.Search()
+                for n in names:
+                    # TMDb API
+                    try:
+                        search.person(query=n)
+                        for s in search.results:
+                            if n == s["name"]:
+                                matched_names.append(n)
+                    except:
                         reply += self.reporter.print_report(
-                            "correct",
-                            "Audio "
-                            + self._section_id("audio", i)
-                            + " People Matched: `"
-                            + ", ".join(matched_names)
-                            + "`",
+                            "info", "Failed to get TMDb people data"
                         )
-                    unmatched_names = set(names) - set(matched_names)
-                    if len(unmatched_names) > 0:
+                    # IMDb API
+                    try:
+                        for person in ia.search_person(n):
+                            if n == person["name"]:
+                                matched_names.append(n)
+                    except:
                         reply += self.reporter.print_report(
-                            "warning",
-                            "Audio "
-                            + self._section_id("audio", i)
-                            + " People Unmatched: `"
-                            + ", ".join(unmatched_names)
-                            + "`",
+                            "info", "Failed to get IMDb people data"
                         )
+                matched_names = set(matched_names)
+                if len(matched_names) > 0:
+                    reply += self.reporter.print_report(
+                        "correct",
+                        "Audio "
+                        + self._section_id("audio", i)
+                        + " People Matched: `"
+                        + ", ".join(matched_names)
+                        + "`",
+                    )
+                unmatched_names = set(names) - set(matched_names)
+                if len(unmatched_names) > 0:
+                    reply += self.reporter.print_report(
+                        "warning",
+                        "Audio "
+                        + self._section_id("audio", i)
+                        + " People Unmatched: `"
+                        + ", ".join(unmatched_names)
+                        + "`",
+                    )
 
         return reply
 
