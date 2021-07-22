@@ -33,7 +33,7 @@ python-dotenv==0.18.0
 regex==2021.7.6
 requests==2.26.0
 six==1.16.0
-SQLAlchemy==1.4.21
+SQLAlchemy==1.4.22
 tmdbsimple==2.8.0
 toml==0.10.2
 tqdm==4.61.2
