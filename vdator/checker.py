@@ -27,7 +27,9 @@ logger.disabled = True
 DetectorFactory.seed = 0
 
 HUNSPELL_LANG = [x.strip() for x in os.environ.get("HUNSPELL_LANG").split(",")]
-MISSPELLED_IGNORE_LIST = [x.strip() for x in os.environ.get("MISSPELLED_IGNORE_LIST").split(",")]
+MISSPELLED_IGNORE_LIST = [
+    x.strip() for x in os.environ.get("MISSPELLED_IGNORE_LIST").split(",")
+]
 
 # used for filename
 RELEASE_GROUP = os.environ.get("RELEASE_GROUP").strip()
@@ -1578,7 +1580,11 @@ class Checker:
                             misspelled_words.append(t)
 
                     misspelled_words = set(misspelled_words)
-                    misspelled_words = [word for word in misspelled_words if word.lower() not in MISSPELLED_IGNORE_LIST]
+                    misspelled_words = [
+                        word
+                        for word in misspelled_words
+                        if word.lower() not in MISSPELLED_IGNORE_LIST
+                    ]
                     if len(misspelled_words) > 0:
                         reply += self.reporter.print_report(
                             "error",
