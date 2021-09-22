@@ -36,7 +36,7 @@ six==1.16.0
 SQLAlchemy==1.4.23
 tmdbsimple==2.8.0
 toml==0.10.2
-tqdm==4.62.2
+tqdm==4.62.3
 typing-extensions==3.10.0.2
 urllib3==1.26.6
 Werkzeug==2.0.1
