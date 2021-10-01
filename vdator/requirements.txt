@@ -5,7 +5,7 @@ attrs==21.2.0
 black==21.9b0
 certifi==2021.5.30
 chardet==4.0.0
-charset-normalizer==2.0.4
+charset-normalizer==2.0.6
 click==8.0.1
 discord==1.7.3
 discord-markdown==0.4.0
