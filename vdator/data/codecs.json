@@ -2,10 +2,14 @@
     "codecs": {
         "video": {
             "h264/AVC": ".h264",
+            "h264/MVC": ".mvc",
             "h265/HEVC": ".h265",
             "MPEG1": ".m1v",
             "MPEG2": ".m2v",
             "VC-1": ".vc1"
+        },
+        "video_3d": {
+            "h264/MVC": ".mvc"
         },
         "audio": {
             "AC3": ".ac3",
