@@ -44,7 +44,7 @@ Chapter padding
 ### Supported pastebin sites
 
 - [Pastebin](https://pastebin.com/)
-- [Hastebin](https://hastebin.com/)
+- [Hastebin](https://www.toptal.com/developers/hastebin/)
 - [termbin](https://termbin.com/)
 - [{d}paste](https://dpaste.com/)
 - [ghostbin.co](https://ghostbin.co/)

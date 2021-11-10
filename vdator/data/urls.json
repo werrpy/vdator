@@ -8,13 +8,13 @@
             "slug_regex": "https://ghostbin.co/paste/(.*)",
             "raw_url": "https://ghostbin.co/paste/{}/raw"
         },
-        "hastebin.com": {
-            "slug_regex": "https://hastebin.com/(.*)",
-            "raw_url": "https://hastebin.com/raw/{}"
-        },
         "www.heypasteit.com": {
             "slug_regex": "https://www.heypasteit.com/clip/(.*)",
             "raw_url": "https://www.heypasteit.com/download/{}"
+        },
+        "www.toptal.com": {
+            "slug_regex": "https://www.toptal.com/developers/hastebin/(.*)",
+            "raw_url": "https://www.toptal.com/developers/hastebin/raw/{}"
         },
         "paste.centos.org": {
             "slug_regex": "https://paste.centos.org/view/(.*)",
