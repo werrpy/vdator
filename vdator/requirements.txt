@@ -2,7 +2,7 @@ aiohttp==3.7.4.post0
 appdirs==1.4.4
 async-timeout==3.0.1
 attrs==21.2.0
-black==21.9b0
+black==21.12b0
 certifi==2021.10.8
 chardet==4.0.0
 charset-normalizer==2.0.6
