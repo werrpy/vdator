@@ -35,7 +35,7 @@ regex==2021.11.10
 requests==2.26.0
 six==1.16.0
 SQLAlchemy==1.4.25
-tmdbsimple==2.8.0
+tmdbsimple==2.8.1
 toml==0.10.2
 tomli==1.2.1
 tqdm==4.62.3
