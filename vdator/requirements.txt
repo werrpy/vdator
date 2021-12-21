@@ -15,7 +15,7 @@ emoji==1.6.1
 Flask==2.0.2
 greenlet==1.1.2
 hunspell==0.5.5
-idna==3.2
+idna==3.3
 IMDbPY==2021.4.18
 iso-639==0.4.5
 itsdangerous==2.0.1
