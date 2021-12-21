@@ -6,7 +6,7 @@ black==21.12b0
 certifi==2021.10.8
 chardet==4.0.0
 charset-normalizer==2.0.9
-click==8.0.1
+click==8.0.3
 discord==1.7.3
 discord-markdown==0.4.0
 discord.py==1.7.3
