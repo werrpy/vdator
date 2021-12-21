@@ -37,7 +37,7 @@ six==1.16.0
 SQLAlchemy==1.4.28
 tmdbsimple==2.8.1
 toml==0.10.2
-tomli==1.2.1
+tomli==2.0.0
 tqdm==4.62.3
 typing-extensions==4.0.1
 Unidecode==1.3.2
