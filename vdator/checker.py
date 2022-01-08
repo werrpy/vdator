@@ -720,6 +720,9 @@ class Checker:
                 release_name += "." + height
                 release_name += scan_type
                 release_name += ".UHD.BluRay.REMUX"
+                # Dolby Vision (DV)
+                if self.source_detector.is_dv():
+                    release_name += ".DV"
                 # SDR/HDR
                 if self.mediainfo["video"][0]["color_primaries"] == "BT.2020":
                     release_name += ".HDR"

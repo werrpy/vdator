@@ -118,6 +118,26 @@ class SourceDetector:
 
         return is_uhd
 
+    def is_dv(self):
+        """
+        Does this source have dolby vision?
+
+        Returns
+        -------
+        boolean True if DV, False otherwise
+        """
+        is_dv = False
+
+        if (
+            "video" in self.mediainfo
+            and len(self.mediainfo["video"]) >= 1
+            and "hdr_format" in self.mediainfo["video"][0]
+        ):
+            if "Dolby Vision" in self.mediainfo["video"][0]["hdr_format"]:
+                is_dv = True
+
+        return is_dv
+
     def _has_bdinfo(self):
         """
         Does the paste include bdinfo?
