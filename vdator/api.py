@@ -32,10 +32,7 @@ def compile(self, markdown=False):
 Compiler.compile = compile
 
 # parsers
-from bdinfo_parser import BDInfoParser
-from paste_parser import PasteParser
-from media_info_parser import MediaInfoParser
-from codecs_parser import CodecsParser
+from parsers import *
 from source_detector import SourceDetector
 from reporter import Reporter
 from checker import Checker
