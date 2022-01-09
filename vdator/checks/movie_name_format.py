@@ -63,3 +63,18 @@ class CheckMovieNameFormat(Check, IsMovie):
             reply += self.reporter.print_report("error", "Missing movie name")
 
         return reply
+
+    def _movie_name_extra_space(self, movie_name):
+        reply = ""
+
+        if movie_name.startswith(" "):
+            reply += self.reporter.print_report(
+                "error", "Movie name starts with an extra space!"
+            )
+
+        if movie_name.endswith(" "):
+            reply += self.reporter.print_report(
+                "error", "Movie name ends with an extra space!"
+            )
+
+        return reply

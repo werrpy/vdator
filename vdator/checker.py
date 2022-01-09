@@ -64,22 +64,10 @@ class Checker(RemoveUntilFirstCodec):
             self.bdinfo,
             self.channel_name,
         ).run()
-
-        try:
-            reply += self.check_tracks_have_language()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report(
-                "fail", "Error checking if tracks have language"
-            )
-        try:
-            reply += self.check_video_language_matches_first_audio_language()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report(
-                "fail",
-                "Error checking that video language matches first audio language",
-            )
+        reply += CheckTracksHaveLanguage(self.reporter, self.mediainfo).run()
+        reply += CheckVideoLanguageMatchesFirstAudioLanguage(
+            self.reporter, self.mediainfo
+        ).run()
         try:
             reply += self.check_muxing_mode()
         except:
@@ -371,73 +359,6 @@ class Checker(RemoveUntilFirstCodec):
                     "info", "Note: 1080i @ 25fps is actually progressive"
                 )
 
-        return reply
-
-    def _movie_name_extra_space(self, movie_name):
-        reply = ""
-
-        if movie_name.startswith(" "):
-            reply += self.reporter.print_report(
-                "error", "Movie name starts with an extra space!"
-            )
-
-        if movie_name.endswith(" "):
-            reply += self.reporter.print_report(
-                "error", "Movie name ends with an extra space!"
-            )
-
-        return reply
-
-    def check_tracks_have_language(self):
-        reply, is_valid = "", True
-
-        for section in ["video", "audio", "text"]:
-            for i, _ in enumerate(self.mediainfo[section]):
-                if "language" not in self.mediainfo[section][i]:
-                    reply += self.reporter.print_report(
-                        "error",
-                        section.capitalize()
-                        + " "
-                        + self._section_id(section, i)
-                        + ": Does not have a language chosen",
-                    )
-                    is_valid = False
-
-        if is_valid:
-            reply += self.reporter.print_report(
-                "correct", "All tracks have a language chosen"
-            )
-
-        return reply
-
-    def check_video_language_matches_first_audio_language(self):
-        reply = ""
-
-        if not has(self.mediainfo, "video.0.language"):
-            reply += self.reporter.print_report("error", "Video language not set")
-            return reply
-        if not has(self.mediainfo, "audio.0.language"):
-            reply += self.reporter.print_report("error", "First audio language not set")
-            return reply
-        if (
-            self.mediainfo["video"][0]["language"]
-            == self.mediainfo["audio"][0]["language"]
-        ):
-            reply += self.reporter.print_report(
-                "correct",
-                "Video language matches first audio language: `"
-                + self.mediainfo["video"][0]["language"]
-                + "`",
-            )
-        else:
-            reply += self.reporter.print_report(
-                "error",
-                "Video language does not match first audio language: `"
-                + self.mediainfo["video"][0]["language"]
-                + "` vs `"
-                + self.mediainfo["audio"][0]["language"]
-                + "`",
-            )
         return reply
 
     def check_muxing_mode(self):
