@@ -17,7 +17,7 @@ logger = logging.getLogger("imdbpy")
 logger.disabled = True
 
 # checks
-from checks.mixins import SectionId, IsCommentaryTrack
+from checks.mixins import PrintHeader, SectionId, IsCommentaryTrack
 from checks.remove_until_first_codec import RemoveUntilFirstCodec
 from checks import *
 
@@ -27,7 +27,7 @@ from nltk_people import download_nltk_data
 download_nltk_data()
 
 
-class Checker(SectionId, IsCommentaryTrack):
+class Checker(PrintHeader, SectionId, IsCommentaryTrack):
     def __init__(self, codecs_parser, source_detector, reporter):
         self.codecs = codecs_parser
         self.remove_until_first_codec = RemoveUntilFirstCodec(codecs_parser)
@@ -45,7 +45,7 @@ class Checker(SectionId, IsCommentaryTrack):
         reply = ""
 
         # check metadata
-        reply += "> **Metadata**\n"
+        reply += self._print_header("Metadata")
         reply += CheckMovieNameFormat(self.reporter, self.mediainfo).run()
         reply += CheckMetadataIds(self.reporter, self.mediainfo, tmdb, ia).run()
         reply += CheckFilename(
@@ -66,7 +66,7 @@ class Checker(SectionId, IsCommentaryTrack):
         reply += CheckMetadataDefaultFlag(self.reporter, self.mediainfo).run()
 
         # check video
-        reply += "> **Video & Audio Tracks**\n"
+        reply += self._print_header("Video & Audio Tracks")
         reply += CheckVideoTrack(
             self.reporter,
             self.source_detector,
@@ -99,6 +99,7 @@ class Checker(SectionId, IsCommentaryTrack):
         ).run()
 
         # check text
+        reply += self._print_header("Text Tracks")
         reply += CheckPrintTextTracks(self.reporter, self.mediainfo).run()
         reply += CheckTextOrder(self.reporter, self.mediainfo).run()
         reply += CheckTextDefaultFlag(self.reporter, self.mediainfo).run()

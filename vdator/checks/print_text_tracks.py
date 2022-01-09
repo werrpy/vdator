@@ -8,7 +8,7 @@ class CheckPrintTextTracks(Check, SectionId):
 
     # overriding abstract method
     def get_reply(self):
-        reply = "> **Text Tracks**\n"
+        reply = ""
         if len(self.mediainfo["text"]) > 0:
             reply += "```"
             for i, _ in enumerate(self.mediainfo["text"]):
