@@ -1,4 +1,4 @@
-class CodecsParser:
+class CodecsParser(object):
     """
     Define codecs
     """

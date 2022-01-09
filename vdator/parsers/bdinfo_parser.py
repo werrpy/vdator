@@ -1,7 +1,7 @@
 import re
 
 
-class BDInfoParser:
+class BDInfoParser(object):
     """
     Parse BDInfo
     """

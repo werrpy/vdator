@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 import re
 
 
-class URLParser:
+class URLParser(object):
     def __init__(self, urls):
         # regex used to extract urls from message
         self.urls_regex = r"(?P<url>https?://[^\s]+)"

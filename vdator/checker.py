@@ -1,12 +1,11 @@
 from dotenv import load_dotenv
-import datetime, logging, os, re, requests, string, traceback, unidecode
+import logging, os, re, requests, string, traceback
 from pydash import has
 
 # APIs
 from iso639 import languages as iso639_languages
 from langdetect import detect as langdetect_detect, DetectorFactory
 import tmdbsimple as tmdb
-import imdb
 from imdb import IMDb
 import hunspell
 
@@ -14,6 +13,10 @@ import hunspell
 from helpers import has_many, is_float, show_diff
 import nltk, nltk_people
 from nltk_people import extract_names
+
+# checks
+from checks.mixins.remove_until_first_codec import RemoveUntilFirstCodec
+from checks import *
 
 # load environment variables
 load_dotenv()
@@ -31,21 +34,8 @@ MISSPELLED_IGNORE_LIST = [
     x.strip() for x in os.environ.get("MISSPELLED_IGNORE_LIST").split(",")
 ]
 
-# used for filename
-RELEASE_GROUP = os.environ.get("RELEASE_GROUP").strip()
 
-# channels
-TRAINEE_CHANNELS = [x.strip() for x in os.environ.get("TRAINEE_CHANNELS").split(",")]
-INTERNAL_CHANNELS = [x.strip() for x in os.environ.get("INTERNAL_CHANNELS").split(",")]
-
-# filename cuts
-CUTS = [None] + [x.strip() for x in os.environ.get("FILENAME_CUTS").split(",")]
-
-# how many years off the movie year can be. (default: 1)
-MOVIE_YEAR_OFFSET = int(os.environ.get("MOVIE_YEAR_OFFSET", "1").strip())
-
-
-class Checker:
+class Checker(RemoveUntilFirstCodec):
     def __init__(self, codecs_parser, source_detector, reporter):
         self.codecs = codecs_parser
         self.source_detector = source_detector
@@ -64,27 +54,24 @@ class Checker:
 
         # check metadata
         reply += "> **Metadata**\n"
-        try:
-            reply += self.check_movie_name_format()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report("fail", "Error parsing movie name")
-        try:
-            reply += self.check_ids()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report("fail", "Error parsing IMDb/TMDb ids")
+        reply += CheckMovieNameFormat(self.reporter, self.mediainfo).run()
+        reply += CheckMetadataIds(self.reporter, self.mediainfo, tmdb, ia).run()
+        reply += CheckFilename(
+            self.reporter,
+            self.source_detector,
+            self.codecs,
+            self.mediainfo,
+            self.bdinfo,
+            self.channel_name,
+        ).run()
 
-        try:
-            reply += self.check_filename()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report("fail", "Error checking filename")
         try:
             reply += self.check_tracks_have_language()
         except:
             traceback.print_exc()
-            reply += self.reporter.print_report("fail", "Error checking filename")
+            reply += self.reporter.print_report(
+                "fail", "Error checking if tracks have language"
+            )
         try:
             reply += self.check_video_language_matches_first_audio_language()
         except:
@@ -386,61 +373,6 @@ class Checker:
 
         return reply
 
-    def check_movie_name_format(self):
-        reply = ""
-
-        # is it a movie or tv show?
-        is_movie = self._is_movie()
-
-        if has(self.mediainfo, "general.0.movie_name"):
-            if is_movie:
-                # movie name in format "Name (Year)"
-                if re.search(
-                    r"^.+\(\d{4}\)$", self.mediainfo["general"][0]["movie_name"]
-                ):
-                    reply += self.reporter.print_report(
-                        "correct",
-                        "Movie name format `Name (Year)`: `"
-                        + self.mediainfo["general"][0]["movie_name"]
-                        + "`",
-                    )
-                else:
-                    reply += self.reporter.print_report(
-                        "error",
-                        "Movie name does not match format `Name (Year)`: `"
-                        + self.mediainfo["general"][0]["movie_name"]
-                        + "`",
-                    )
-                    reply += self._movie_name_extra_space(
-                        self.mediainfo["general"][0]["movie_name"]
-                    )
-            else:
-                # tv show name in format "Name - S01E01" or "Name - S01E01E02"
-                if re.search(
-                    r"^.+\s-\sS\d{2}(E\d{2})+.*$",
-                    self.mediainfo["general"][0]["movie_name"],
-                ):
-                    reply += self.reporter.print_report(
-                        "correct",
-                        "TV show name format `Name - S01E01`: `"
-                        + self.mediainfo["general"][0]["movie_name"]
-                        + "`",
-                    )
-                else:
-                    reply += self.reporter.print_report(
-                        "error",
-                        "TV show name does not match format `Name - S01E01`: `"
-                        + self.mediainfo["general"][0]["movie_name"]
-                        + "`",
-                    )
-                    reply += self._movie_name_extra_space(
-                        self.mediainfo["general"][0]["movie_name"]
-                    )
-        else:
-            reply += self.reporter.print_report("error", "Missing movie name")
-
-        return reply
-
     def _movie_name_extra_space(self, movie_name):
         reply = ""
 
@@ -455,445 +387,6 @@ class Checker:
             )
 
         return reply
-
-    # returns True if its a movie, False if tv show
-    def _is_movie(self):
-        # is it a movie or tv show? assume movie
-        is_movie = True
-        determined_movie_or_tv = False
-
-        if has(self.mediainfo, "general.0.tmdb"):
-            if self.mediainfo["general"][0]["tmdb"].startswith("movie/"):
-                is_movie = True
-                determined_movie_or_tv = True
-            elif self.mediainfo["general"][0]["tmdb"].startswith("tv/"):
-                is_movie = False
-                determined_movie_or_tv = True
-
-        if not determined_movie_or_tv:
-            if has(self.mediainfo, "general.0.movie_name"):
-                # tv show name in format "Name - S01E01" or "Name - S01E01E02"
-                is_tv = re.search(
-                    r"^.+\s-\sS\d{2}(E\d{2})+.*$",
-                    self.mediainfo["general"][0]["movie_name"],
-                )
-                if is_tv:
-                    is_movie = not (is_tv)
-        return is_movie
-
-    def check_ids(self):
-        reply = ""
-
-        imdb_movie, tmdb_info, tmdb_year = None, None, None
-
-        movie_data = {"name": None, "year": None}
-
-        matched = {
-            "imdb_title": False,
-            "imdb_year": False,
-            "tmdb_title": False,
-            "tmdb_year": False,
-            # matched movie title/year with either imdb or tmdb
-            "title": False,
-            "year": False,
-            "title_replied": False,
-            "year_replied": False,
-        }
-
-        # is it a movie or tv show?
-        is_movie = self._is_movie()
-
-        # extract movie name and year or tv show name
-        if has(self.mediainfo, "general.0.movie_name"):
-            if is_movie:
-                # movie
-                movie_name = re.search(
-                    r"^(.+)\((\d{4})\)", self.mediainfo["general"][0]["movie_name"]
-                )
-                if movie_name:
-                    movie_data["name"] = movie_name.group(1).strip()
-                    movie_data["year"] = movie_name.group(2).strip()
-            else:
-                # tv show
-                tv_show_name = re.search(
-                    r"^(.+)\s-\s.+\s-\s.+", self.mediainfo["general"][0]["movie_name"]
-                )
-                if tv_show_name:
-                    movie_data["name"] = tv_show_name.group(1).strip()
-
-        if has(self.mediainfo, "general.0.imdb"):
-            imdb_id = "".join(
-                re.findall(r"[\d]+", self.mediainfo["general"][0]["imdb"])
-            )
-            try:
-                imdb_movie = ia.get_movie(imdb_id)
-            except imdb._exceptions.IMDbParserError:
-                reply += self.reporter.print_report(
-                    "error",
-                    "Invalid IMDb id: `" + self.mediainfo["general"][0]["imdb"] + "`",
-                )
-            except:
-                # imdb._exceptions.IMDbDataAccessError
-                reply += self.reporter.print_report(
-                    "info",
-                    "Failed to get IMDb movie data for id: `"
-                    + self.mediainfo["general"][0]["imdb"]
-                    + "`",
-                )
-            else:
-                # force single space in movie name
-                imdb_movie["title"] = re.sub(r"\s+", " ", imdb_movie["title"])
-                matched["imdb_title"] = movie_data["name"] == imdb_movie["title"]
-                if is_movie:
-                    matched["imdb_year"] = self._year_range(
-                        imdb_movie["year"], movie_data["year"]
-                    )
-
-        if has(self.mediainfo, "general.0.tmdb"):
-            tmdb_id = "".join(
-                re.findall(r"[\d]+", self.mediainfo["general"][0]["tmdb"])
-            )
-            # movie or tv show
-            tmdb_data = tmdb.Movies(tmdb_id) if is_movie else tmdb.TV(tmdb_id)
-
-            try:
-                tmdb_info = tmdb_data.info()
-                # force single space in movie name
-                if "title" in tmdb_info:
-                    tmdb_info["title"] = re.sub(r"\s+", " ", tmdb_info["title"])
-            except:
-                reply += self.reporter.print_report(
-                    "info",
-                    "Failed to get TMDb data for id: `"
-                    + self.mediainfo["general"][0]["tmdb"]
-                    + "`",
-                )
-            else:
-                if is_movie:
-                    # movie
-                    if "release_date" in tmdb_info and tmdb_info["release_date"]:
-                        datetime_obj = datetime.datetime.strptime(
-                            tmdb_info["release_date"], "%Y-%m-%d"
-                        )
-                        tmdb_year = str(datetime_obj.year)
-                    # tmdb_info["original_title"] is original title
-                    # tmdb_info["title"] is the translated title in whatever language you're requesting
-                    matched["tmdb_title"] = (
-                        "title" in tmdb_info
-                        and movie_data["name"] == tmdb_info["title"]
-                    )
-                    matched["tmdb_year"] = tmdb_year and self._year_range(
-                        tmdb_year, movie_data["year"]
-                    )
-                else:
-                    # tv show
-                    matched["tmdb_title"] = (
-                        "title" in tmdb_info
-                        and movie_data["name"] == tmdb_info["title"]
-                    )
-
-        # matched title/year with either imdb or tmdb
-        matched["title"] = matched["imdb_title"] or matched["tmdb_title"]
-        matched["year"] = matched["imdb_year"] or matched["tmdb_year"]
-
-        if has(self.mediainfo, "general.0.imdb") or has(
-            self.mediainfo, "general.0.tmdb"
-        ):
-            if is_movie:
-                # movie
-                if matched["title"] and matched["year"]:
-                    reply += self.reporter.print_report(
-                        "correct", "Matched movie name and year with IMDb/TMDb"
-                    )
-                else:
-                    if matched["title"]:
-                        reply += self.reporter.print_report(
-                            "correct", "Matched movie name with IMDb/TMDb"
-                        )
-                    else:
-                        if imdb_movie and "title" in imdb_movie and imdb_movie["title"]:
-                            reply += self.reporter.print_report(
-                                "error", "IMDb: Name: `" + imdb_movie["title"] + "`"
-                            )
-                            if movie_data["name"]:
-                                reply += show_diff(
-                                    movie_data["name"], imdb_movie["title"]
-                                )
-                            matched["title_replied"] = True
-                        # tmdb_info["original_title"] is original title
-                        # tmdb_info["title"] is the translated title in whatever language you're requesting
-                        if tmdb_info and "title" in tmdb_info and tmdb_info["title"]:
-                            reply += self.reporter.print_report(
-                                "error", "TMDb: Name: `" + tmdb_info["title"] + "`"
-                            )
-                            if movie_data["name"]:
-                                reply += show_diff(
-                                    movie_data["name"], tmdb_info["title"]
-                                )
-                            matched["title_replied"] = True
-                        if not matched["title_replied"]:
-                            reply += self.reporter.print_report(
-                                "error", "Failed to match movie name with IMDb/TMDb"
-                            )
-
-                    if matched["year"]:
-                        reply += self.reporter.print_report(
-                            "correct", "Matched movie year with IMDb/TMDb"
-                        )
-                    else:
-                        if imdb_movie and "year" in imdb_movie:
-                            reply += self.reporter.print_report(
-                                "error", "IMDb: Year: `" + str(imdb_movie["year"]) + "`"
-                            )
-                            matched["year_replied"] = True
-                        if tmdb_year:
-                            reply += self.reporter.print_report(
-                                "error", "TMDb: Year: `" + str(tmdb_year) + "`"
-                            )
-                            matched["year_replied"] = True
-                        if not matched["year_replied"]:
-                            reply += self.reporter.print_report(
-                                "error", "Failed to match movie year with IMDb/TMDb"
-                            )
-            else:
-                # tv show
-                if matched["title"]:
-                    reply += self.reporter.print_report(
-                        "correct", "Matched tv show name with IMDb/TMDb"
-                    )
-                else:
-                    if imdb_movie and "title" in imdb_movie:
-                        reply += self.reporter.print_report(
-                            "error", "IMDb: Name: `" + imdb_movie["title"] + "`"
-                        )
-                        matched["title_replied"] = True
-                    if tmdb_info and "name" in tmdb_info:
-                        reply += self.reporter.print_report(
-                            "error", "TMDb: Name: `" + tmdb_info["name"] + "`"
-                        )
-                        matched["title_replied"] = True
-                    if not matched["title_replied"]:
-                        reply += self.reporter.print_report(
-                            "error", "Failed to match tv show name with IMDb/TMDb"
-                        )
-
-        return reply
-
-    def _year_range(self, year, test_year, offset=MOVIE_YEAR_OFFSET):
-        # self._year_range(year, test_year)
-        # example: with offset = 1, and year = 2004, test_year can be between 2003 and 2005 inclusive
-        # 2002 in range(2004 - 1, (2004 + 1) + 1) False
-        # 2003 in range(2004 - 1, (2004 + 1) + 1) True
-        # 2004 in range(2004 - 1, (2004 + 1) + 1) True
-        # 2005 in range(2004 - 1, (2004 + 1) + 1) True
-        # 2006 in range(2004 - 1, (2004 + 1) + 1) False
-        year = int(year)
-        test_year = int(test_year)
-        return test_year in range(year - offset, (year + offset) + 1)
-
-    def _construct_release_name(self, reply, cut=None, hybird=False, repack=False):
-        release_name = ""
-
-        if not self.source_detector.is_dvd():
-            # scan type must come from bdinfo
-            bdinfo_video_parts = self.bdinfo["video"][0].split(" / ")
-            scan_type = bdinfo_video_parts[2].strip()[-1].lower()
-
-        if has_many(self.mediainfo, "video.0", ["height", "title"]) and has(
-            self.mediainfo, "audio.0.title"
-        ):
-            # Name.S01E01 or Name.S01E01E02
-            tv_show_name_search = re.search(
-                r"(.+)\s-\s(S\d{2}(E\d{2})+)",
-                self.mediainfo["general"][0]["movie_name"],
-            )
-            # Name.Year
-            movie_name_search = re.search(
-                r"(.+)\s\((\d{4})\)", self.mediainfo["general"][0]["movie_name"]
-            )
-            if tv_show_name_search:
-                title = self._format_filename_title(tv_show_name_search.group(1))
-                season_episode = tv_show_name_search.group(2).strip()
-                release_name += title + "." + season_episode
-            elif movie_name_search:
-                title = self._format_filename_title(movie_name_search.group(1))
-                year = movie_name_search.group(2).strip()
-                release_name += title + "." + year
-            else:
-                release_name += self._format_filename_title(
-                    self.mediainfo["general"][0]["movie_name"]
-                )
-
-            # with or without hybrid
-            if hybird:
-                release_name += ".Hybrid"
-
-            # with or without repack
-            if repack:
-                release_name += ".REPACK"
-
-            # check cuts here
-            if cut is not None:
-                release_name += "." + cut
-
-            # resolution (ex. 1080p)
-            height = "".join(re.findall(r"[\d]+", self.mediainfo["video"][0]["height"]))
-
-            if self.source_detector.is_dvd():
-                # source DVD
-                if "standard" in self.mediainfo["video"][0]:
-                    release_name += "." + self.mediainfo["video"][0]["standard"]
-                release_name += ".DVD.REMUX"
-            elif self.source_detector.is_uhd():
-                # source UHD BluRay
-                release_name += "." + height
-                release_name += scan_type
-                release_name += ".UHD.BluRay.REMUX"
-                # Dolby Vision (DV)
-                if self.source_detector.is_dv():
-                    release_name += ".DV"
-                # SDR/HDR
-                if self.mediainfo["video"][0]["color_primaries"] == "BT.2020":
-                    release_name += ".HDR"
-                else:
-                    release_name += ".SDR"
-            else:
-                # source HD BluRay
-                release_name += "." + height
-                release_name += scan_type
-                release_name += ".BluRay.REMUX"
-
-            # video format (ex. AVC)
-            main_video_title = self.mediainfo["video"][0]["title"].split(" / ")
-            if len(main_video_title) >= 1:
-                release_name += "." + self.codecs.get_video_codec_title_name(
-                    main_video_title[0].strip()
-                )
-
-            main_audio_title = self.mediainfo["audio"][0]["title"]
-            (
-                main_audio_title,
-                _,
-                _,
-            ) = self._remove_until_first_codec(main_audio_title)
-            main_audio_title_parts = main_audio_title.split(" / ")
-
-            audio_codec_title, main_audio_channels = None, None
-
-            # get main audio codec
-            if len(main_audio_title) > 0:
-                main_audio_codec = main_audio_title_parts[0]
-                if self.codecs.is_audio_title(main_audio_codec):
-                    audio_codec_title = self.codecs.get_audio_codec_title_name(
-                        main_audio_codec
-                    )
-
-            # get main audio channels
-            if len(main_audio_title) > 1:
-                main_audio_channels = main_audio_title_parts[1]
-                search_channel_atmos = re.search(
-                    r"(\d.\d)\+\d+\sobjects", main_audio_channels
-                )
-                if search_channel_atmos:
-                    main_audio_channels = search_channel_atmos.group(1)
-
-            if (
-                audio_codec_title
-                and main_audio_channels
-                and is_float(main_audio_channels)
-            ):
-                # have main audio codec and channels
-                if audio_codec_title == "TrueHD.Atmos":
-                    # atmos channel
-                    release_name += ".TrueHD." + main_audio_channels + ".Atmos"
-                else:
-                    release_name += "." + audio_codec_title + "." + main_audio_channels
-
-            # release group
-            release_name += "-"
-            if self.channel_name in INTERNAL_CHANNELS:
-                release_name += RELEASE_GROUP + ".mkv"
-
-        return release_name
-
-    def _partial_match(self, possible_names, name):
-        for n in possible_names:
-            if n in name:
-                return True
-        return False
-
-    def check_filename(self):
-        reply = ""
-
-        if has_many(self.mediainfo, "general.0", ["movie_name", "complete_name"]):
-            complete_name = self.mediainfo["general"][0]["complete_name"]
-            if "\\" in complete_name:
-                complete_name = complete_name.split("\\")[-1]
-            elif "/" in complete_name:
-                complete_name = complete_name.split("/")[-1]
-
-            # possible release names
-            complete_name_lc = complete_name.lower()
-            possible_release_names = [
-                self._construct_release_name(
-                    reply,
-                    cut,
-                    hybird=("hybrid" in complete_name_lc),
-                    repack=("repack" in complete_name_lc),
-                )
-                for cut in CUTS
-            ]
-
-            if (
-                self.channel_name in INTERNAL_CHANNELS
-                and complete_name in possible_release_names
-            ):
-                reply += self.reporter.print_report(
-                    "correct", "Filename: `" + complete_name + "`"
-                )
-            elif self._partial_match(possible_release_names, complete_name):
-                reply += self.reporter.print_report(
-                    "correct", "Filename: `" + complete_name + "`"
-                )
-            else:
-                expected_release_name = possible_release_names[0]
-
-                # pick the expected release name with the proper cut
-                for i, cut in enumerate(CUTS[1:]):
-                    if cut in complete_name:
-                        expected_release_name = possible_release_names[i + 1]
-
-                if self.channel_name not in INTERNAL_CHANNELS:
-                    expected_release_name += "GRouP.mkv"
-
-                reply += self.reporter.print_report(
-                    "error",
-                    "Filename missmatch:\n```fix\nFilename: "
-                    + complete_name
-                    + "\nExpected: "
-                    + expected_release_name
-                    + "```",
-                    new_line=False,
-                )
-                reply += show_diff(complete_name, expected_release_name)
-        else:
-            reply += self.reporter.print_report("error", "Cannot validate filename")
-
-        return reply
-
-    def _format_filename_title(self, title):
-        title = title.strip()
-        # remove accents
-        title = unidecode.unidecode(title)
-        # remove punctuation
-        title = title.replace("&", "and")
-        title = "".join([i for i in title if not i in string.punctuation or i == "."])
-        title = title.replace(":", ".")
-        # replace spaces with dots
-        title = title.replace(" ", ".")
-        # force single dots
-        title = re.sub(r"\.+", ".", title)
-        return title
 
     def check_tracks_have_language(self):
         reply, is_valid = "", True

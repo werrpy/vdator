@@ -5,7 +5,7 @@ from emoji import EMOJI_ALIAS_UNICODE_ENGLISH as EMOJIS
 from helpers import num_to_emoji
 
 
-class Reporter:
+class Reporter(object):
     """
     Keep track of types of responses
     """

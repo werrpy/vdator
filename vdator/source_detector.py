@@ -5,7 +5,7 @@ import os, re
 DVD_CHECK_MODE = os.environ.get("DVD_CHECK_MODE").strip()
 
 # detect if DVD, 1080p BluRay or UHD BluRay
-class SourceDetector:
+class SourceDetector(object):
     """
     Define ways to detect source
     """

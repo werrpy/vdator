@@ -1,4 +1,4 @@
-class MediaInfoParser:
+class MediaInfoParser(object):
     """
     Parse MediaInfo
     """

@@ -19,7 +19,7 @@ class BDInfoType(Enum):
     PLAYLIST_REPORT = 2
 
 
-class PasteParser:
+class PasteParser(object):
     def __init__(self, bdinfo_parser):
         self.bdinfo_parser = bdinfo_parser
 
