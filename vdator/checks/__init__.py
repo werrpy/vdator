@@ -17,3 +17,9 @@ from .video_track import *
 from .print_audio_track_names import *
 from .audio_track_conversions import *
 from .flac_audio_tracks import *
+from .audio_track_people import *
+from .audio_track_spellcheck import *
+
+# text
+from .print_text_tracks import *
+from .text_order import *

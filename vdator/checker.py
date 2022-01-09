@@ -10,8 +10,7 @@ from imdb import IMDb
 import hunspell
 
 # parsers
-import nltk, nltk_people
-from nltk_people import extract_names
+import nltk
 
 # checks
 from checks.mixins import SectionId, IsCommentaryTrack
@@ -25,6 +24,17 @@ tmdb.API_KEY = os.environ.get("TMDB_API_KEY")
 ia = IMDb()
 logger = logging.getLogger("imdbpy")
 logger.disabled = True
+
+# download nltk resources
+ntlk_list = [
+    "stopwords",
+    "punkt",
+    "averaged_perceptron_tagger",
+    "maxent_ne_chunker",
+    "words",
+]
+for t in ntlk_list:
+    nltk.download(t)
 
 # make language detection deterministic
 DetectorFactory.seed = 0
@@ -92,7 +102,7 @@ class Checker(SectionId, IsCommentaryTrack):
             self.remove_until_first_codec,
             self.mediainfo,
             self.bdinfo,
-            self.eac3to
+            self.eac3to,
         ).run()
         # check FLAC audio using mediainfo
         reply += CheckFLACAudioTracks(
@@ -100,34 +110,16 @@ class Checker(SectionId, IsCommentaryTrack):
         ).run()
 
         # TMDb and IMDb People API
-        try:
-            reply += self.check_people()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report(
-                "fail", "Error checking IMDb/TMDb people"
-            )
-        try:
-            reply += self.spell_check_track_name()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report(
-                "fail", "Error spell checking track names"
-            )
+        reply += CheckAudioTrackPeople(
+            self.reporter, self.remove_until_first_codec, self.mediainfo, tmdb, ia
+        ).run()
+        reply += CheckAudioTrackSpellCheck(
+            self.reporter, self.hobj, self.remove_until_first_codec, self.mediainfo
+        ).run()
 
         # check text
-        try:
-            reply += self.print_text_tracks()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report("fail", "Error printing text tracks")
-        try:
-            reply += self.check_text_order()
-        except:
-            traceback.print_exc()
-            reply += self.reporter.print_report(
-                "fail", "Error checking text track order"
-            )
+        reply += CheckPrintTextTracks(self.reporter, self.mediainfo).run()
+        reply += CheckTextOrder(self.reporter, self.mediainfo).run()
         try:
             reply += self.check_text_default_flag()
         except:
@@ -164,218 +156,6 @@ class Checker(SectionId, IsCommentaryTrack):
                 "fail", "Error checking chapter padding"
             )
 
-        return reply
-
-    def check_people(self):
-        reply = ""
-
-        # check people in audio track names
-        for i, _ in enumerate(self.mediainfo["audio"]):
-            if "title" in self.mediainfo["audio"][i]:
-                title = self.mediainfo["audio"][i]["title"]
-
-                # skip if has an audio codec
-                _, _, found_codec = self.remove_until_first_codec.remove(title)
-                if found_codec:
-                    continue
-
-                # try to match names
-                matched_names = list()
-                names = extract_names(title)
-                search = tmdb.Search()
-                for n in names:
-                    # TMDb API
-                    try:
-                        search.person(query=n)
-                        for s in search.results:
-                            if n == s["name"]:
-                                matched_names.append(n)
-                    except:
-                        reply += self.reporter.print_report(
-                            "info", "Failed to get TMDb people data"
-                        )
-                    # IMDb API
-                    try:
-                        for person in ia.search_person(n):
-                            if n == person["name"]:
-                                matched_names.append(n)
-                    except:
-                        reply += self.reporter.print_report(
-                            "info", "Failed to get IMDb people data"
-                        )
-                matched_names = set(matched_names)
-                if len(matched_names) > 0:
-                    reply += self.reporter.print_report(
-                        "correct",
-                        "Audio "
-                        + self._section_id("audio", i)
-                        + " People Matched: `"
-                        + ", ".join(matched_names)
-                        + "`",
-                    )
-                unmatched_names = set(names) - set(matched_names)
-                if len(unmatched_names) > 0:
-                    reply += self.reporter.print_report(
-                        "warning",
-                        "Audio "
-                        + self._section_id("audio", i)
-                        + " People Unmatched: `"
-                        + ", ".join(unmatched_names)
-                        + "`",
-                    )
-
-        return reply
-
-    def spell_check_track_name(self):
-        reply = ""
-
-        # spellcheck audio track names
-        for i, _ in enumerate(self.mediainfo["audio"]):
-            if "title" in self.mediainfo["audio"][i]:
-                title, title_parts, found_codec = self.remove_until_first_codec.remove(
-                    self.mediainfo["audio"][i]["title"]
-                )
-
-                spellcheck_text = None
-                if found_codec:
-                    # spellcheck title parts before codec
-                    spellcheck_text = " ".join(title_parts)
-                else:
-                    # spellcheck entire audio title
-                    spellcheck_text = title
-                if spellcheck_text:
-                    # map punctuation to space
-                    translator = str.maketrans(
-                        string.punctuation, " " * len(string.punctuation)
-                    )
-                    spellcheck_text = spellcheck_text.translate(translator)
-
-                    # ignore names
-                    ignore_list = extract_names(spellcheck_text)
-                    ignore_list = [a for b in ignore_list for a in b.split()]
-
-                    # tokenize
-                    tokens = nltk.word_tokenize(spellcheck_text)
-                    tokens = [t for t in tokens if t not in ignore_list]
-
-                    misspelled_words = list()
-                    for t in tokens:
-                        if not self.hobj.spell(t):
-                            # t is misspelled
-                            misspelled_words.append(t)
-
-                    misspelled_words = set(misspelled_words)
-                    misspelled_words = [
-                        word
-                        for word in misspelled_words
-                        if word.lower() not in MISSPELLED_IGNORE_LIST
-                    ]
-                    if len(misspelled_words) > 0:
-                        reply += self.reporter.print_report(
-                            "error",
-                            "Audio "
-                            + self._section_id("audio", i)
-                            + " Misspelled: `"
-                            + ", ".join(misspelled_words)
-                            + "`",
-                        )
-
-        return reply
-
-    def print_text_tracks(self):
-        reply = "> **Text Tracks**\n"
-        if len(self.mediainfo["text"]) > 0:
-            reply += "```"
-            for i, _ in enumerate(self.mediainfo["text"]):
-                reply += self._section_id("text", i) + ":"
-                if "default" in self.mediainfo["text"][i]:
-                    reply += " default:" + self.mediainfo["text"][i]["default"]
-                if "forced" in self.mediainfo["text"][i]:
-                    reply += " forced:" + self.mediainfo["text"][i]["forced"]
-                if "language" in self.mediainfo["text"][i]:
-                    reply += " language:" + self.mediainfo["text"][i]["language"]
-                if "title" in self.mediainfo["text"][i]:
-                    reply += " title: " + self.mediainfo["text"][i]["title"]
-                reply += "\n"
-            reply += "```"
-        else:
-            reply += self.reporter.print_report("info", "No text tracks")
-        return reply
-
-    def check_text_order(self):
-        reply = ""
-
-        if len(self.mediainfo["text"]) == 0:
-            return reply
-
-        language_number = 1  # Used to keep track of first actual sub.
-        forced_checked, commentary_checked = False, False
-        forced_track_eng_first = False
-        prev_track_language, prev_track_name = "", ""
-        subs_in_order = True
-
-        for i, _ in enumerate(self.mediainfo["text"]):
-            forced_track, commentary_track = False, False
-            track_language, track_name = "", ""
-
-            if "language" in self.mediainfo["text"][i]:
-                track_language = self.mediainfo["text"][i]["language"].lower()
-            else:
-                # Error printed elsewhere.
-                subs_in_order = False
-            if "forced" in self.mediainfo["text"][i]:
-                forced_track = self.mediainfo["text"][i]["forced"].lower() == "yes"
-            if "title" in self.mediainfo["text"][i]:
-                track_name = self.mediainfo["text"][i]["title"]
-                commentary_track = self._is_commentary_track(track_name)
-
-            if i == 0 and forced_track:
-                forced_track_eng_first = track_language == "english"
-            elif forced_track and track_language == "english":
-                subs_in_order = False
-                reply += self.reporter.print_report(
-                    "error",
-                    "Text {} is a forced English track, it must be first".format(
-                        self._section_id("text", i)
-                    ),
-                )
-            elif not forced_checked:
-                forced_checked = True
-                track_name, track_language = "", ""
-            elif commentary_track:
-                commentary_checked = True
-            elif commentary_checked:
-                subs_in_order = False
-                reply += self.reporter.print_report(
-                    "error",
-                    "Text {} came after the commentary sub(s)".format(
-                        self._section_id("text", i)
-                    ),
-                )
-            elif track_language == prev_track_language:
-                if prev_track_name != "" and track_name < prev_track_name:
-                    reply += self.reporter.print_report(
-                        "warning",
-                        "Text {} might need to come after Text {}, alphabetical within language".format(
-                            self._section_id("Text", i - 1), self._section_id("Text", i)
-                        ),
-                    )
-            elif language_number > 1 and track_language < prev_track_language:
-                subs_in_order = False
-                prev_track_language = ""
-                reply += self.reporter.print_report(
-                    "error",
-                    "Text {} should come after Text {}, language order".format(
-                        self._section_id("text", i - 1), self._section_id("text", i)
-                    ),
-                )
-            elif language_number == 1 and track_language != "english":
-                language_number += 1
-            prev_track_language = track_language
-            prev_track_name = track_name
-
-        if subs_in_order:
-            reply += self.reporter.print_report("correct", "Subtitles are in order")
         return reply
 
     def check_text_default_flag(self):

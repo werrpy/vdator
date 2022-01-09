@@ -6,7 +6,13 @@ import re
 
 class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
     def __init__(
-        self, reporter, source_detector, remove_until_first_codec, mediainfo, bdinfo, eac3to
+        self,
+        reporter,
+        source_detector,
+        remove_until_first_codec,
+        mediainfo,
+        bdinfo,
+        eac3to,
     ):
         super().__init__(reporter, mediainfo, "Error checking audio track conversions")
         self.source_detector = source_detector
@@ -337,7 +343,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
             )
 
         return reply
-    
+
     def _eac3to_log_has_mono(self):
         # get command-lines
 
