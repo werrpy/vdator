@@ -1,5 +1,8 @@
 class RemoveUntilFirstCodec(object):
-    def _remove_until_first_codec(self, title):
+    def __init__(self, codecs):
+        self.codecs = codecs
+
+    def remove(self, title):
         title2, title_parts, found = title, list(), False
         if " / " in title:
             for part in title.split(" / "):

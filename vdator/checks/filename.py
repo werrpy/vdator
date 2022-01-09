@@ -1,5 +1,4 @@
 from .check import *
-from .mixins.remove_until_first_codec import *
 
 from dotenv import load_dotenv
 import os, re, string, unidecode
@@ -13,13 +12,21 @@ TRAINEE_CHANNELS = [x.strip() for x in os.environ.get("TRAINEE_CHANNELS").split(
 INTERNAL_CHANNELS = [x.strip() for x in os.environ.get("INTERNAL_CHANNELS").split(",")]
 
 
-class CheckFilename(Check, RemoveUntilFirstCodec):
+class CheckFilename(Check):
     def __init__(
-        self, reporter, source_detector, codecs, mediainfo, bdinfo, channel_name
+        self,
+        reporter,
+        source_detector,
+        codecs,
+        remove_until_first_codec,
+        mediainfo,
+        bdinfo,
+        channel_name,
     ):
         super().__init__(reporter, mediainfo, "Error checking filename")
         self.source_detector = source_detector
         self.codecs = codecs
+        self.remove_until_first_codec = remove_until_first_codec
         self.bdinfo = bdinfo
         self.channel_name = channel_name
 
@@ -167,7 +174,7 @@ class CheckFilename(Check, RemoveUntilFirstCodec):
                 main_audio_title,
                 _,
                 _,
-            ) = self._remove_until_first_codec(main_audio_title)
+            ) = self.remove_until_first_codec.remove(main_audio_title)
             main_audio_title_parts = main_audio_title.split(" / ")
 
             audio_codec_title, main_audio_channels = None, None

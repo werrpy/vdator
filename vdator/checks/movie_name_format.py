@@ -1,5 +1,5 @@
 from .check import *
-from .mixins.is_movie import *
+from .mixins import IsMovie
 
 import re
 

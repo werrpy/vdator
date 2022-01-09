@@ -172,30 +172,36 @@ Edit `vdator/data/urls.json` and add your pastebin site.
 
 Edit `vdator/checker.py`.
 
-In the `run_checks()` method, add 
+In the `run_checks()` method add:
 ```python
-try:
-    reply += self.my_new_check()
-except:
-    traceback.print_exc()
-    reply += self.reporter.print_report("fail", "Error my new check failed")
+reply += MyNewCheck(self.reporter, self.mediainfo).run()
 ```
 
-Define the method for your check:
-
+Edit `vdator/checks/__init__.py` and add:
 ```python
-def my_new_check(self):
-    reply = ""
-    # use self.bdinfo, self.mediainfo, self.eac3to
-    # use has() and has_many() to check if the bdinfo/mediainfo keys you need exist, for example:
-    # if has(self.bdinfo, "video"):
-        # safe to use self.bdinfo["video"] here
-    # if has_many(self.mediainfo, "video.0", ["height"]):
-        # safe to use self.mediainfo["video"][0]["height"] here
-    # use self.reporter.print_report() to print status messages
-    reply += self.reporter.print_report("info", "Some info message")
-    # lastly return the string result of the check which is appended to the bot reply in run_checks()
-    return reply
+from .my_check import *
+```
+
+Create `vdator/checks/my_check.py`:
+```python
+from .check import *
+
+
+class MyNewCheck(Check):
+    def __init__(self, reporter, mediainfo):
+        super().__init__(reporter, mediainfo, "Error running my check")
+
+    # overriding abstract method
+    def get_reply(self):
+        reply = ""
+        # use self.mediainfo here
+        # use has() and has_many() to check if the mediainfo keys you need exist, for example:
+        # if has_many(self.mediainfo, "video.0", ["height"]):
+            # safe to use self.mediainfo["video"][0]["height"] here
+        # use self.reporter.print_report() to print status messages
+        reply += self.reporter.print_report("info", "Some info message")
+        # lastly return the string result of the check which is appended to the bot reply in run_checks()
+        return reply
 ```
 
 ### API

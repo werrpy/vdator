@@ -1,7 +1,8 @@
 from .check import *
+from .mixins import SectionId
 
 
-class CheckTracksHaveLanguage(Check):
+class CheckTracksHaveLanguage(Check, SectionId):
     def __init__(self, reporter, mediainfo):
         super().__init__(reporter, mediainfo, "Error checking if tracks have language")
 
