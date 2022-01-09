@@ -3,20 +3,21 @@ from .check import *
 from dotenv import load_dotenv
 import nltk
 from nltk_people import extract_names
-import os, string
+import hunspell, os, string
 
 # load environment variables
 load_dotenv()
 
+HUNSPELL_LANG = [x.strip() for x in os.environ.get("HUNSPELL_LANG").split(",")]
 MISSPELLED_IGNORE_LIST = [
     x.strip() for x in os.environ.get("MISSPELLED_IGNORE_LIST").split(",")
 ]
 
 
 class CheckAudioTrackSpellCheck(Check):
-    def __init__(self, reporter, hobj, remove_until_first_codec, mediainfo):
+    def __init__(self, reporter, remove_until_first_codec, mediainfo):
         super().__init__(reporter, mediainfo, "Error spell checking audio track names")
-        self.hobj = hobj
+        self.hobj = hunspell.HunSpell(HUNSPELL_LANG[0], HUNSPELL_LANG[1])
         self.remove_until_first_codec = remove_until_first_codec
 
     # overriding abstract method

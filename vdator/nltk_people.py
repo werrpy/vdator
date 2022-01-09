@@ -2,6 +2,19 @@ import nltk
 from nltk.corpus import stopwords
 
 
+def download_nltk_data():
+    # download nltk data
+    ntlk_list = [
+        "stopwords",
+        "punkt",
+        "averaged_perceptron_tagger",
+        "maxent_ne_chunker",
+        "words",
+    ]
+    for t in ntlk_list:
+        nltk.download(t)
+
+
 def ie_preprocess(document):
     """
     nltk preprocess text

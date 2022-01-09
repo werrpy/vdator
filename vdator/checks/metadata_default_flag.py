@@ -1,9 +1,9 @@
 from .check import *
 
 
-class CheckDefaultFlag(Check):
+class CheckMetadataDefaultFlag(Check):
     def __init__(self, reporter, mediainfo):
-        super().__init__(reporter, mediainfo, "Error checking default flag")
+        super().__init__(reporter, mediainfo, "Error checking metadata default flag")
 
     # overriding abstract method
     def get_reply(self):
