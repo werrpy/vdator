@@ -1,4 +1,5 @@
 from pydash import has
+import re
 
 
 class IsMovie(object):
