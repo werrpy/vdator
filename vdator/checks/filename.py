@@ -45,7 +45,6 @@ class CheckFilename(Check):
             complete_name_lc = complete_name.lower()
             possible_release_names = [
                 self._construct_release_name(
-                    reply,
                     cut,
                     hybird=("hybrid" in complete_name_lc),
                     repack=("repack" in complete_name_lc),
@@ -90,7 +89,7 @@ class CheckFilename(Check):
 
         return reply
 
-    def _construct_release_name(self, reply, cut=None, hybird=False, repack=False):
+    def _construct_release_name(self, cut=None, hybird=False, repack=False):
         release_name = ""
 
         if not self.source_detector.is_dvd():
