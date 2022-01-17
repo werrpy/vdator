@@ -139,9 +139,9 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
             if last_text_id != -1:
                 try:
                     first_commentary = next(iter(commentary_tracks_by_lang.values()))
-                    if first_commentary and "id" in first_commentary:
+                    if first_commentary and has(first_commentary, "0.id"):
                         try:
-                            if last_text_id > int(first_commentary["id"]):
+                            if last_text_id > int(first_commentary[0]["id"]):
                                 # commentary tracks should be after regular subs
                                 reply += self.reporter.print_report(
                                     "error",
@@ -233,12 +233,14 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
         # add tracks with SDH
         tracks_with_SDH = []
         for track in unparsed:
-            if "SDH" in track["title"]:
+            if "SDH" in track["title"].split():
                 tracks_with_SDH.append(track)
         tracks_with_SDH = sorted(tracks_with_SDH, key=lambda track: track["title"])
         if tracks_with_SDH:
             parsed.extend(tracks_with_SDH)
-            unparsed = [track for track in unparsed if ("SDH" not in track["title"])]
+            unparsed = [
+                track for track in unparsed if ("SDH" not in track["title"].split())
+            ]
 
         # sort rest of the tracks in alphabetical order
         unparsed = sorted(unparsed, key=lambda track: track["title"])
