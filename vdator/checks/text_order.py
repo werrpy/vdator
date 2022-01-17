@@ -41,12 +41,14 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
         commentary_tracks_by_lang = OrderedDict((k, list()) for k in text_langs)
 
         # get tracks by language, and separate commentary tracks
-        for text in self.mediainfo["text"]:
+        for i, text in enumerate(self.mediainfo["text"]):
             text["title"] = text["title"] if "title" in text else ""
             if self._is_commentary_track(text["title"]):
                 commentary_tracks_by_lang[text["language"]].append(text)
             else:
                 text_tracks_by_lang[text["language"]].append(text)
+            # forced english track should be first
+            reply += self._forced_english_track_first(i, text)
 
         # languages should be in alphabetical order with English first
         reply += self._languages_in_order(text_tracks_by_lang, "Regular subs: ")
@@ -65,6 +67,27 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
 
         # commentary tracks should be after regular subs
         reply += self._commentary_last(text_tracks_by_lang, commentary_tracks_by_lang)
+
+        return reply
+
+    def _forced_english_track_first(self, i, text_track):
+        """Forced english track should be first"""
+        reply = ""
+
+        is_forced_track = (
+            text_track["forced"].lower() == "yes" if "forced" in text_track else False
+        )
+        is_english_track = text_track["language"].lower() == "english"
+        is_first_track = i == 0
+
+        if is_forced_track and is_english_track and not is_first_track:
+            # forced english track should be first
+            reply += self.reporter.print_report(
+                "error",
+                "Text {} is a forced English track, it should be first".format(
+                    self._section_id("text", i)
+                ),
+            )
 
         return reply
 
@@ -87,6 +110,7 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
                 + ", ".join(text_track_langs_expected_order)
                 + "`",
             )
+
         return reply
 
     def _commentary_last(self, text_tracks_by_lang, commentary_tracks_by_lang):
@@ -111,6 +135,7 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
                         )
                 except ValueError:
                     pass
+
         return reply
 
     def _subs_in_order_within_language(self, text_tracks_by_lang, prefix=""):
@@ -136,6 +161,7 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
                         k, ", ".join(expected_order_ids)
                     ),
                 )
+
         return reply
 
     def _get_last_text_id(self, text_tracks_by_lang):
