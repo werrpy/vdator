@@ -71,16 +71,26 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
         return reply
 
     def _forced_english_track_first(self, i, text_track):
-        """Forced english track should be first"""
+        """
+        Forced english track should be first
+        Only checks tracks without titles, since titles have a predefined order: No title, SDH, alphabetical
+        """
         reply = ""
 
         is_forced_track = (
             text_track["forced"].lower() == "yes" if "forced" in text_track else False
         )
         is_english_track = text_track["language"].lower() == "english"
+        # only checks tracks without titles
+        title_is_blank = text_track["title"] == ""
         is_first_track = i == 0
 
-        if is_forced_track and is_english_track and not is_first_track:
+        if (
+            is_forced_track
+            and is_english_track
+            and title_is_blank
+            and not is_first_track
+        ):
             # forced english track should be first
             reply += self.reporter.print_report(
                 "error",
