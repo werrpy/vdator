@@ -39,12 +39,14 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
         #
         text_tracks_by_lang = OrderedDict((k, list()) for k in text_langs)
         commentary_tracks_by_lang = OrderedDict((k, list()) for k in text_langs)
+        has_commentary = False
 
         # get tracks by language, and separate commentary tracks
         for i, text in enumerate(self.mediainfo["text"]):
             text["title"] = text["title"] if "title" in text else ""
             if self._is_commentary_track(text["title"]):
                 commentary_tracks_by_lang[text["language"]].append(text)
+                has_commentary = True
             else:
                 text_tracks_by_lang[text["language"]].append(text)
             # forced english track should be first
@@ -52,21 +54,26 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
 
         # languages should be in alphabetical order with English first
         reply += self._languages_in_order(text_tracks_by_lang, "Regular subs: ")
-        reply += self._languages_in_order(
-            commentary_tracks_by_lang, "Commentary subs: "
-        )
+        if has_commentary:
+            reply += self._languages_in_order(
+                commentary_tracks_by_lang, "Commentary subs: "
+            )
 
         # subtitles in order within language: no title, SDH, rest in alphabetical order
         reply += "**Expected order within language:** No title, SDH, alphabetical\n"
         reply += self._subs_in_order_within_language(
             text_tracks_by_lang, "Regular subs: "
         )
-        reply += self._subs_in_order_within_language(
-            commentary_tracks_by_lang, "Commentary subs: "
-        )
+        if has_commentary:
+            reply += self._subs_in_order_within_language(
+                commentary_tracks_by_lang, "Commentary subs: "
+            )
 
         # commentary tracks should be after regular subs
-        reply += self._commentary_last(text_tracks_by_lang, commentary_tracks_by_lang)
+        if has_commentary:
+            reply += self._commentary_last(
+                text_tracks_by_lang, commentary_tracks_by_lang
+            )
 
         return reply
 
@@ -126,24 +133,29 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
     def _commentary_last(self, text_tracks_by_lang, commentary_tracks_by_lang):
         """Commentary tracks should be last"""
         reply = ""
+
         if len(commentary_tracks_by_lang) > 0:
             last_text_id = self._get_last_text_id(text_tracks_by_lang)
             if last_text_id != -1:
                 try:
-                    first_commentary = list(commentary_tracks_by_lang.values())[0][0]
-                    if last_text_id > int(first_commentary["id"]):
-                        # commentary tracks after should be after regular subs
-                        reply += self.reporter.print_report(
-                            "error",
-                            "Commentary subs should be after regular subs",
-                        )
-                    else:
-                        # commentary tracks are after regular subs
-                        reply += self.reporter.print_report(
-                            "correct",
-                            "Commentary subs are after regular subs",
-                        )
-                except ValueError:
+                    first_commentary = next(iter(commentary_tracks_by_lang.values()))
+                    if first_commentary and "id" in first_commentary:
+                        try:
+                            if last_text_id > int(first_commentary["id"]):
+                                # commentary tracks should be after regular subs
+                                reply += self.reporter.print_report(
+                                    "error",
+                                    "Commentary subs should be after regular subs",
+                                )
+                            else:
+                                # commentary tracks are after regular subs
+                                reply += self.reporter.print_report(
+                                    "correct",
+                                    "Commentary subs are after regular subs",
+                                )
+                        except ValueError:
+                            pass
+                except StopIteration:
                     pass
 
         return reply
