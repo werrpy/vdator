@@ -177,7 +177,7 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
             if v_ids != expected_order_ids:
                 # subs for language are out of order
                 reply += self.reporter.print_report(
-                    "error",
+                    "warning",
                     prefix
                     + "Language: `{}`: Subtitles should be in order: `{}`".format(
                         k, ", ".join(expected_order_ids)
