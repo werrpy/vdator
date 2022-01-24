@@ -38,7 +38,10 @@ class CheckAudioTrackPeople(Check, SectionId):
                                 matched_names.append(n)
                     except:
                         reply += self.reporter.print_report(
-                            "info", "Failed to get TMDb people data"
+                            "info",
+                            "Audio "
+                            + self._section_id("audio", i)
+                            + ": Failed to get TMDb people data",
                         )
                     # IMDb API
                     try:
@@ -47,7 +50,10 @@ class CheckAudioTrackPeople(Check, SectionId):
                                 matched_names.append(n)
                     except:
                         reply += self.reporter.print_report(
-                            "info", "Failed to get IMDb people data"
+                            "info",
+                            "Audio "
+                            + self._section_id("audio", i)
+                            + ": Failed to get IMDb people data",
                         )
                 matched_names = set(matched_names)
                 if len(matched_names) > 0:
