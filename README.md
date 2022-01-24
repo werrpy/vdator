@@ -43,15 +43,16 @@ Chapter padding
 
 ### Supported pastebin sites
 
-- [Pastebin](https://pastebin.com/)
-- [Hastebin](https://www.toptal.com/developers/hastebin/)
-- [termbin](https://termbin.com/)
 - [{d}paste](https://dpaste.com/)
-- [ghostbin.co](https://ghostbin.co/)
+- [dpaste](https://dpaste.org/)
 - [Hey! Paste it](https://www.heypasteit.com/)
 - [CentOS Pastebin Service](https://paste.centos.org/)
 - [Paste.ee](https://paste.ee/)
 - [openSUSE Paste](https://paste.opensuse.org/)
+- [Pastebin](https://pastebin.com/)
+- [Rentry.co - Markdown Pastebin](https://rentry.co/)
+- [termbin](https://termbin.com/)
+- [Hastebin](https://www.toptal.com/developers/hastebin/)
 
 ### Setup
 

@@ -37,7 +37,7 @@ class URLParser(object):
 
         # check if its not already a raw url
         is_already_raw_url = re.search(
-            self.urls[hostname]["raw_url"].format("(.*)"), url
+            self.urls[hostname]["raw_url_regex"].format("(.*)"), url
         )
 
         if not is_already_raw_url:

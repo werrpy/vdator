@@ -1,39 +1,54 @@
 {
     "urls": {
         "dpaste.com": {
-            "slug_regex": "https://dpaste.com/(.*)",
+            "slug_regex": "https?://dpaste.com/(.*)",
+            "raw_url_regex": "https?://dpaste.com/{}.txt",
             "raw_url": "https://dpaste.com/{}.txt"
         },
-        "ghostbin.co": {
-            "slug_regex": "https://ghostbin.co/paste/(.*)",
-            "raw_url": "https://ghostbin.co/paste/{}/raw"
+        "dpaste.org": {
+            "slug_regex": "https?://dpaste.org/(.*)",
+            "raw_url_regex": "https?://dpaste.org/{}/raw",
+            "raw_url": "https://dpaste.org/{}/raw"
         },
         "www.heypasteit.com": {
-            "slug_regex": "https://www.heypasteit.com/clip/(.*)",
+            "slug_regex": "https?://www.heypasteit.com/clip/(.*)",
+            "raw_url_regex": "https?://www.heypasteit.com/download/{}",
             "raw_url": "https://www.heypasteit.com/download/{}"
         },
-        "www.toptal.com": {
-            "slug_regex": "https://www.toptal.com/developers/hastebin/(.*)",
-            "raw_url": "https://www.toptal.com/developers/hastebin/raw/{}"
-        },
         "paste.centos.org": {
-            "slug_regex": "https://paste.centos.org/view/(.*)",
+            "slug_regex": "https?://paste.centos.org/view/(.*)",
+            "raw_url_regex": "https?://paste.centos.org/view/raw/{}",
             "raw_url": "https://paste.centos.org/view/raw/{}"
         },
         "paste.ee": {
-            "slug_regex": "https://paste.ee/p/(.*)",
+            "slug_regex": "https?://paste.ee/p/(.*)",
+            "raw_url_regex": "https?://paste.ee/d/{}",
             "raw_url": "https://paste.ee/d/{}"
         },
         "paste.opensuse.org": {
-            "slug_regex": "https://paste.opensuse.org/(.*)",
+            "slug_regex": "https?://paste.opensuse.org/(.*)",
+            "raw_url_regex": "https?://paste.opensuse.org/view/raw/{}",
             "raw_url": "https://paste.opensuse.org/view/raw/{}"
         },
         "pastebin.com": {
-            "slug_regex": "https://pastebin.com/(.*)",
+            "slug_regex": "https?://pastebin.com/(.*)",
+            "raw_url_regex": "https?://pastebin.com/raw/{}",
             "raw_url": "https://pastebin.com/raw/{}"
         },
+        "rentry.co": {
+            "slug_regex": "https?://rentry.co/(.*)",
+            "raw_url_regex": "https?://rentry.co/{}/raw",
+            "raw_url": "https://rentry.co/{}/raw"
+        },
         "termbin.com": {
+            "slug_regex": "https?://termbin.com/(.*)",
+            "raw_url_regex": "https?://termbin.com/{}",
             "raw_url": "https://termbin.com/{}"
+        },
+        "www.toptal.com": {
+            "slug_regex": "https?://www.toptal.com/developers/hastebin/(.*)",
+            "raw_url_regex": "https?://www.toptal.com/developers/hastebin/raw/{}",
+            "raw_url": "https://www.toptal.com/developers/hastebin/raw/{}"
         }
     }
 }
