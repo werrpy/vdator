@@ -161,12 +161,15 @@ Edit `vdator/data/urls.json` and add your pastebin site.
 
 ```
 # hostname
-'example.com': {
+"example.com": {
     # regex to get paste's unique identifier
-    'slug_regex': 'https://example.com/(.*)',
+    "slug_regex": "https://example.com/(.*)",
+
+    # regex to check if paste links directly to raw text, using {} in place of the unique identifier
+    "raw_url_regex": "https?://pastebin.com/raw/{}",
     
-    # link to raw text using {} in place of the unique identifier
-    'raw_url': 'https://example.com/raw/{}'
+    # link to raw text, using {} in place of the unique identifier
+    "raw_url": "https://example.com/raw/{}"
 }
 ```
 
