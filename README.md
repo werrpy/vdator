@@ -52,6 +52,7 @@ Chapter padding
 - [Pastebin](https://pastebin.com/)
 - [Rentry.co - Markdown Pastebin](https://rentry.co/)
 - [termbin](https://termbin.com/)
+- [TextBin](https://textbin.net/)
 - [Hastebin](https://www.toptal.com/developers/hastebin/)
 
 ### Setup

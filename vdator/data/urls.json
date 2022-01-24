@@ -45,6 +45,11 @@
             "raw_url_regex": "https?://termbin.com/{}",
             "raw_url": "https://termbin.com/{}"
         },
+        "textbin.net": {
+            "slug_regex": "https?://textbin.net/(.*)",
+            "raw_url_regex": "https?://textbin.net/raw/{}",
+            "raw_url": "https://textbin.net/raw/{}"
+        },
         "www.toptal.com": {
             "slug_regex": "https?://www.toptal.com/developers/hastebin/(.*)",
             "raw_url_regex": "https?://www.toptal.com/developers/hastebin/raw/{}",
