@@ -111,6 +111,21 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                                 bdinfo_audio_title,
                             )
 
+                            # if it has TrueHD objects, add them to the audio channel
+                            if (
+                                "number_of_dynamic_objects"
+                                in self.mediainfo["audio"][i]
+                            ):
+                                bdinfo_audio_title = re.sub(
+                                    r"(.*\d\.\d)(.*)",
+                                    r"\g<1>+{} objects\g<2>".format(
+                                        self.mediainfo["audio"][i][
+                                            "number_of_dynamic_objects"
+                                        ]
+                                    ),
+                                    bdinfo_audio_title,
+                                )
+
                             possible_bdinfo_audio_titles = [bdinfo_audio_title]
                             if self._eac3to_log_has_mono():
                                 # could be 1.0 channels if eac3to log uses -mono
