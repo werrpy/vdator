@@ -51,17 +51,20 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                 if is_commentary:
                     reply += commentary_reply
                 elif len(bdinfo_audio_parts) >= 1:
+                    optionally_flac = False
                     # check audio conversions
-                    if (
-                        bdinfo_audio_parts[0] == "DTS-HD Master Audio"
-                        and is_float(bdinfo_audio_parts[1])
-                        and float(bdinfo_audio_parts[1]) < 3
-                    ):
-                        # DTS-HD MA 1.0 or 2.0 to FLAC
-                        reply += self._check_audio_conversion(
-                            i, "DTS-HD Master Audio", "FLAC Audio"
-                        )
-                        bdinfo_audio_parts_converted[0] = "FLAC Audio"
+                    if bdinfo_audio_parts[0] == "DTS-HD Master Audio":
+                        # DTS-HD MA
+                        channels = float(bdinfo_audio_parts[1])
+                        if is_float(bdinfo_audio_parts[1]):
+                            if channels < 3:
+                                # can be DTS-HD MA 1.0, DTS-HD MA 2.0, FLAC 1.0, and FLAC 2.0
+                                optionally_flac = True
+
+                            reply += self._check_audio_conversion(
+                                i, "DTS-HD Master Audio", "FLAC Audio", optionally_flac
+                            )
+
                     elif bdinfo_audio_parts[0] == "LPCM Audio":
                         if (
                             is_float(bdinfo_audio_parts[1])
@@ -69,13 +72,13 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                         ):
                             # LPCM 1.0 or 2.0 to FLAC
                             reply += self._check_audio_conversion(
-                                i, "LPCM Audio", "FLAC Audio"
+                                i, "LPCM Audio", "FLAC Audio", False
                             )
                             bdinfo_audio_parts_converted[0] = "FLAC Audio"
                         else:
                             # LPCM > 2.0 to DTS-HD MA
                             reply += self._check_audio_conversion(
-                                i, "LPCM Audio", "DTS-HD Master Audio"
+                                i, "LPCM Audio", "DTS-HD Master Audio", False
                             )
                             bdinfo_audio_parts_converted[0] = "DTS-HD Master Audio"
 
@@ -91,7 +94,36 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                         ) = self.remove_until_first_codec.remove(mediainfo_audio_title)
 
                         bdinfo_audio_title = " / ".join(bdinfo_audio_parts_converted)
-                        if bdinfo_audio_title == self.mediainfo["audio"][i]["title"]:
+                        bdinfo_audio_titles = [bdinfo_audio_title]
+                        if optionally_flac:
+                            # May be converted to FLAC
+                            # Add DTS-HD MA 1.0/2.0/2.1 and FLAC 1.0/2.0/2.1 as options
+                            old_bdinfo_audio_parts_converted = (
+                                bdinfo_audio_parts_converted.copy()
+                            )
+
+                            bdinfo_audio_parts_converted[0] = "FLAC Audio"
+                            # FLAC 2.0/2.1
+                            bdinfo_audio_titles.append(
+                                " / ".join(bdinfo_audio_parts_converted)
+                            )
+                            bdinfo_audio_parts_converted[1] = "1.0"
+                            # FLAC 1.0
+                            bdinfo_audio_titles.append(
+                                " / ".join(bdinfo_audio_parts_converted)
+                            )
+
+                            # DTS-HD MA 2.0/2.1
+                            bdinfo_audio_titles.append(
+                                " / ".join(old_bdinfo_audio_parts_converted)
+                            )
+                            old_bdinfo_audio_parts_converted[1] = "1.0"
+                            # DTS-HD MA 1.0
+                            bdinfo_audio_titles.append(
+                                " / ".join(old_bdinfo_audio_parts_converted)
+                            )
+
+                        if self.mediainfo["audio"][i]["title"] in bdinfo_audio_titles:
                             reply += self.reporter.print_report(
                                 "correct",
                                 "Audio "
@@ -105,11 +137,12 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                             m_bit_rate = re.search(
                                 r"(\d+)\skbps", mediainfo_audio_title
                             ).group(1)
-                            bdinfo_audio_title = re.sub(
-                                r"(.*\s)\d+(\skbps.*)",
-                                r"\g<1>{}\g<2>".format(m_bit_rate),
-                                bdinfo_audio_title,
-                            )
+                            for j, title in enumerate(bdinfo_audio_titles):
+                                bdinfo_audio_titles[j] = re.sub(
+                                    r"(.*\s)\d+(\skbps.*)",
+                                    r"\g<1>{}\g<2>".format(m_bit_rate),
+                                    title,
+                                )
 
                             # if it has TrueHD objects, add them to the audio channel
                             if (
@@ -125,22 +158,10 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                                     ),
                                     bdinfo_audio_title,
                                 )
+                                bdinfo_audio_titles.append(bdinfo_audio_title)
 
-                            possible_bdinfo_audio_titles = [bdinfo_audio_title]
-                            if self._eac3to_log_has_mono():
-                                # could be 1.0 channels if eac3to log uses -mono
-                                possible_bdinfo_audio_titles.append(
-                                    re.sub(
-                                        r"\d+\.\d+",
-                                        "1.0",
-                                        bdinfo_audio_title,
-                                    )
-                                )
-
-                            if (
-                                mediainfo_audio_title
-                                not in possible_bdinfo_audio_titles
-                            ):
+                            # bdinfo_audio_titles has list of possible titles
+                            if mediainfo_audio_title not in bdinfo_audio_titles:
                                 is_bad_audio_format = True
 
                             if is_bad_audio_format:
@@ -271,7 +292,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
 
         return is_commentary, reply
 
-    def _check_audio_conversion(self, i, audio_from, audio_to):
+    def _check_audio_conversion(self, i, audio_from, audio_to, optional):
         reply = ""
 
         # verify audio track titles
@@ -348,7 +369,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                     )
             except ValueError:
                 pass
-        else:
+        elif not optional:
             reply += self.reporter.print_report(
                 "error",
                 "Audio "
