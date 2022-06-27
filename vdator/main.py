@@ -94,7 +94,9 @@ def print_version():
     return "vdator " + VERSION
 
 
-client = discord.Client()
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
 
 
 @client.event
@@ -117,22 +119,33 @@ async def on_message(message):
     message : discord.Message class
         discord message
     """
+    # get name of channel message was sent in
+    # if message is in a thread, the channel name is in message.channel.parent, otherwise its in message.channel.name
+    channel_name = (
+        str(message.channel.parent)
+        if hasattr(message.channel, "parent")
+        else str(message.channel.name)
+    )
+    channel = get(
+        message.guild.channels,
+        name=channel_name,
+        type=discord.ChannelType.text,
+    )
+
     # only listens in bot and review channels
-    if not (
-        message.channel.name in BOT_CHANNELS or message.channel.name in REVIEW_CHANNELS
-    ):
+    if not (channel_name in BOT_CHANNELS or channel_name in REVIEW_CHANNELS):
         return
 
     # help command
     if message.content == "!help":
         reply = print_help()
-        await message.channel.send(reply)
+        await channel.send(reply)
         return
 
     # version command
     if message.content == "!version":
         reply = print_version()
-        await message.channel.send(reply)
+        await channel.send(reply)
         return
 
     # self
@@ -175,9 +188,7 @@ async def on_message(message):
                     else:
                         try:
                             # setup checker
-                            checker.setup(
-                                bdinfo, mediainfo, eac3to, message.channel.name
-                            )
+                            checker.setup(bdinfo, mediainfo, eac3to, channel_name)
                         except:
                             traceback.print_exc()
                             reply += reporter.print_report(
@@ -217,21 +228,21 @@ async def on_message(message):
         for i, r in enumerate(replies):
             replies[i] = replies[i].replace("``````", "```")
 
-        if message.channel.name in BOT_CHANNELS:
+        if channel_name in BOT_CHANNELS:
             # reply in bot channel
             for reply in replies:
-                await message.channel.send(reply)
-        elif message.channel.name in REVIEW_CHANNELS:
+                await channel.send(reply)
+        elif channel_name in REVIEW_CHANNELS:
             # add reactions in review channel
             await add_status_reactions(message, reply)
 
             # and send reply to
             for ch in REVIEW_REPLY_CHANNELS:
-                channel = get(
+                review_reply_channel = get(
                     message.guild.channels, name=ch, type=discord.ChannelType.text
                 )
                 for reply in replies:
-                    await channel.send(reply)
+                    await review_reply_channel.send(reply)
 
 
 token = os.environ.get("DISCORD_BOT_SECRET")
