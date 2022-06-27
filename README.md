@@ -57,7 +57,7 @@ Chapter padding
 
 ### Setup
 
-Requires Python >= 3.7
+Requires Python >= 3.8
 
 Create a [Discord bot](https://discordapp.com/developers/docs/intro) and add it to a server.
 Copy the enviornment variables template `vdator/.env.EXAMPLE` to `vdator/.env`
