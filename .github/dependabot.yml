@@ -9,3 +9,6 @@ updates:
     directory: "/vdator" # Location of package manifests
     schedule:
       interval: "daily"
+    target-branch:
+      - "main"
+      - "discord.py-2.0"
