@@ -36,7 +36,7 @@ class CheckPrintChapters(Check):
                     reply += "```"
                 else:
                     reply += self.reporter.print_report("info", "Chapters are numbered")
-                if len(menu[0]["languages"]) > 0:
+                if len(menu[0]["languages"]) > 0 and menu[0]["languages"][0] != "":
                     reply += (
                         "Chapter languages: `" + ", ".join(menu[0]["languages"]) + "`\n"
                     )
