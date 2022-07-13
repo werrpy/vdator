@@ -31,13 +31,8 @@ class CheckAudioTrackSpellCheck(Check):
                     self.mediainfo["audio"][i]["title"]
                 )
 
-                spellcheck_text = None
-                if found_codec:
-                    # spellcheck title parts before codec
-                    spellcheck_text = " ".join(title_parts)
-                else:
-                    # spellcheck entire audio title
-                    spellcheck_text = title
+                # spellcheck title parts before codec or entire audio title
+                spellcheck_text = " ".join(title_parts) if found_codec else title
                 if spellcheck_text:
                     # map punctuation to space
                     translator = str.maketrans(

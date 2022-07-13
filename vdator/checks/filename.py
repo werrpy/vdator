@@ -212,6 +212,9 @@ class CheckFilename(Check):
             if self.channel_name in INTERNAL_CHANNELS:
                 release_name += RELEASE_GROUP + ".mkv"
 
+        # replace multiple dots with one
+        release_name = re.sub('\.+', '.', release_name)
+
         return release_name
 
     def _format_filename_title(self, title):
