@@ -61,9 +61,15 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                                 # can be DTS-HD MA 1.0, DTS-HD MA 2.0, FLAC 1.0, and FLAC 2.0
                                 optionally_flac = True
 
-                            reply += self._check_audio_conversion(
-                                i, "DTS-HD Master Audio", "FLAC Audio", optionally_flac
-                            )
+                                reply += self._check_audio_conversion(
+                                    i,
+                                    "DTS-HD Master Audio",
+                                    ["DTS-HD Master Audio", "FLAC Audio"],
+                                )
+                            else:
+                                reply += self._check_audio_conversion(
+                                    i, "DTS-HD Master Audio", ["DTS-HD Master Audio"]
+                                )
 
                     elif bdinfo_audio_parts[0] == "LPCM Audio":
                         if (
@@ -72,13 +78,13 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                         ):
                             # LPCM 1.0 or 2.0 to FLAC
                             reply += self._check_audio_conversion(
-                                i, "LPCM Audio", "FLAC Audio", False
+                                i, "LPCM Audio", ["FLAC Audio"], False
                             )
                             bdinfo_audio_parts_converted[0] = "FLAC Audio"
                         else:
                             # LPCM > 2.0 to DTS-HD MA
                             reply += self._check_audio_conversion(
-                                i, "LPCM Audio", "DTS-HD Master Audio", False
+                                i, "LPCM Audio", ["DTS-HD Master Audio"], False
                             )
                             bdinfo_audio_parts_converted[0] = "DTS-HD Master Audio"
 
@@ -292,7 +298,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
 
         return is_commentary, reply
 
-    def _check_audio_conversion(self, i, audio_from, audio_to, optional):
+    def _check_audio_conversion(self, i, audio_from, audio_to):
         reply = ""
 
         # verify audio track titles
@@ -328,7 +334,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
             return reply
 
         # verify audio conversions
-        if mediainfo_parts[0] == audio_to:
+        if mediainfo_parts[0] in audio_to:
             disable_channels_check = self._eac3to_log_has_mono()
 
             if (
@@ -369,13 +375,14 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                     )
             except ValueError:
                 pass
-        elif not optional:
+        else:
             reply += self.reporter.print_report(
                 "error",
                 "Audio "
                 + self._section_id("audio", i)
-                + " should be converted to "
-                + audio_to,
+                + " should be converted to one of ["
+                + ", ".join(audio_to)
+                + "]",
             )
 
         return reply
