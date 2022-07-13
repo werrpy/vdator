@@ -213,7 +213,7 @@ class CheckFilename(Check):
                 release_name += RELEASE_GROUP + ".mkv"
 
         # replace multiple dots with one
-        release_name = re.sub('\.+', '.', release_name)
+        release_name = re.sub("\.+", ".", release_name)
 
         return release_name
 
