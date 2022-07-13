@@ -78,13 +78,13 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                         ):
                             # LPCM 1.0 or 2.0 to FLAC
                             reply += self._check_audio_conversion(
-                                i, "LPCM Audio", ["FLAC Audio"], False
+                                i, "LPCM Audio", ["FLAC Audio"]
                             )
                             bdinfo_audio_parts_converted[0] = "FLAC Audio"
                         else:
                             # LPCM > 2.0 to DTS-HD MA
                             reply += self._check_audio_conversion(
-                                i, "LPCM Audio", ["DTS-HD Master Audio"], False
+                                i, "LPCM Audio", ["DTS-HD Master Audio"]
                             )
                             bdinfo_audio_parts_converted[0] = "DTS-HD Master Audio"
 
