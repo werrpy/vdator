@@ -142,13 +142,15 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                             # use bitrate from mediainfo audio title
                             m_bit_rate = re.search(
                                 r"(\d+)\skbps", mediainfo_audio_title
-                            ).group(1)
-                            for j, title in enumerate(bdinfo_audio_titles):
-                                bdinfo_audio_titles[j] = re.sub(
-                                    r"(.*\s)\d+(\skbps.*)",
-                                    r"\g<1>{}\g<2>".format(m_bit_rate),
-                                    title,
-                                )
+                            )
+                            if m_bit_rate:
+                                m_bit_rate = m_bit_rate.group(1)
+                                for j, title in enumerate(bdinfo_audio_titles):
+                                    bdinfo_audio_titles[j] = re.sub(
+                                        r"(.*\s)\d+(\skbps.*)",
+                                        r"\g<1>{}\g<2>".format(m_bit_rate),
+                                        title,
+                                    )
 
                             # if it has TrueHD objects, add them to the audio channel
                             if (
