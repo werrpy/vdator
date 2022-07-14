@@ -1,12 +1,13 @@
 from .check import *
-from .mixins import SectionId, RemoveUntilFirstCodec
+from .mixins import SectionId
 
 from nltk_people import extract_names
 
 
-class CheckAudioTrackPeople(Check, SectionId, RemoveUntilFirstCodec):
-    def __init__(self, reporter, mediainfo, tmdb, ia):
+class CheckAudioTrackPeople(Check, SectionId):
+    def __init__(self, reporter, remove_until_first_codec, mediainfo, tmdb, ia):
         super().__init__(reporter, mediainfo, "Error checking IMDb/TMDb people")
+        self.remove_until_first_codec = remove_until_first_codec
         self.tmdb = tmdb
         self.ia = ia
 
@@ -20,7 +21,7 @@ class CheckAudioTrackPeople(Check, SectionId, RemoveUntilFirstCodec):
                 title = self.mediainfo["audio"][i]["title"]
 
                 # skip if has an audio codec
-                _, _, found_codec = self._remove_until_first_codec(title)
+                _, _, found_codec = self.remove_until_first_codec.remove(title)
                 if found_codec:
                     continue
 
