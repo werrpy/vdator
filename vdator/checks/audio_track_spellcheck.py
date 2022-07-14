@@ -1,4 +1,5 @@
 from .check import *
+from .mixins import RemoveUntilFirstCodec
 
 from dotenv import load_dotenv
 import nltk
@@ -14,11 +15,10 @@ MISSPELLED_IGNORE_LIST = [
 ]
 
 
-class CheckAudioTrackSpellCheck(Check):
-    def __init__(self, reporter, remove_until_first_codec, mediainfo):
+class CheckAudioTrackSpellCheck(Check, RemoveUntilFirstCodec):
+    def __init__(self, reporter, mediainfo):
         super().__init__(reporter, mediainfo, "Error spell checking audio track names")
         self.hobj = hunspell.HunSpell(HUNSPELL_LANG[0], HUNSPELL_LANG[1])
-        self.remove_until_first_codec = remove_until_first_codec
 
     # overriding abstract method
     def get_reply(self):
@@ -27,7 +27,7 @@ class CheckAudioTrackSpellCheck(Check):
         # spellcheck audio track names
         for i, _ in enumerate(self.mediainfo["audio"]):
             if "title" in self.mediainfo["audio"][i]:
-                title, title_parts, found_codec = self.remove_until_first_codec.remove(
+                title, title_parts, found_codec = self._remove_until_first_codec(
                     self.mediainfo["audio"][i]["title"]
                 )
 

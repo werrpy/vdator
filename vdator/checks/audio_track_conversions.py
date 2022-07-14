@@ -1,22 +1,22 @@
 from .check import *
-from .mixins import SectionId, IsCommentaryTrack
+from .mixins import SectionId, IsCommentaryTrack, RemoveUntilFirstCodec
 
 import re
 
 
-class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
+class CheckAudioTrackConversions(
+    Check, SectionId, IsCommentaryTrack, RemoveUntilFirstCodec
+):
     def __init__(
         self,
         reporter,
         source_detector,
-        remove_until_first_codec,
         mediainfo,
         bdinfo,
         eac3to,
     ):
         super().__init__(reporter, mediainfo, "Error checking audio track conversions")
         self.source_detector = source_detector
-        self.remove_until_first_codec = remove_until_first_codec
         self.bdinfo = bdinfo
         self.eac3to = eac3to
 
@@ -97,7 +97,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                             mediainfo_audio_title,
                             _,
                             _,
-                        ) = self.remove_until_first_codec.remove(mediainfo_audio_title)
+                        ) = self._remove_until_first_codec(mediainfo_audio_title)
 
                         bdinfo_audio_title = " / ".join(bdinfo_audio_parts_converted)
                         bdinfo_audio_titles = [bdinfo_audio_title]
@@ -318,7 +318,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
             return reply
 
         mediainfo_audio_title = self.mediainfo["audio"][i]["title"]
-        (mediainfo_audio_title, _, _) = self.remove_until_first_codec.remove(
+        (mediainfo_audio_title, _, _) = self._remove_until_first_codec(
             mediainfo_audio_title
         )
 
