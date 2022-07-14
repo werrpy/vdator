@@ -1,12 +1,13 @@
 from .check import *
-from .mixins import SectionId, RemoveUntilFirstCodec
+from .mixins import SectionId
 
 import re
 
 
-class CheckFLACAudioTracks(Check, SectionId, RemoveUntilFirstCodec):
-    def __init__(self, reporter, mediainfo):
+class CheckFLACAudioTracks(Check, SectionId):
+    def __init__(self, reporter, remove_until_first_codec, mediainfo):
         super().__init__(reporter, mediainfo, "Error checking FLAC audio tracks")
+        self.remove_until_first_codec = remove_until_first_codec
 
     # overriding abstract method
     def get_reply(self):
@@ -20,7 +21,7 @@ class CheckFLACAudioTracks(Check, SectionId, RemoveUntilFirstCodec):
                     continue
 
                 # skip if no codec info
-                audio_title, _, found_codec = self._remove_until_first_codec(
+                audio_title, _, found_codec = self.remove_until_first_codec.remove(
                     audio_track["title"]
                 )
                 if not found_codec:

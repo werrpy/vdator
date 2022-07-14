@@ -17,7 +17,8 @@ logger = logging.getLogger("imdbpy")
 logger.disabled = True
 
 # checks
-from checks.mixins import PrintHeader, IsCommentaryTrack
+from checks.mixins import PrintHeader, SectionId, IsCommentaryTrack
+from checks.remove_until_first_codec import RemoveUntilFirstCodec
 from checks import *
 
 # nltk data
@@ -26,9 +27,10 @@ from nltk_people import download_nltk_data
 download_nltk_data()
 
 
-class Checker(PrintHeader, IsCommentaryTrack):
+class Checker(PrintHeader, SectionId, IsCommentaryTrack):
     def __init__(self, codecs_parser, source_detector, reporter):
         self.codecs = codecs_parser
+        self.remove_until_first_codec = RemoveUntilFirstCodec(codecs_parser)
         self.source_detector = source_detector
         self.reporter = reporter
 
@@ -50,6 +52,7 @@ class Checker(PrintHeader, IsCommentaryTrack):
             self.reporter,
             self.source_detector,
             self.codecs,
+            self.remove_until_first_codec,
             self.mediainfo,
             self.bdinfo,
             self.channel_name,
@@ -77,16 +80,23 @@ class Checker(PrintHeader, IsCommentaryTrack):
         reply += CheckAudioTrackConversions(
             self.reporter,
             self.source_detector,
+            self.remove_until_first_codec,
             self.mediainfo,
             self.bdinfo,
             self.eac3to,
         ).run()
         # check FLAC audio using mediainfo
-        reply += CheckFLACAudioTracks(self.reporter, self.mediainfo).run()
+        reply += CheckFLACAudioTracks(
+            self.reporter, self.remove_until_first_codec, self.mediainfo
+        ).run()
 
         # TMDb and IMDb People API
-        reply += CheckAudioTrackPeople(self.reporter, self.mediainfo, tmdb, ia).run()
-        reply += CheckAudioTrackSpellCheck(self.reporter, self.mediainfo).run()
+        reply += CheckAudioTrackPeople(
+            self.reporter, self.remove_until_first_codec, self.mediainfo, tmdb, ia
+        ).run()
+        reply += CheckAudioTrackSpellCheck(
+            self.reporter, self.remove_until_first_codec, self.mediainfo
+        ).run()
 
         # check text
         reply += self._print_header("Text Tracks")
