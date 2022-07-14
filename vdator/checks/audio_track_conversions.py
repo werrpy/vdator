@@ -137,8 +137,6 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                                 + ": Track names match",
                             )
                         else:
-                            is_bad_audio_format = False
-
                             # use bitrate from mediainfo audio title
                             m_bit_rate = re.search(
                                 r"(\d+)\skbps", mediainfo_audio_title
@@ -170,9 +168,6 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
 
                             # bdinfo_audio_titles has list of possible titles
                             if mediainfo_audio_title not in bdinfo_audio_titles:
-                                is_bad_audio_format = True
-
-                            if is_bad_audio_format:
                                 reply += self.reporter.print_report(
                                     "error",
                                     "Audio "
