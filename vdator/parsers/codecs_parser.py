@@ -10,22 +10,22 @@ class CodecsParser(object):
         Parameters
         ----------
         codecs : dict
-            codec definitions
+          codec definitions
         """
 
         """
         {
-            "codecs": {
-                "video": {...},
-                "audio": {...},
-                "subtitles": {...},
-                "chapters": {...}
-            },
-            "track_titles": {
-                "video": {...},
-                "audio": {...}
-            },
-            "scan_types": {...}
+          "codecs": {
+            "video": {...},
+            "audio": {...},
+            "subtitles": {...},
+            "chapters": {...}
+          },
+          "track_titles": {
+            "video": {...},
+            "audio": {...}
+          },
+          "scan_types": {...}
         }
         """
         self.codecs = codecs
@@ -45,7 +45,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -62,13 +62,30 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
         True if codec is a video title codec, False otherwise.
         """
         if codec in self.codecs["track_titles"]["video"]:
+            return True
+        return False
+
+    def is_video_3d(self, codec):
+        """
+        Is this a 3d video codec?
+
+        Parameters
+        ----------
+        codec : str
+          codec
+
+        Returns
+        -------
+        True if codec is a 3d video, False otherwise.
+        """
+        if codec in self.codecs["codecs"]["video_3d"]:
             return True
         return False
 
@@ -79,7 +96,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -96,7 +113,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -113,7 +130,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -130,7 +147,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -147,7 +164,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -162,7 +179,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -179,7 +196,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -196,7 +213,7 @@ class CodecsParser(object):
         Parameters
         ----------
         codec : str
-            codec
+          codec
 
         Returns
         -------
@@ -213,10 +230,10 @@ class CodecsParser(object):
         Parameters
         ----------
         scan_type : str
-            scan type
+          scan type
 
         video_fps : str
-            frame rate
+          frame rate
 
         Returns
         -------
