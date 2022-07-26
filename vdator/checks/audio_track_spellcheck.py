@@ -1,4 +1,5 @@
 from .check import *
+from .mixins import SectionId
 
 from dotenv import load_dotenv
 import nltk
@@ -14,7 +15,7 @@ MISSPELLED_IGNORE_LIST = [
 ]
 
 
-class CheckAudioTrackSpellCheck(Check):
+class CheckAudioTrackSpellCheck(Check, SectionId):
     def __init__(self, reporter, remove_until_first_codec, mediainfo):
         super().__init__(reporter, mediainfo, "Error spell checking audio track names")
         self.hobj = hunspell.HunSpell(HUNSPELL_LANG[0], HUNSPELL_LANG[1])
