@@ -18,7 +18,6 @@
             "DTS Hi-Res": ".dtshr",
             "DTS Master Audio": ".dtsma",
             "DTS": ".dts",
-            "E-AC3": "eac3",
             "FLAC Audio": ".flac",
             "RAW/PCM": ".pcm",
             "TrueHD/AC3": ".thd",
@@ -47,6 +46,7 @@
             "DTS:X Master Audio": "DTS-X",
             "Dolby Digital Audio": "DD",
             "Dolby Digital EX Audio": "DD-EX",
+            "Dolby Digital Plus Audio": "DDP",
             "Dolby TrueHD Audio": "TrueHD",
             "Dolby TrueHD/Atmos Audio": "TrueHD.Atmos",
             "FLAC Audio": "FLAC"
