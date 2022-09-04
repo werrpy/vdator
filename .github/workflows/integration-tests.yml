@@ -62,7 +62,7 @@ jobs:
 
   discord-bot:
 
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/discord.py-2.0' }}
 
     runs-on: ubuntu-latest
 

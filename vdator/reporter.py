@@ -1,7 +1,7 @@
 import re
 
 # APIs
-from emoji import EMOJI_ALIAS_UNICODE_ENGLISH as EMOJIS
+import emoji
 from helpers import num_to_emoji
 
 
@@ -42,11 +42,11 @@ class Reporter(object):
             self.report[type.lower()] += 1
 
         msg_type = {
-            "correct": EMOJIS[":ballot_box_with_check:"],
-            "warning": EMOJIS[":warning:"],
-            "error": EMOJIS[":x:"],
-            "info": EMOJIS[":information_source:"],
-            "fail": EMOJIS[":interrobang:"],
+            "correct": emoji.emojize(":ballot_box_with_check:", language="alias"),
+            "warning": emoji.emojize(":warning:", language="alias"),
+            "error": emoji.emojize(":x:", language="alias"),
+            "info": emoji.emojize(":information_source:", language="alias"),
+            "fail": emoji.emojize(":interrobang:", language="alias"),
         }
 
         if type.lower() in msg_type:
@@ -104,13 +104,13 @@ async def react_num_errors(message, num_errors):
     """
     if num_errors in range(1, 11):
         # errors between 1 and 10
-        emoji = num_to_emoji(num_errors)
-        if emoji:
-            await message.add_reaction(EMOJIS[emoji])
+        em = num_to_emoji(num_errors)
+        if em:
+            await message.add_reaction(emoji.emojize(em, language="alias"))
     elif num_errors > 10:
         # more than 10 errors
-        await message.add_reaction(EMOJIS[num_to_emoji(10)])
-        await message.add_reaction(EMOJIS[":heavy_plus_sign:"])
+        await message.add_reaction(emoji.emojize(num_to_emoji(10), language="alias"))
+        await message.add_reaction(emoji.emojize(":heavy_plus_sign:", language="alias"))
 
 
 async def add_status_reactions(message, content):
@@ -140,17 +140,21 @@ async def add_status_reactions(message, content):
         }
 
         if report["warning"] == 0 and report["error"] == 0 and report["fail"] == 0:
-            await message.add_reaction(EMOJIS[":ballot_box_with_check:"])
+            await message.add_reaction(
+                emoji.emojize(":ballot_box_with_check:", language="alias")
+            )
         else:
             if report["warning"] > 0:
-                await message.add_reaction(EMOJIS[":warning:"])
+                await message.add_reaction(emoji.emojize(":warning:", language="alias"))
             if report["error"] > 0:
-                await message.add_reaction(EMOJIS[":x:"])
+                await message.add_reaction(emoji.emojize(":x:", language="alias"))
 
             num_errors = report["warning"] + report["error"]
             if num_errors > 0:
                 await react_num_errors(message, num_errors)
 
             if report["fail"] > 0:
-                await message.add_reaction(EMOJIS[":interrobang:"])
+                await message.add_reaction(
+                    emoji.emojize(":interrobang:", language="alias")
+                )
                 await react_num_errors(message, report["fail"])
