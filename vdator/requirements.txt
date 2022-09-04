@@ -7,6 +7,7 @@ certifi==2022.6.15
 charset-normalizer==2.1.1
 cinemagoer==2022.2.11
 click==8.1.3
+discord-markdown==0.4.0
 discord.py==2.0.1
 emoji==2.0.0
 Flask==2.2.2
