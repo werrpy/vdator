@@ -45,6 +45,7 @@ Chapter padding
 
 - [{d}paste](https://dpaste.com/)
 - [dpaste](https://dpaste.org/)
+- [Hastebin](https://hastebin.com/)
 - [Hey! Paste it](https://www.heypasteit.com/)
 - [CentOS Pastebin Service](https://paste.centos.org/)
 - [Paste.ee](https://paste.ee/)
@@ -53,7 +54,6 @@ Chapter padding
 - [Rentry.co - Markdown Pastebin](https://rentry.co/)
 - [termbin](https://termbin.com/)
 - [TextBin](https://textbin.net/)
-- [Hastebin](https://www.toptal.com/developers/hastebin/)
 
 ### Setup
 
