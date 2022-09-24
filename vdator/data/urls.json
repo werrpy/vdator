@@ -10,6 +10,11 @@
             "raw_url_regex": "https?://dpaste.org/{}/raw",
             "raw_url": "https://dpaste.org/{}/raw"
         },
+        "hastebin.com": {
+            "slug_regex": "https?://hastebin.com/(.*)",
+            "raw_url_regex": "https?://hastebin.com/raw/{}",
+            "raw_url": "https://hastebin.com/raw/{}"
+        },
         "www.heypasteit.com": {
             "slug_regex": "https?://www.heypasteit.com/clip/(.*)",
             "raw_url_regex": "https?://www.heypasteit.com/download/{}",
@@ -49,11 +54,6 @@
             "slug_regex": "https?://textbin.net/(.*)",
             "raw_url_regex": "https?://textbin.net/raw/{}",
             "raw_url": "https://textbin.net/raw/{}"
-        },
-        "www.toptal.com": {
-            "slug_regex": "https?://www.toptal.com/developers/hastebin/(.*)",
-            "raw_url_regex": "https?://www.toptal.com/developers/hastebin/raw/{}",
-            "raw_url": "https://www.toptal.com/developers/hastebin/raw/{}"
         }
     }
 }
