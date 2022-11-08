@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install packages
-        run: sudo apt-get install -y expect python-dev libhunspell-dev
+        run: sudo apt-get install -y expect libhunspell-dev
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install packages
-        run: sudo apt-get install -y python-dev libhunspell-dev
+        run: sudo apt-get install -y libhunspell-dev
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -73,7 +73,7 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install packages
-        run: sudo apt-get install -y expect python-dev libhunspell-dev
+        run: sudo apt-get install -y expect libhunspell-dev
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
