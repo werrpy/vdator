@@ -213,7 +213,7 @@ async def on_message(message):
 
         # split into multiple messages based on reply length
         BLOCK_QUOTES = "```"
-        len_limit = int(os.environ.get("DISCORD_MSG_CHAR_LIMIT")) - len(BLOCK_QUOTES)
+        len_limit = int(os.environ.get("DISCORD_MSG_CHAR_LIMIT")) - len(BLOCK_QUOTES) * 2
         replies = split_string(reply, len_limit, "\n")
 
         # preserve blockquotes
@@ -231,6 +231,7 @@ async def on_message(message):
         if channel_name in BOT_CHANNELS:
             # reply in bot channel
             for reply in replies:
+                print(len(reply))
                 await channel.send(reply)
         elif channel_name in REVIEW_CHANNELS:
             # add reactions in review channel
