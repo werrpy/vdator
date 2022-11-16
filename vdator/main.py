@@ -231,7 +231,6 @@ async def on_message(message):
         if channel_name in BOT_CHANNELS:
             # reply in bot channel
             for reply in replies:
-                print(len(reply))
                 await channel.send(reply)
         elif channel_name in REVIEW_CHANNELS:
             # add reactions in review channel
