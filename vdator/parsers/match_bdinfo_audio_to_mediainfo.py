@@ -43,8 +43,6 @@ class MatchBDInfoAudioToMediaInfo(object):
                         len(bdinfo_audio_track_parts) > 1
                         and len(mediainfo_audio_track_parts) > 1
                     ):
-                        print("bdparts = " + ",".join(bdinfo_audio_track_parts))
-                        print("miparts = " + ",".join(mediainfo_audio_track_parts))
                         if (
                             bdinfo_audio_track_parts[0]
                             == mediainfo_audio_track_parts[0]
@@ -63,5 +61,4 @@ class MatchBDInfoAudioToMediaInfo(object):
         #    # add leftover bdinfo audio tracks
         #    sorted_bdinfo_audio_tracks.extend(bdinfo_audio_tracks)
 
-        print(sorted_bdinfo_audio_tracks)
         return sorted_bdinfo_audio_tracks
