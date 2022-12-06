@@ -1,7 +1,7 @@
 from .check import *
 from .mixins import SectionId, IsCommentaryTrack
 
-import copy, re
+import re
 
 
 class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
@@ -21,65 +21,6 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
         self.remove_until_first_codec = remove_until_first_codec
         self.bdinfo = bdinfo
         self.eac3to = eac3to
-
-        # tries to match bdinfo audio tracks to mediainfo
-        self.bdinfo["audio"] = self.match_bdinfo_mediainfo()
-
-    def match_bdinfo_mediainfo(self):
-        # tries to match bdinfo audio tracks to mediainfo by codec and channels
-        # for every mediainfo track, pick first matching bdinfo track
-        # returns a sorted list of bdinfo audio tracks
-        sorted_bdinfo_audio_tracks = list()
-
-        bdinfo_audio_tracks = copy.deepcopy(self.bdinfo["audio"])
-        mediainfo_audio_tracks = copy.deepcopy(self.mediainfo["audio"])
-
-        while len(mediainfo_audio_tracks) > 0:
-            if len(bdinfo_audio_tracks) == 0:
-                # no bdinfo audio tracks left, add rest of the bdinfo audio tracks
-                sorted_bdinfo_audio_tracks.extend(bdinfo_audio_tracks)
-                # clear bdinfo_audio_tracks
-                bdinfo_audio_tracks = list()
-                break
-
-            mediainfo_audio_track = mediainfo_audio_tracks.pop()
-            mediainfo_audio_title, bdinfo_audio_title = None, None
-
-            if "title" in mediainfo_audio_track:
-                (
-                    mediainfo_audio_title,
-                    _,
-                    _,
-                ) = self.remove_until_first_codec.remove(mediainfo_audio_track["title"])
-
-            # find next matching bdinfo audio track
-            for i, bdinfo_audio_track in enumerate(bdinfo_audio_tracks):
-                if "name" in bdinfo_audio_track:
-                    (
-                        bdinfo_audio_title,
-                        _,
-                        _,
-                    ) = self.remove_until_first_codec.remove(bdinfo_audio_track["name"])
-
-                if mediainfo_audio_title and bdinfo_audio_title:
-                    bdinfo_audio_track_parts = bdinfo_audio_title.split(" / ")
-                    mediainfo_audio_track_parts = mediainfo_audio_title.split(" / ")
-                    if (
-                        len(bdinfo_audio_track_parts) > 1
-                        and len(mediainfo_audio_track_parts) > 1
-                    ):
-                        if (
-                            bdinfo_audio_track_parts[0]
-                            == mediainfo_audio_track_parts[0]
-                            and bdinfo_audio_track_parts[1]
-                            == mediainfo_audio_track_parts[1]
-                        ):
-                            # codecs and channel match
-                            sorted_bdinfo_audio_tracks.append(bdinfo_audio_track)
-                            del bdinfo_audio_tracks[i]
-                            break
-
-        return sorted_bdinfo_audio_tracks
 
     # overriding abstract method
     def get_reply(self):
