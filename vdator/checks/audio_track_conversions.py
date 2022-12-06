@@ -36,8 +36,6 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
             len_bdinfo = len(self.bdinfo["audio"])
             len_mediainfo = len(self.mediainfo["audio"])
             min_len = min(len_bdinfo, len_mediainfo)
-            max_len = max(len_bdinfo, len_mediainfo)
-            diff_len = abs(max_len - min_len)
 
             for i in range(0, min_len):
                 # audio = dict{'name':'...', 'language':'...'}
@@ -200,13 +198,11 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
                             + ": Missing track name",
                         )
 
-            if diff_len > 0:
+            if min_len < len_mediainfo:
                 reply += self.reporter.print_report(
                     "warning",
-                    "Checked first `{}/{}` audio tracks".format(min_len, max_len),
+                    "Checked first `{}/{}` audio tracks".format(min_len, len_mediainfo),
                 )
-                if len_bdinfo > len_mediainfo:
-                    reply += "Did you forget to add a minus (-) sign in front of unused audio tracks in bdinfo?\n"
 
         return reply
 
