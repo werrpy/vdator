@@ -225,6 +225,8 @@ class CheckMetadataIds(Check, IsMovie):
         # 2004 in range(2004 - 1, (2004 + 1) + 1) True
         # 2005 in range(2004 - 1, (2004 + 1) + 1) True
         # 2006 in range(2004 - 1, (2004 + 1) + 1) False
+        if not (year and test_year):
+            return False
         year = int(year)
         test_year = int(test_year)
         return test_year in range(year - offset, (year + offset) + 1)

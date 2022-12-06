@@ -95,6 +95,10 @@ deactivate
 
 Install [PyHunSpell](https://github.com/blatinier/pyhunspell#installation)
 
+```bash
+sudo apt install python3-dev libhunspell-dev
+```
+
 Install dependencies
 
 ```bash
