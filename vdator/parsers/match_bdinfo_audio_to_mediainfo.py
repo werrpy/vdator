@@ -18,13 +18,16 @@ class MatchBDInfoAudioToMediaInfo(object):
 
         for mediainfo_audio_track in mediainfo_audio_tracks:
             # go through every mediainfo audio track
-            mediainfo_audio_title = None
+            mediainfo_audio_title, mediainfo_audio_track_parts = None, []
+
             if "title" in mediainfo_audio_track:
                 (
                     mediainfo_audio_title,
                     _,
                     _,
                 ) = self.remove_until_first_codec.remove(mediainfo_audio_track["title"])
+                if mediainfo_audio_title:
+                    mediainfo_audio_track_parts = mediainfo_audio_title.split(" / ")
 
             # find the next matching bdinfo audio track
             for i, bdinfo_audio_track in enumerate(bdinfo_audio_tracks):
@@ -36,13 +39,9 @@ class MatchBDInfoAudioToMediaInfo(object):
                         _,
                     ) = self.remove_until_first_codec.remove(bdinfo_audio_track["name"])
 
-                if mediainfo_audio_title and bdinfo_audio_title:
+                if len(mediainfo_audio_track_parts) > 1 and bdinfo_audio_title:
                     bdinfo_audio_track_parts = bdinfo_audio_title.split(" / ")
-                    mediainfo_audio_track_parts = mediainfo_audio_title.split(" / ")
-                    if (
-                        len(bdinfo_audio_track_parts) > 1
-                        and len(mediainfo_audio_track_parts) > 1
-                    ):
+                    if len(bdinfo_audio_track_parts) > 1:
                         if (
                             bdinfo_audio_track_parts[0]
                             == mediainfo_audio_track_parts[0]
@@ -57,8 +56,8 @@ class MatchBDInfoAudioToMediaInfo(object):
             if len(bdinfo_audio_tracks) == 0:
                 break
 
-        # if len(bdinfo_audio_tracks) > 0:
-        #    # add leftover bdinfo audio tracks
-        #    sorted_bdinfo_audio_tracks.extend(bdinfo_audio_tracks)
+        if len(bdinfo_audio_tracks) > 0:
+            # add leftover bdinfo audio tracks
+            sorted_bdinfo_audio_tracks.extend(bdinfo_audio_tracks)
 
         return sorted_bdinfo_audio_tracks
