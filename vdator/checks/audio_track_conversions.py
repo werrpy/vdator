@@ -9,6 +9,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
         self,
         reporter,
         source_detector,
+        codecs,
         remove_until_first_codec,
         mediainfo,
         bdinfo,
@@ -16,6 +17,7 @@ class CheckAudioTrackConversions(Check, SectionId, IsCommentaryTrack):
     ):
         super().__init__(reporter, mediainfo, "Error checking audio track conversions")
         self.source_detector = source_detector
+        self.codecs = codecs
         self.remove_until_first_codec = remove_until_first_codec
         self.bdinfo = bdinfo
         self.eac3to = eac3to

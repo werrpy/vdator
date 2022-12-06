@@ -13,6 +13,8 @@ from parsers import *
 from source_detector import SourceDetector
 from reporter import Reporter, add_status_reactions
 from checker import Checker
+from checks.remove_until_first_codec import RemoveUntilFirstCodec
+
 
 # script location
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -187,21 +189,44 @@ async def on_message(message):
                         )
                     else:
                         try:
-                            # setup checker
-                            checker.setup(bdinfo, mediainfo, eac3to, channel_name)
+                            remove_until_first_codec = RemoveUntilFirstCodec(
+                                codecs_parser
+                            )
+                            match_bdinfo_audio_to_mediainfo = (
+                                MatchBDInfoAudioToMediaInfo(
+                                    remove_until_first_codec, bdinfo, mediainfo
+                                )
+                            )
+                            bdinfo[
+                                "audio"
+                            ] = (
+                                match_bdinfo_audio_to_mediainfo.match_bdinfo_audio_to_mediainfo()
+                            )
+                            bdinfo["audio"] = bdinfo_parser.expand_compat_tracks(
+                                bdinfo["audio"]
+                            )
                         except:
                             traceback.print_exc()
                             reply += reporter.print_report(
-                                "fail", "vdator failed to setup checker"
+                                "fail", "Matching bdinfo audio tracks to mediainfo"
                             )
                         else:
                             try:
-                                reply += checker.run_checks()
+                                # setup checker
+                                checker.setup(bdinfo, mediainfo, eac3to, channel_name)
                             except:
                                 traceback.print_exc()
                                 reply += reporter.print_report(
-                                    "fail", "vdator failed to parse"
+                                    "fail", "vdator failed to setup checker"
                                 )
+                            else:
+                                try:
+                                    reply += checker.run_checks()
+                                except:
+                                    traceback.print_exc()
+                                    reply += reporter.print_report(
+                                        "fail", "vdator failed to parse"
+                                    )
                 else:
                     reply += reporter.print_report(
                         "error", "No mediainfo. Are you missing the `General` heading?"

@@ -220,7 +220,7 @@ class BDInfoParser(object):
         -------
         dict{'name':'...', 'language':'...'}
         """
-        track = {"name": None, "language": None}
+        track = {"name": None, "language": None, "compat_track": None}
         try:
             name = name.strip()
             name_parts = name.split(" / ")
@@ -272,10 +272,8 @@ class BDInfoParser(object):
                     audio_track,
                     compat_track,
                 ) = self.format_audio_compatibility_track(audio_track)
-                bdinfo["audio"].append(audio_track)
-                bdinfo["audio"].append(compat_track)
-            else:
-                bdinfo["audio"].append(audio_track)
+                audio_track["compat_track"] = compat_track
+            bdinfo["audio"].append(audio_track)
         elif l2.startswith("subtitle:"):
             bdinfo["subtitle"].append(self.format_subtitle_track(track_name))
         else:
@@ -284,3 +282,19 @@ class BDInfoParser(object):
             if len(l) >= 2:
                 bdinfo[l[0].strip().lower()] = l[1].strip()
         return bdinfo
+
+    def expand_compat_tracks(self, bdinfo_audio):
+        """
+        Expand audio compatibility tracks into two tracks and keep order
+
+        Returns
+        -------
+        audio_tracks list
+        """
+        audio_tracks = list()
+        for audio_track in bdinfo_audio:
+            audio_tracks.append(audio_track)
+            if "compat_track" in audio_track:
+                audio_tracks.append(audio_track["compat_track"])
+
+        return audio_tracks

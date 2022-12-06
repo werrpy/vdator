@@ -164,10 +164,8 @@ class PasteParser(object):
                             ) = self.bdinfo_parser.format_audio_compatibility_track(
                                 audio_track
                             )
-                            bdinfo["audio"].append(audio_track)
-                            bdinfo["audio"].append(compat_track)
-                        else:
-                            bdinfo["audio"].append(audio_track)
+                            audio_track["compat_track"] = compat_track
+                        bdinfo["audio"].append(audio_track)
 
             elif sect == self.Section.MEDIAINFO:
                 mediainfo.append(l)
