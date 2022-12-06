@@ -80,6 +80,7 @@ class Checker(PrintHeader, SectionId, IsCommentaryTrack):
         reply += CheckAudioTrackConversions(
             self.reporter,
             self.source_detector,
+            self.codecs,
             self.remove_until_first_codec,
             self.mediainfo,
             self.bdinfo,
