@@ -10,9 +10,9 @@ import tmdbsimple as tmdb
 tmdb.API_KEY = os.environ.get("TMDB_API_KEY")
 
 # IMDb API
-from imdb import IMDb
+from imdb import Cinemagoer
 
-ia = IMDb()
+ia = Cinemagoer()
 logger = logging.getLogger("imdbpy")
 logger.disabled = True
 
