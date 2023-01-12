@@ -87,7 +87,7 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
         is_forced_track = (
             text_track["forced"].lower() == "yes" if "forced" in text_track else False
         )
-        is_english_track = "english" in text_track["language"].lower().split()
+        is_english_track = text_track["language"].lower() == "english"
         # only checks tracks without titles
         title_is_blank = text_track["title"] == ""
         is_first_track = i == 0
@@ -205,13 +205,9 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
         English first, rest in alphabetical order
         """
         # English tracks first
-        tracks = [
-            lang for lang in languages if "english" in lang.lower().split()
-        ]
+        tracks = [lang for lang in languages if lang.lower() == "english"]
         # rest of the tracks by language in alphabetical order
-        rest = sorted(
-            [lang for lang in languages if not "english" in lang.lower().split()]
-        )
+        rest = sorted([lang for lang in languages if lang.lower() != "english"])
 
         # add the rest of the tracks
         if rest:
