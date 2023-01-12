@@ -2,6 +2,7 @@ from .check import *
 from .mixins import IsCommentaryTrack, SectionId
 
 from collections import OrderedDict
+import re
 
 
 class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
@@ -27,7 +28,9 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
             return reply
 
         # text_langs = ['German', 'English', ...]
-        text_langs = [text["language"] for text in self.mediainfo["text"]]
+        text_langs = [
+            self._format_lang(text["language"]) for text in self.mediainfo["text"]
+        ]
         # remove duplicates from list and preserve order
         text_langs = list(dict.fromkeys(text_langs))
 
@@ -45,10 +48,12 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
         for i, text in enumerate(self.mediainfo["text"]):
             text["title"] = text["title"] if "title" in text else ""
             if self._is_commentary_track(text["title"]):
-                commentary_tracks_by_lang[text["language"]].append(text)
+                commentary_tracks_by_lang[self._format_lang(text["language"])].append(
+                    text
+                )
                 has_commentary = True
             else:
-                text_tracks_by_lang[text["language"]].append(text)
+                text_tracks_by_lang[self._format_lang(text["language"])].append(text)
             # forced english track should be first
             reply += self._forced_english_track_first(i, text)
 
@@ -76,6 +81,13 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
             )
 
         return reply
+
+    def _format_lang(self, lang):
+        """
+        Format a text language to remove parenthesis
+        English (US) becomes English
+        """
+        return re.sub(r"\([^)]*\)", "", lang).strip()
 
     def _forced_english_track_first(self, i, text_track):
         """
