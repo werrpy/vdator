@@ -205,7 +205,9 @@ class CheckTextOrder(Check, IsCommentaryTrack, SectionId):
         English first, rest in alphabetical order
         """
         # English tracks first
-        tracks = [lang for lang in languages if "english" in lang.lower().split()]
+        tracks = [
+            lang for lang in languages if "english" in lang.lower().split()
+        ]
         # rest of the tracks by language in alphabetical order
         rest = sorted(
             [lang for lang in languages if not "english" in lang.lower().split()]
