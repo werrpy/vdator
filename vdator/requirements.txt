@@ -26,7 +26,7 @@ multidict==6.0.3
 mypy-extensions==0.4.3
 nltk==3.8.1
 numpy==1.23.5
-pathspec==0.10.2
+pathspec==0.10.3
 platformdirs==2.6.0
 pydash==5.1.2
 python-dotenv==0.21.0
