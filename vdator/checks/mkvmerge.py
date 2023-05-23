@@ -36,12 +36,13 @@ class CheckMKVMerge(Check):
 
     # overriding abstract method
     # force_version = "Version 57.0.0 \"Till The End\" 2021-05-22"
+    # force_version = "Version 76.0 \"Celebration\" 2023-04-30"
     def get_reply(self, force_version=None):
         reply = ""
 
         version_name_regex_mkvtoolnix = r'"(.*)"'
         version_name_regex_mediainfo = r"\'(.*)\'"
-        version_num_regex = r"(\d+\.\d+\.\d+)"
+        version_num_regex = r"(\d+\.\d+(\.\d+)?)"
 
         if not has(self.mediainfo, "general.0.writing_application"):
             reply += self.reporter.print_report("info", "Not using mkvtoolnix")
@@ -68,6 +69,7 @@ class CheckMKVMerge(Check):
             r = requests.get(os.environ.get("MKVTOOLNIX_NEWS"))
             if r.status_code == 200:
                 ## Version 32.0.0 "Astral Progressions" 2019-03-12
+                ## Version 76.0 "Celebration" 2023-04-30
                 mkvtoolnix_version_line = r.text.splitlines()[0]
                 if force_version:
                     mkvtoolnix_version_line = force_version
